@@ -1,0 +1,63 @@
+{
+  "name": "logux-redux",
+  "version": "0.0.0",
+  "description": "Redux compatible API for Logux",
+  "keywords": [
+    "logux",
+    "client",
+    "redux"
+  ],
+  "author": "Andrey Sitnik <andrey@sitnik.ru>",
+  "license": "MIT",
+  "repository": "logux/logux-redux",
+  "dependencies": {
+    "logux-client": "logux/logux-client"
+  },
+  "devDependencies": {
+    "docdash": "^0.4.0",
+    "eslint": "^3.18.0",
+    "eslint-config-logux": "^9.0.0",
+    "eslint-config-standard": "^7.1.0",
+    "eslint-plugin-es5": "^1.0.1",
+    "eslint-plugin-jest": "^19.0.1",
+    "eslint-plugin-node": "^4.2.1",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^2.1.1",
+    "jest": "^19.0.2",
+    "jsdoc": "^3.4.3",
+    "lint-staged": "^3.4.0",
+    "pre-commit": "^1.2.2",
+    "rimraf": "^2.6.1",
+    "webpack": "^2.3.2",
+    "webpack-bundle-analyzer": "^2.3.1",
+    "yaspeller-ci": "^0.4.0"
+  },
+  "scripts": {
+    "lint-staged": "lint-staged",
+    "spellcheck": "yarn run docs && yaspeller-ci *.md docs/*.html",
+    "clean": "rimraf docs/ coverage/ bundle/ test/demo/build/",
+    "lint": "eslint *.js test/**/*.js",
+    "docs": "jsdoc --configure .jsdocrc *.js",
+    "test": "jest --coverage && yarn run lint && yarn run spellcheck",
+    "prebundle": "webpack index.js bundle/index.js",
+    "bundle": "gzip -9 -f bundle/index.js",
+    "postbundle": "ls -lh bundle/*.gz | awk '{print \"Size:\", $5\"B\"}'"
+  },
+  "jest": {
+    "coverageThreshold": {
+      "global": {
+        "statements": 100
+      }
+    }
+  },
+  "eslintConfig": {
+    "extends": "eslint-config-logux/browser"
+  },
+  "lint-staged": {
+    "*.md": "yaspeller-ci",
+    "*.js": "eslint"
+  },
+  "pre-commit": [
+    "lint-staged"
+  ]
+}
