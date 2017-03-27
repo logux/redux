@@ -15,9 +15,13 @@ function createLoguxStore (reducer, preloadedState, enhancer, config) {
   var store = createStore(reducer, preloadedState, enhancer)
   store.client = new Client(config)
 
+  store.add = function (action, meta) {
+    return store.client.log.add(action, meta)
+  }
+
   var originDispatch = store.dispatch
   store.dispatch = function dispatch (action) {
-    store.client.log.add(action, { tab: store.client.id })
+    store.add(action, { tab: store.client.id })
   }
   store.client.log.on('add', function (action) {
     originDispatch(action)
