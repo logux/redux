@@ -37,3 +37,11 @@ it('sets tab ID', function () {
     store.dispatch({ type: 'INC' })
   })
 })
+
+it('has shortcut for add', function () {
+  var store = createStore()
+  return store.add({ type: 'INC' }, { reasons: ['test'] }).then(function () {
+    expect(store.getState()).toEqual({ value: 1 })
+    expect(store.client.log.store.created[0][1].reasons).toEqual(['test'])
+  })
+})
