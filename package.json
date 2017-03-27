@@ -11,7 +11,8 @@
   "license": "MIT",
   "repository": "logux/logux-redux",
   "dependencies": {
-    "logux-client": "logux/logux-client"
+    "logux-client": "logux/logux-client",
+    "redux": "^3.6.0"
   },
   "devDependencies": {
     "docdash": "^0.4.0",
