@@ -1,4 +1,4 @@
-var createLoguxCreator = require('../create-logux-store')
+var createLoguxCreator = require('../create-logux-creator')
 
 function reducer (state, action) {
   if (action.type === 'INC') {
