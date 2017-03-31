@@ -14,12 +14,12 @@ npm install logux-redux
 ```
 
 ### Usage
-`createStoreCreator` returns original Redux `createStore` function with Logux inside
+Create Redux store by `createLoguxCreator`. It returns original Redux `createStore` function with Logux inside
 ```diff js
 -import { createStore } from 'redux'
-+import { createStoreCreator } from 'logux-redux'
++import { createLoguxCreator } from 'logux-redux'
 
-+const createStore = createStoreCreator({
++const createStore = createLoguxCreator({
 +  subprotocol: '1.0.0',
 +  userId: 10,
 +  url: 'wss://localhost:1337'
