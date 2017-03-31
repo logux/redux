@@ -6,6 +6,7 @@
   ],
   "dictionary": [
     "logux",
+    "createStore",
     "docdash",
     "JSDoc",
     "js",
