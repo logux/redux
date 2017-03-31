@@ -8,6 +8,36 @@ between clients and server logs.
 
 This library provides Redux compatible API.
 
+### Install
+```shell
+npm install logux-redux
+```
+
+### Usage
+`createStoreCreator` returns original Redux `createStore` function with Logux inside
+```diff js
+-import { createStore } from 'redux'
++import { createStoreCreator } from 'logux-redux'
+
++const createStore = createStoreCreator({
++  subprotocol: '1.0.0',
++  userId: 10,
++  url: 'wss://localhost:1337'
++})
+
+function reducer (state, action) {
+  switch (action.type) {
+    case 'INC':
+      return { value: state.value + 1 }
+    default: 
+      return state
+  }
+}
+
+const preloadedState = { value: 0 }
+
+const store = createStore( reducer, preloadedState, enhancer )
+```
 See also [Logux Status] for UX best practices.
 
 [Logux Status]: https://github.com/logux/logux-status

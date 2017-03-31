@@ -1,4 +1,4 @@
-var createLoguxStore = require('../create-logux-store')
+var createLoguxCreator = require('../create-logux-store')
 
 function reducer (state, action) {
   if (action.type === 'INC') {
@@ -9,11 +9,12 @@ function reducer (state, action) {
 }
 
 function createStore () {
-  return createLoguxStore(reducer, { value: 0 }, undefined, {
+  var createLoguxStore = createLoguxCreator({
     subprotocol: '1.0.0',
     userId: 10,
     url: 'wss://localhost:1337'
   })
+  return createLoguxStore(reducer, { value: 0 })
 }
 
 it('creates Redux store', function () {
