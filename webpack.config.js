@@ -9,5 +9,6 @@ module.exports = {
       reportFilename: 'bundle-report.html',
       openAnalyzer: false
     })
-  ]
+  ],
+  stats: 'errors-only'
 }
