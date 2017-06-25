@@ -1,5 +1,5 @@
+var CrossTabClient = require('logux-client/cross-tab-client')
 var createStore = require('redux').createStore
-var Client = require('logux-client/client')
 
 /**
  * Creates Logux client and connect it to Redux createStore function.
@@ -9,7 +9,7 @@ var Client = require('logux-client/client')
  * @return {function} Redux createStore function with Logux hacks.
  */
 function createLoguxCreator (config) {
-  var client = new Client(config)
+  var client = new CrossTabClient(config)
 
   /**
    * Creates Redux store and connect Logux Client to it.
