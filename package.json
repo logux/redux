@@ -37,11 +37,11 @@
   },
   "scripts": {
     "lint-staged": "lint-staged",
-    "spellcheck": "yarn run docs && yaspeller-ci *.md docs/*.html",
+    "spellcheck": "yarn docs && yaspeller-ci *.md docs/*.html",
     "clean": "rimraf docs/ coverage/ bundle/ test/demo/build/",
     "lint": "eslint *.js test/{**/,}*.js",
     "docs": "jsdoc --configure .jsdocrc *.js",
-    "test": "jest --coverage && yarn run lint && yarn run spellcheck",
+    "test": "jest --coverage && yarn lint && yarn spellcheck",
     "presize": "webpack index.js bundle/index.js",
     "size": "gzip -9 -f bundle/index.js",
     "postsize": "ls -lh bundle/*.gz | awk '{print \"Size:\", $5\"B\"}'"
