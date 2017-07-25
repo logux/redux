@@ -42,7 +42,7 @@ function createLoguxCreator (config) {
       store.history[meta.dispatch] = store.getState()
     }
 
-    store.client.log.on('add', function (action, meta) {
+    client.log.on('add', function (action, meta) {
       if (meta.dispatch) return
       originDispatch(action)
 
@@ -50,7 +50,7 @@ function createLoguxCreator (config) {
       store.history[meta.id.join('\t')] = store.getState()
     })
 
-    store.client.log.on('clean', function (action, meta) {
+    client.log.on('clean', function (action, meta) {
       if (!meta.added) return
       if (meta.dispatch) {
         delete store.history[meta.dispatch]
