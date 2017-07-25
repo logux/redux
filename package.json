@@ -12,6 +12,7 @@
   "repository": "logux/logux-redux",
   "dependencies": {
     "logux-client": "logux/logux-client",
+    "logux-core": "logux/logux-core",
     "redux": "^3.7.2"
   },
   "devDependencies": {

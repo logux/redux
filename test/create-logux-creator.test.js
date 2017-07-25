@@ -1,20 +1,29 @@
 var createLoguxCreator = require('../create-logux-creator')
 
-function reducer (state, action) {
-  if (action.type === 'INC') {
-    return { value: state.value + 1 }
-  } else {
-    return state
-  }
-}
-
-function createStore () {
+function createStore (reducer) {
   var creator = createLoguxCreator({
     subprotocol: '1.0.0',
     userId: 10,
     url: 'wss://localhost:1337'
   })
-  return creator(reducer, { value: 0 })
+  if (!reducer) {
+    reducer = function (state, action) {
+      if (action.type === 'INC') {
+        return { value: state.value + 1 }
+      } else {
+        return state
+      }
+    }
+  }
+  var store = creator(reducer, { value: 0 })
+
+  var prev = 0
+  store.client.log.generateId = function () {
+    prev += 1
+    return [prev, 'test', 0]
+  }
+
+  return store
 }
 
 it('creates Redux store', function () {
@@ -49,30 +58,54 @@ it('has shortcut for add', function () {
 })
 
 it('has history', function () {
-  var store = createStore()
-
-  var prev = 0
-  store.client.log.generateId = function () {
-    prev += 1
-    return [prev, 'test', 0]
-  }
+  var store = createStore(function (state, action) {
+    return { value: action.type }
+  })
 
   return Promise.all([
     store.add({ type: 'A' }),
-    store.add({ type: 'INC' }, { reasons: ['forever'] }),
-    store.add({ type: 'INC' }, { reasons: ['temp'] })
+    store.add({ type: 'B' }, { reasons: ['forever'] }),
+    store.add({ type: 'C' }, { reasons: ['temp'] })
   ]).then(function () {
     return store.client.log.removeReason('temp')
   }).then(function () {
-    store.dispatch({ type: 'INC' })
+    store.dispatch({ type: 'D' })
     expect(store.history).toEqual({
-      '2\ttest\t0': { value: 1 },
-      1: { value: 3 }
+      '2\ttest\t0': { value: 'B' },
+      '4\ttest\t0': { value: 'D' }
     })
     return store.client.log.removeReason('tab' + store.client.id)
   }).then(function () {
     expect(store.history).toEqual({
-      '2\ttest\t0': { value: 1 }
+      '2\ttest\t0': { value: 'B' }
+    })
+  })
+})
+
+it('changes history', function () {
+  var store = createStore(function (state, action) {
+    if (action.type === 'ADD') {
+      return { value: state.value + action.value }
+    } else {
+      return state
+    }
+  })
+
+  return Promise.all([
+    store.add({ type: 'ADD', value: 'a' }, { reasons: ['test'] }),
+    store.add({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
+  ]).then(function () {
+    store.dispatch({ type: 'ADD', value: 'c' })
+    return store.add(
+      { type: 'ADD', value: '|' },
+      { id: [1, 'test', 1], reasons: ['test'] })
+  }).then(function () {
+    expect(store.getState().value).toEqual('0a|bc')
+    expect(store.history).toEqual({
+      '1\ttest\t0': { value: '0a' },
+      '1\ttest\t1': { value: '0a|' },
+      '2\ttest\t0': { value: '0a|b' },
+      '3\ttest\t0': { value: '0a|bc' }
     })
   })
 })

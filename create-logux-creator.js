@@ -1,4 +1,5 @@
 var CrossTabClient = require('logux-client/cross-tab-client')
+var isFirstOlder = require('logux-core/is-first-older')
 var createStore = require('redux').createStore
 
 /**
@@ -21,7 +22,13 @@ function createLoguxCreator (config) {
    * @return {object} Redux store with Logux hacks.
    */
   return function createLoguxStore (reducer, preloadedState, enhancer) {
-    var store = createStore(reducer, preloadedState, enhancer)
+    var store = createStore(function (state, action) {
+      if (action.type === 'LOGUX_REPLACE_STATE') {
+        return action.state
+      } else {
+        return reducer(state, action)
+      }
+    }, preloadedState, enhancer)
 
     store.client = client
     store.history = { }
@@ -30,33 +37,55 @@ function createLoguxCreator (config) {
       return store.client.log.add(action, meta)
     }
 
-    var lastId = 0
     var originDispatch = store.dispatch
     store.dispatch = function dispatch (action) {
-      lastId += 1
-      var id = store.client.id
-      var meta = { tab: id, reasons: ['tab' + id], dispatch: lastId }
+      var meta = {
+        id: client.log.generateId(),
+        tab: store.client.id,
+        reasons: ['tab' + store.client.id],
+        dispatch: true
+      }
       store.add(action, meta)
 
       originDispatch(action)
-      store.history[meta.dispatch] = store.getState()
+      store.history[meta.id.join('\t')] = store.getState()
     }
 
+    var prevMeta
     client.log.on('add', function (action, meta) {
       if (meta.dispatch) return
-      originDispatch(action)
 
-      if (!meta.added) return
-      store.history[meta.id.join('\t')] = store.getState()
+      if (!meta.added) {
+        prevMeta = meta
+        originDispatch(action)
+      } else if (isFirstOlder(prevMeta, meta)) {
+        prevMeta = meta
+        originDispatch(action)
+        store.history[meta.id.join('\t')] = store.getState()
+      } else {
+        var actions = []
+
+        client.log.each(function (action2, meta2) {
+          if (meta.added === meta2.added || isFirstOlder(meta, meta2)) {
+            actions.push([action2, meta2.id.join('\t')])
+          } else {
+            var state = store.history[meta2.id.join('\t')]
+
+            state = actions.reduceRight(function (prev, i) {
+              var changed = reducer(prev, i[0])
+              store.history[i[1]] = changed
+              return changed
+            }, state)
+
+            originDispatch({ type: 'LOGUX_REPLACE_STATE', state: state })
+          }
+        })
+      }
     })
 
     client.log.on('clean', function (action, meta) {
       if (!meta.added) return
-      if (meta.dispatch) {
-        delete store.history[meta.dispatch]
-      } else {
-        delete store.history[meta.id.join('\t')]
-      }
+      delete store.history[meta.id.join('\t')]
     })
 
     return store
