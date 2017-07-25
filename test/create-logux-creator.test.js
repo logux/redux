@@ -9,12 +9,12 @@ function reducer (state, action) {
 }
 
 function createStore () {
-  var createLoguxStore = createLoguxCreator({
+  var creator = createLoguxCreator({
     subprotocol: '1.0.0',
     userId: 10,
     url: 'wss://localhost:1337'
   })
-  return createLoguxStore(reducer, { value: 0 })
+  return creator(reducer, { value: 0 })
 }
 
 it('creates Redux store', function () {
