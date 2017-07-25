@@ -22,21 +22,40 @@ function createLoguxCreator (config) {
    */
   return function createLoguxStore (reducer, preloadedState, enhancer) {
     var store = createStore(reducer, preloadedState, enhancer)
+
     store.client = client
+    store.history = { }
 
     store.add = function (action, meta) {
       return store.client.log.add(action, meta)
     }
 
+    var lastId = 0
     var originDispatch = store.dispatch
     store.dispatch = function dispatch (action) {
+      lastId += 1
       var id = store.client.id
-      store.add(action, { tab: id, reasons: ['tab' + id], dispatch: true })
+      var meta = { tab: id, reasons: ['tab' + id], dispatch: lastId }
+      store.add(action, meta)
+
       originDispatch(action)
+      store.history[meta.dispatch] = store.getState()
     }
+
     store.client.log.on('add', function (action, meta) {
-      if (!meta.dispatch) {
-        originDispatch(action)
+      if (meta.dispatch) return
+      originDispatch(action)
+
+      if (!meta.added) return
+      store.history[meta.id.join('\t')] = store.getState()
+    })
+
+    store.client.log.on('clean', function (action, meta) {
+      if (!meta.added) return
+      if (meta.dispatch) {
+        delete store.history[meta.dispatch]
+      } else {
+        delete store.history[meta.id.join('\t')]
       }
     })
 
