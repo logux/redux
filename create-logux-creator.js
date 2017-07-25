@@ -30,10 +30,14 @@ function createLoguxCreator (config) {
 
     var originDispatch = store.dispatch
     store.dispatch = function dispatch (action) {
-      store.add(action, { tab: store.client.id })
-    }
-    store.client.log.on('add', function (action) {
+      var id = store.client.id
+      store.add(action, { tab: id, reasons: ['tab' + id], dispatch: true })
       originDispatch(action)
+    }
+    store.client.log.on('add', function (action, meta) {
+      if (!meta.dispatch) {
+        originDispatch(action)
+      }
     })
 
     return store

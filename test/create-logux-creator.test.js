@@ -33,6 +33,7 @@ it('sets tab ID', function () {
   return new Promise(function (resolve) {
     store.client.log.on('add', function (action, meta) {
       expect(meta.tab).toEqual(store.client.id)
+      expect(meta.reasons).toEqual(['tab' + store.client.id])
       resolve()
     })
     store.dispatch({ type: 'INC' })
