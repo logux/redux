@@ -23,7 +23,7 @@ function createLoguxCreator (config) {
    */
   return function createLoguxStore (reducer, preloadedState, enhancer) {
     var store = createStore(function (state, action) {
-      if (action.type === 'LOGUX_REPLACE_STATE') {
+      if (action.type === 'logux/state') {
         return action.state
       } else {
         return reducer(state, action)
@@ -77,7 +77,7 @@ function createLoguxCreator (config) {
               return changed
             }, state)
 
-            originDispatch({ type: 'LOGUX_REPLACE_STATE', state: state })
+            originDispatch({ type: 'logux/state', state: state })
           }
         })
       }
