@@ -37,6 +37,8 @@ function createLoguxCreator (config) {
       return store.client.log.add(action, meta)
     }
 
+    var prevMeta
+
     var originDispatch = store.dispatch
     store.dispatch = function dispatch (action) {
       var meta = {
@@ -47,11 +49,11 @@ function createLoguxCreator (config) {
       }
       store.add(action, meta)
 
+      prevMeta = meta
       originDispatch(action)
       store.history[meta.id.join('\t')] = store.getState()
     }
 
-    var prevMeta
     client.log.on('add', function (action, meta) {
       if (meta.dispatch) return
 
@@ -68,6 +70,7 @@ function createLoguxCreator (config) {
         client.log.each(function (action2, meta2) {
           if (meta.added === meta2.added || isFirstOlder(meta, meta2)) {
             actions.push([action2, meta2.id.join('\t')])
+            return true
           } else {
             var state = store.history[meta2.id.join('\t')]
 
@@ -78,6 +81,7 @@ function createLoguxCreator (config) {
             }, state)
 
             originDispatch({ type: 'logux/state', state: state })
+            return false
           }
         })
       }

@@ -96,16 +96,18 @@ it('changes history', function () {
     store.add({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
   ]).then(function () {
     store.dispatch({ type: 'ADD', value: 'c' })
+    store.dispatch({ type: 'ADD', value: 'd' })
     return store.add(
       { type: 'ADD', value: '|' },
-      { id: [1, 'test', 1], reasons: ['test'] })
+      { id: [2, 'test', 1], reasons: ['test'] })
   }).then(function () {
-    expect(store.getState().value).toEqual('0a|bc')
+    expect(store.getState().value).toEqual('0ab|cd')
     expect(store.history).toEqual({
       '1\ttest\t0': { value: '0a' },
-      '1\ttest\t1': { value: '0a|' },
-      '2\ttest\t0': { value: '0a|b' },
-      '3\ttest\t0': { value: '0a|bc' }
+      '2\ttest\t0': { value: '0ab' },
+      '2\ttest\t1': { value: '0ab|' },
+      '3\ttest\t0': { value: '0ab|c' },
+      '4\ttest\t0': { value: '0ab|cd' }
     })
   })
 })
