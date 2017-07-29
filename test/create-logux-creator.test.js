@@ -57,6 +57,12 @@ it('has shortcut for add', function () {
   })
 })
 
+it('listen for action from other tabs', function () {
+  var store = createStore()
+  store.client.emitter.emit('add', { type: 'INC' }, { })
+  expect(store.getState()).toEqual({ value: 1 })
+})
+
 it('has history', function () {
   var store = createStore(function (state, action) {
     return { value: action.type }
