@@ -134,8 +134,8 @@ function createLoguxCreator (config) {
       if (meta.dispatch) return
 
       if (action.type === 'logux/undo') {
-        client.log.has(action.id).then(function (exist) {
-          if (exist) {
+        client.log.byId(action.id).then(function (result) {
+          if (result[0]) {
             delete history[action.id.join('\t')]
             replay(action.id)
           } else {
