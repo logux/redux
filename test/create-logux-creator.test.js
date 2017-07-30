@@ -221,3 +221,39 @@ it('replaces reducer', function () {
     expect(store.getState().value).toEqual('0aZB')
   })
 })
+
+it('replays history since last state', function () {
+  var store = createStore(historyLine, { saveStateEvery: 2 })
+  return Promise.all([
+    store.add({ type: 'ADD', value: 'a' }, { reasons: ['first'] }),
+    store.add({ type: 'ADD', value: 'b' }, { reasons: ['test'] }),
+    store.add({ type: 'ADD', value: 'c' }, { reasons: ['test'] }),
+    store.add({ type: 'ADD', value: 'd' }, { reasons: ['test'] })
+  ]).then(function () {
+    return store.log.removeReason('first')
+  }).then(function () {
+    return store.add(
+      { type: 'ADD', value: '|' },
+      { id: [0, 'test', 0], reasons: ['test'] }
+    )
+  }).then(function () {
+    expect(store.getState().value).toEqual('0abc|d')
+  })
+})
+
+it('replays actions on missed history', function () {
+  var store = createStore(historyLine)
+  return Promise.all([
+    store.add({ type: 'ADD', value: 'a' }, { reasons: ['first'] }),
+    store.add({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
+  ]).then(function () {
+    return store.log.removeReason('first')
+  }).then(function () {
+    return store.add(
+      { type: 'ADD', value: '|' },
+      { id: [0, 'test', 0], reasons: ['test'] }
+    )
+  }).then(function () {
+    expect(store.getState().value).toEqual('0|b')
+  })
+})

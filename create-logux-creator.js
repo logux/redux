@@ -104,11 +104,22 @@ function createLoguxCreator (config) {
       saveHistory(meta)
     }
 
+    function replaceState (state, actions) {
+      var newState = actions.reduceRight(function (prev, i) {
+        var changed = reducer(prev, i[0])
+        if (history[i[1]]) history[i[1]] = changed
+        return changed
+      }, state)
+      originDispatch({ type: 'logux/state', state: newState })
+    }
+
     function replay (actionId) {
       var until = actionId.join('\t')
 
       var ignore = { }
       var actions = []
+      var replayed = false
+      var newAction
       var collecting = true
 
       client.log.each(function (action, meta) {
@@ -121,20 +132,35 @@ function createLoguxCreator (config) {
           }
 
           if (!ignore[id]) actions.push([action, id])
-          if (id === until) collecting = false
+          if (id === until) {
+            newAction = action
+            collecting = false
+          }
 
           return true
         } else {
-          var state = history[id]
-
-          state = actions.reduceRight(function (prev, i) {
-            var changed = reducer(prev, i[0])
-            if (history[i[1]]) history[i[1]] = changed
-            return changed
-          }, state)
-
-          originDispatch({ type: 'logux/state', state: state })
+          replayed = true
+          replaceState(history[id], actions)
           return false
+        }
+      }).then(function () {
+        if (replayed) return
+
+        var full = actions.slice(0)
+        while (actions.length > 0) {
+          var last = actions[actions.length - 1]
+          actions.pop()
+          if (history[last[1]]) {
+            replayed = true
+            replaceState(history[last[1]], actions.concat([
+              [newAction, until]
+            ]))
+            break
+          }
+        }
+
+        if (!replayed) {
+          replaceState(preloadedState, full)
         }
       })
     }
