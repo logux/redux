@@ -34,6 +34,12 @@ function historyLine (state, action) {
   }
 }
 
+function actions (log) {
+  return log.store.created.map(function (i) {
+    return i[0]
+  })
+}
+
 var originWarn = console.warn
 afterEach(function () {
   console.warn = originWarn
@@ -280,5 +286,45 @@ it('does not fall on missed onMissedHistory', function () {
     )
   }).then(function () {
     expect(store.getState().value).toEqual('0|')
+  })
+})
+
+it('cleans action added by dispatch', function () {
+  var store = createStore(historyLine, {
+    dispatchHistory: 3
+  })
+
+  function add (index) {
+    return function () {
+      store.dispatch({ type: 'ADD', value: index })
+    }
+  }
+
+  var promise = Promise.resolve()
+  for (var i = 0; i < 50; i++) {
+    promise = promise.then(add(i))
+  }
+
+  return promise.then(function () {
+    expect(actions(store.log)).toEqual([
+      { type: 'ADD', value: 49 },
+      { type: 'ADD', value: 48 },
+      { type: 'ADD', value: 47 }
+    ])
+  })
+})
+
+it('cleans last 1000 by default', function () {
+  var store = createStore(increment)
+
+  var promise = Promise.resolve()
+  for (var i = 0; i < 1050; i++) {
+    promise = promise.then(function () {
+      store.dispatch({ type: 'INC' })
+    })
+  }
+
+  return promise.then(function () {
+    expect(actions(store.log).length).toEqual(1000)
   })
 })
