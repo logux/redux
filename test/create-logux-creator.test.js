@@ -26,6 +26,19 @@ function createStore (reducer) {
   return store
 }
 
+function historyLine (state, action) {
+  if (action.type === 'ADD') {
+    return { value: state.value + action.value }
+  } else {
+    return state
+  }
+}
+
+var originWarn = console.warn
+afterEach(function () {
+  console.warn = originWarn
+})
+
 it('creates Redux store', function () {
   var store = createStore()
   store.dispatch({ type: 'INC' })
@@ -89,13 +102,7 @@ it('has history', function () {
 })
 
 it('changes history', function () {
-  var store = createStore(function (state, action) {
-    if (action.type === 'ADD') {
-      return { value: state.value + action.value }
-    } else {
-      return state
-    }
-  })
+  var store = createStore(historyLine)
 
   return Promise.all([
     store.add({ type: 'ADD', value: 'a' }, { reasons: ['test'] }),
@@ -115,5 +122,39 @@ it('changes history', function () {
       '3\ttest\t0': { value: '0ab|c' },
       '4\ttest\t0': { value: '0ab|cd' }
     })
+  })
+})
+
+it('undoes actions', function () {
+  var store = createStore(historyLine)
+
+  return Promise.all([
+    store.add({ type: 'ADD', value: 'a' }, { reasons: ['test'] }),
+    store.add({ type: 'ADD', value: 'b' }, { reasons: ['test'] }),
+    store.add({ type: 'ADD', value: 'c' }, { reasons: ['test'] })
+  ]).then(function () {
+    expect(store.getState().value).toEqual('0abc')
+    return store.add(
+      { type: 'logux/undo', id: [2, 'test', 0] }, { reasons: ['test'] })
+  }).then(function () {
+    expect(store.getState().value).toEqual('0ac')
+    expect(store.history).toEqual({
+      '1\ttest\t0': { value: '0a' },
+      '3\ttest\t0': { value: '0ac' }
+    })
+  })
+})
+
+it('warns about undoes cleaned action', function () {
+  console.warn = jest.fn()
+  var store = createStore()
+
+  return store.add({ type: 'logux/undo', id: [1, 't', 0] }).then(function () {
+    return Promise.resolve()
+  }).then(function () {
+    expect(console.warn).toHaveBeenCalledWith(
+      'Logux can not undo action [1,"t",0], because it did not find ' +
+      'this action in the log. Maybe action was cleaned.'
+    )
   })
 })

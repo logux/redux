@@ -2,6 +2,14 @@ var CrossTabClient = require('logux-client/cross-tab-client')
 var isFirstOlder = require('logux-core/is-first-older')
 var createStore = require('redux').createStore
 
+function warnBadUndo (id) {
+  var json = JSON.stringify(id)
+  console.warn(
+    'Logux can not undo action ' + json + ', because it did not ' +
+    'find this action in the log. Maybe action was cleaned.'
+  )
+}
+
 /**
  * Creates Logux client and connect it to Redux createStore function.
  *
@@ -54,10 +62,54 @@ function createLoguxCreator (config) {
       store.history[meta.id.join('\t')] = store.getState()
     }
 
+    function replay (actionId) {
+      var until = actionId.join('\t')
+
+      var ignore = { }
+      var actions = []
+      var collecting = true
+
+      client.log.each(function (action, meta) {
+        var id = meta.id.join('\t')
+
+        if (collecting) {
+          if (action.type === 'logux/undo') {
+            ignore[action.id.join('\t')] = true
+            return true
+          }
+
+          if (!ignore[id]) actions.push([action, id])
+          if (id === until) collecting = false
+
+          return true
+        } else {
+          var state = store.history[id]
+
+          state = actions.reduceRight(function (prev, i) {
+            var changed = reducer(prev, i[0])
+            store.history[i[1]] = changed
+            return changed
+          }, state)
+
+          originDispatch({ type: 'logux/state', state: state })
+          return false
+        }
+      })
+    }
+
     client.on('add', function (action, meta) {
       if (meta.dispatch) return
 
-      if (!meta.added) {
+      if (action.type === 'logux/undo') {
+        client.log.has(action.id).then(function (exist) {
+          if (exist) {
+            delete store.history[action.id.join('\t')]
+            replay(action.id)
+          } else {
+            warnBadUndo(action.id)
+          }
+        })
+      } else if (!meta.added) {
         prevMeta = meta
         originDispatch(action)
       } else if (isFirstOlder(prevMeta, meta)) {
@@ -65,25 +117,7 @@ function createLoguxCreator (config) {
         originDispatch(action)
         store.history[meta.id.join('\t')] = store.getState()
       } else {
-        var actions = []
-
-        client.log.each(function (action2, meta2) {
-          if (meta.added === meta2.added || isFirstOlder(meta, meta2)) {
-            actions.push([action2, meta2.id.join('\t')])
-            return true
-          } else {
-            var state = store.history[meta2.id.join('\t')]
-
-            state = actions.reduceRight(function (prev, i) {
-              var changed = reducer(prev, i[0])
-              store.history[i[1]] = changed
-              return changed
-            }, state)
-
-            originDispatch({ type: 'logux/state', state: state })
-            return false
-          }
-        })
+        replay(meta.id)
       }
     })
 
