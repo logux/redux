@@ -177,6 +177,12 @@ function createLoguxCreator (config) {
       })
     }
 
+    client.log.on('preadd', function (action, meta) {
+      if (action.type === 'logux/undo' && meta.reasons.length === 0) {
+        meta.reasons.push('reasonsLoading')
+      }
+    })
+
     var lastAdded = 0
     var dispatchCalls = 0
     client.on('add', function (action, meta) {
@@ -192,11 +198,16 @@ function createLoguxCreator (config) {
       }
 
       if (action.type === 'logux/undo') {
+        var reasons = meta.reasons
         client.log.byId(action.id).then(function (result) {
           if (result[0]) {
+            if (reasons.length === 1 && reasons[0] === 'reasonsLoading') {
+              client.log.changeMeta(meta.id, { reasons: result[1].reasons })
+            }
             delete history[action.id.join('\t')]
             replay(action.id)
           } else {
+            client.log.changeMeta(meta.id, { reasons: [] })
             warnBadUndo(action.id)
           }
         })
@@ -213,7 +224,6 @@ function createLoguxCreator (config) {
     })
 
     client.on('clean', function (action, meta) {
-      if (!meta.added) return
       delete history[meta.id.join('\t')]
     })
 

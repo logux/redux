@@ -328,3 +328,30 @@ it('cleans last 1000 by default', function () {
     expect(actions(store.log).length).toEqual(1000)
   })
 })
+
+it('copies reasons to undo action', function () {
+  var store = createStore(increment)
+  return store.add({ type: 'INC' }, { reasons: ['a', 'b'] }).then(function () {
+    return store.add({ type: 'logux/undo', id: [1, 'test', 0] })
+  }).then(function () {
+    return store.log.byId([2, 'test', 0])
+  }).then(function (result) {
+    expect(result[0].type).toEqual('logux/undo')
+    expect(result[1].reasons).toEqual(['a', 'b'])
+  })
+})
+
+it('does not override undo action reasons', function () {
+  var store = createStore(increment)
+  return store.add({ type: 'INC' }, { reasons: ['a', 'b'] }).then(function () {
+    return store.add(
+      { type: 'logux/undo', id: [1, 'test', 0] },
+      { reasons: ['c'] }
+    )
+  }).then(function () {
+    return store.log.byId([2, 'test', 0])
+  }).then(function (result) {
+    expect(result[0].type).toEqual('logux/undo')
+    expect(result[1].reasons).toEqual(['c'])
+  })
+})
