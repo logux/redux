@@ -44,6 +44,9 @@ function hackReducer (reducer) {
  * @param {bool} [config.allowDangerousProtocol=false] Do not show warning
  *                                                     when using 'ws://'
  *                                                     in production.
+ * @param {number} [config.dispatchHistory=1000] How many actions, added by
+ *                                              {@link LoguxStore#dispatch}
+ *                                              will be keeped.
  * @param {number} [config.saveStateEvery=50] How often save state to history.
  * @param {actioner} [config.onMissedHistory] Callback when there is no history
  *                                            to replay actions accurate.
@@ -52,10 +55,14 @@ function hackReducer (reducer) {
  */
 function createLoguxCreator (config) {
   if (!config) config = { }
+
+  var dispatchHistory = config.dispatchHistory || 1000
+  delete config.dispatchHistory
   var saveStateEvery = config.saveStateEvery || 50
   delete config.saveStateEvery
   var onMissedHistory = config.onMissedHistory
   delete config.onMissedHistory
+
   var client = new CrossTabClient(config)
 
   /**
@@ -170,8 +177,19 @@ function createLoguxCreator (config) {
       })
     }
 
+    var lastAdded = 0
+    var dispatchCalls = 0
     client.on('add', function (action, meta) {
-      if (meta.dispatch) return
+      if (meta.added > lastAdded) lastAdded = meta.added
+      if (meta.dispatch) {
+        dispatchCalls += 1
+        if (lastAdded > dispatchHistory && dispatchCalls % 50 === 0) {
+          store.log.removeReason('tab' + store.client.id, {
+            maxAdded: lastAdded - dispatchHistory
+          })
+        }
+        return
+      }
 
       if (action.type === 'logux/undo') {
         client.log.byId(action.id).then(function (result) {
