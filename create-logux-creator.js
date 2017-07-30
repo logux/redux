@@ -46,10 +46,10 @@ function hackReducer (reducer) {
  *                                                     in production.
  * @param {number} [config.dispatchHistory=1000] How many actions, added by
  *                                              {@link LoguxStore#dispatch}
- *                                              will be keeped.
+ *                                              will be kept.
  * @param {number} [config.saveStateEvery=50] How often save state to history.
- * @param {actioner} [config.onMissedHistory] Callback when there is no history
- *                                            to replay actions accurate.
+ * @param {checker} [config.onMissedHistory] Callback when there is no history
+ *                                           to replay actions accurate.
  *
  * @return {storeCreator} Redux createStore compatible function.
  */
@@ -244,7 +244,7 @@ module.exports = createLoguxCreator
  */
 
 /**
- * @callback actioner
+ * @callback checker
  * @param {Action} action The new action.
  */
 

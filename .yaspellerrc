@@ -18,6 +18,11 @@
     "SemVer",
     "reconnection",
     "ws",
-    "subprotocol"
+    "subprotocol",
+    "getState",
+    "CrossTabClient",
+    "nextReducer",
+    "replaceReducer",
+    "storeCreator"
   ]
 }
