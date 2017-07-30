@@ -10,6 +10,16 @@ function warnBadUndo (id) {
   )
 }
 
+function hackReducer (reducer) {
+  return function (state, action) {
+    if (action.type === 'logux/state') {
+      return action.state
+    } else {
+      return reducer(state, action)
+    }
+  }
+}
+
 /**
  * Creates Logux client and connect it to Redux createStore function.
  *
@@ -54,13 +64,7 @@ function createLoguxCreator (config) {
    * @return {object} Redux store with Logux hacks.
    */
   return function createLoguxStore (reducer, preloadedState, enhancer) {
-    var store = createStore(function (state, action) {
-      if (action.type === 'logux/state') {
-        return action.state
-      } else {
-        return reducer(state, action)
-      }
-    }, preloadedState, enhancer)
+    var store = createStore(hackReducer(reducer), preloadedState, enhancer)
 
     store.client = client
     store.log = client.log
@@ -78,8 +82,13 @@ function createLoguxCreator (config) {
       }
     }
 
-    var prevMeta
+    var originReplace = store.replaceReducer
+    store.replaceReducer = function replaceReducer (newReducer) {
+      reducer = newReducer
+      return originReplace(hackReducer(newReducer))
+    }
 
+    var prevMeta
     var originDispatch = store.dispatch
     store.dispatch = function dispatch (action) {
       var meta = {

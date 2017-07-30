@@ -194,11 +194,30 @@ it('warns about undoes cleaned action', function () {
   var store = createStore(increment)
 
   return store.add({ type: 'logux/undo', id: [1, 't', 0] }).then(function () {
-    return Promise.resolve()
-  }).then(function () {
     expect(console.warn).toHaveBeenCalledWith(
       'Logux can not undo action [1,"t",0], because it did not find ' +
       'this action in the log. Maybe action was cleaned.'
     )
+  })
+})
+
+it('replaces reducer', function () {
+  var store = createStore(historyLine)
+  store.dispatch({ type: 'ADD', value: 'a' })
+  store.dispatch({ type: 'ADD', value: 'b' })
+  expect(store.getState().value).toEqual('0ab')
+
+  store.replaceReducer(function (state, action) {
+    if (action.type === 'ADD') {
+      return { value: state.value + action.value.toUpperCase() }
+    } else {
+      return state
+    }
+  })
+  return store.add(
+    { type: 'ADD', value: 'z' },
+    { id: [1, 'test', 1], reasons: ['test'] }
+  ).then(function () {
+    expect(store.getState().value).toEqual('0aZB')
   })
 })
