@@ -14,26 +14,26 @@ function warnBadUndo (id) {
  * Creates Logux client and connect it to Redux createStore function.
  *
  * @param {object} config Logux Client config.
- * @param {string} options.url Server URL.
- * @param {string} options.subprotocol Client subprotocol version
- *                                     in SemVer format.
- * @param {number|string|false} options.userId User ID. Pass `false` if no user.
- * @param {any} [options.credentials] Client credentials for authentication.
- * @param {string} [options.prefix="logux"] Prefix for `IndexedDB` database
- *                                          to run multiple Logux instances
- *                                          in the same browser.
- * @param {number} [options.timeout=20000] Timeout in milliseconds
- *                                         to break connection.
- * @param {number} [options.ping=10000] Milliseconds since last message to test
- *                                      connection by sending ping.
- * @param {Store} [options.store] Store to save log data. `IndexedStore`
- *                                by default (if available)
- * @param {number} [options.minDelay=1000] Minimum delay between reconnections.
- * @param {number} [options.maxDelay=5000] Maximum delay between reconnections.
- * @param {number} [options.attempts=Infinity] Maximum reconnection attempts.
- * @param {bool} [options.allowDangerousProtocol=false] Do not show warning
- *                                                      when using 'ws://'
- *                                                      in production.
+ * @param {string} config.url Server URL.
+ * @param {string} config.subprotocol Client subprotocol version
+ *                                    in SemVer format.
+ * @param {number|string|false} config.userId User ID. Pass `false` if no user.
+ * @param {any} [config.credentials] Client credentials for authentication.
+ * @param {string} [config.prefix="logux"] Prefix for `IndexedDB` database
+ *                                         to run multiple Logux instances
+ *                                         in the same browser.
+ * @param {number} [config.timeout=20000] Timeout in milliseconds
+ *                                        to break connection.
+ * @param {number} [config.ping=10000] Milliseconds since last message to test
+ *                                     connection by sending ping.
+ * @param {Store} [config.store] Store to save log data. `IndexedStore`
+ *                               by default (if available)
+ * @param {number} [config.minDelay=1000] Minimum delay between reconnections.
+ * @param {number} [config.maxDelay=5000] Maximum delay between reconnections.
+ * @param {number} [config.attempts=Infinity] Maximum reconnection attempts.
+ * @param {bool} [config.allowDangerousProtocol=false] Do not show warning
+ *                                                     when using 'ws://'
+ *                                                     in production.
  *
  * @return {function} Redux createStore function with Logux hacks.
  */
