@@ -36,7 +36,7 @@ function warnBadUndo (id) {
  *                                                     in production.
  * @param {number} [config.saveStateEvery=50] How often save state to history.
  *
- * @return {function} Redux createStore function with Logux hacks.
+ * @return {storeCreator} Redux createStore compatible function.
  */
 function createLoguxCreator (config) {
   if (!config) config = { }
@@ -164,3 +164,101 @@ function createLoguxCreator (config) {
 }
 
 module.exports = createLoguxCreator
+
+/**
+ * @callback storeCreator
+ * @param {Function} reducer A function that returns the next state tree,
+ *                           given the current state tree and the action
+ *                           to handle.
+ * @param {any} [preloadedState] The initial state.
+ * @param {Function} [enhancer] The store enhancer.
+ * @returns {LoguxStore} Redux store with Logux extensions.
+ */
+
+/**
+ * Redux store with Logux extensions.
+ * @name LoguxStore
+ * @class
+ */
+/**
+ * Logux synchronization client.
+ *
+ * @name client
+ * @type {CrossTabClient}
+ * @memberof LoguxStore#
+ */
+/**
+ * The Logux log.
+ *
+ * @name log
+ * @type {Log}
+ * @memberof LoguxStore#
+ */
+/**
+ * Add action to log and update store state.
+ *
+ * @param {Action} action The new action.
+ * @param {Meta} [meta] Action’s metadata.
+ *
+ * @return {Promise} Promise when action will be saved to the log.
+ *
+ * @name add
+ * @function
+ * @memberof LoguxStore#
+ */
+/**
+ * Reads the state tree managed by the store.
+ *
+ * @return {any} The current state tree of your application.
+ *
+ * @name getStore
+ * @function
+ * @memberof LoguxStore#
+ */
+/**
+ * Adds a store change listener.
+ *
+ * @param {Function} listener A callback to be invoked on every new action.
+ *
+ * @returns {Function} A function to remove this change listener.
+ *
+ * @name subscribe
+ * @function
+ * @memberof LoguxStore#
+ */
+/**
+ * Add action to log with Redux compatible API.
+ *
+ * You should use it only in legacy code.
+ * There is noway to set metadata in this method.
+ * As result there is no way to cleaning control.
+ * Use {@link LoguxStore#add} instead.
+ *
+ * @param {Object} action A plain object representing “what changed”.
+ *
+ * @return {Object} For convenience, the same action object you dispatched.
+ *
+ * @name dispatch
+ * @function
+ * @memberof LoguxStore#
+ */
+/**
+ * Replaces the reducer currently used by the store to calculate the state.
+ *
+ * @param {Function} nextReducer The reducer for the store to use instead.
+ *
+ * @return {void}
+ *
+ * @name replaceReducer
+ * @function
+ * @memberof LoguxStore#
+ */
+/**
+ * Interoperability point for observable/reactive libraries.
+ *
+ * @returns {observable} A minimal observable of state changes.
+ *
+ * @name observable
+ * @function
+ * @memberof LoguxStore#
+ */
