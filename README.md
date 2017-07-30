@@ -29,7 +29,7 @@ function reducer (state, action) {
   switch (action.type) {
     case 'INC':
       return { value: state.value + 1 }
-    default: 
+    default:
       return state
   }
 }
@@ -37,6 +37,8 @@ function reducer (state, action) {
 const preloadedState = { value: 0 }
 
 const store = createStore( reducer, preloadedState, enhancer )
+
++store.client.start()
 ```
 See also [Logux Status] for UX best practices.
 
