@@ -34,10 +34,14 @@ function warnBadUndo (id) {
  * @param {bool} [config.allowDangerousProtocol=false] Do not show warning
  *                                                     when using 'ws://'
  *                                                     in production.
+ * @param {number} [config.saveStateEvery=50] How often save state to history.
  *
  * @return {function} Redux createStore function with Logux hacks.
  */
 function createLoguxCreator (config) {
+  if (!config) config = { }
+  var saveStateEvery = config.saveStateEvery || 50
+  delete config.saveStateEvery
   var client = new CrossTabClient(config)
 
   /**
@@ -59,10 +63,19 @@ function createLoguxCreator (config) {
     }, preloadedState, enhancer)
 
     store.client = client
-    store.history = { }
+    store.log = client.log
+    var history = { }
 
     store.add = function (action, meta) {
       return store.client.log.add(action, meta)
+    }
+
+    var actionCount = 0
+    function saveHistory (meta) {
+      actionCount += 1
+      if (saveStateEvery === 1 || actionCount % saveStateEvery === 1) {
+        history[meta.id.join('\t')] = store.getState()
+      }
     }
 
     var prevMeta
@@ -79,7 +92,7 @@ function createLoguxCreator (config) {
 
       prevMeta = meta
       originDispatch(action)
-      store.history[meta.id.join('\t')] = store.getState()
+      saveHistory(meta)
     }
 
     function replay (actionId) {
@@ -92,7 +105,7 @@ function createLoguxCreator (config) {
       client.log.each(function (action, meta) {
         var id = meta.id.join('\t')
 
-        if (collecting) {
+        if (collecting || !history[id]) {
           if (action.type === 'logux/undo') {
             ignore[action.id.join('\t')] = true
             return true
@@ -103,11 +116,11 @@ function createLoguxCreator (config) {
 
           return true
         } else {
-          var state = store.history[id]
+          var state = history[id]
 
           state = actions.reduceRight(function (prev, i) {
             var changed = reducer(prev, i[0])
-            store.history[i[1]] = changed
+            if (history[i[1]]) history[i[1]] = changed
             return changed
           }, state)
 
@@ -123,7 +136,7 @@ function createLoguxCreator (config) {
       if (action.type === 'logux/undo') {
         client.log.has(action.id).then(function (exist) {
           if (exist) {
-            delete store.history[action.id.join('\t')]
+            delete history[action.id.join('\t')]
             replay(action.id)
           } else {
             warnBadUndo(action.id)
@@ -135,7 +148,7 @@ function createLoguxCreator (config) {
       } else if (isFirstOlder(prevMeta, meta)) {
         prevMeta = meta
         originDispatch(action)
-        store.history[meta.id.join('\t')] = store.getState()
+        saveHistory(meta)
       } else {
         replay(meta.id)
       }
@@ -143,7 +156,7 @@ function createLoguxCreator (config) {
 
     client.on('clean', function (action, meta) {
       if (!meta.added) return
-      delete store.history[meta.id.join('\t')]
+      delete history[meta.id.join('\t')]
     })
 
     return store
