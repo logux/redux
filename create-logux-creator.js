@@ -45,6 +45,8 @@ function hackReducer (reducer) {
  *                                                     when using 'ws://'
  *                                                     in production.
  * @param {number} [config.saveStateEvery=50] How often save state to history.
+ * @param {actioner} [config.onMissedHistory] Callback when there is no history
+ *                                            to replay actions accurate.
  *
  * @return {storeCreator} Redux createStore compatible function.
  */
@@ -52,6 +54,8 @@ function createLoguxCreator (config) {
   if (!config) config = { }
   var saveStateEvery = config.saveStateEvery || 50
   delete config.saveStateEvery
+  var onMissedHistory = config.onMissedHistory
+  delete config.onMissedHistory
   var client = new CrossTabClient(config)
 
   /**
@@ -145,6 +149,7 @@ function createLoguxCreator (config) {
         }
       }).then(function () {
         if (replayed) return
+        if (onMissedHistory) onMissedHistory(newAction)
 
         var full = actions.slice(0)
         while (actions.length > 0) {
@@ -207,7 +212,12 @@ module.exports = createLoguxCreator
  *                           to handle.
  * @param {any} [preloadedState] The initial state.
  * @param {Function} [enhancer] The store enhancer.
- * @returns {LoguxStore} Redux store with Logux extensions.
+ * @return {LoguxStore} Redux store with Logux extensions.
+ */
+
+/**
+ * @callback actioner
+ * @param {Action} action The new action.
  */
 
 /**

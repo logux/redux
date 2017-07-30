@@ -223,7 +223,11 @@ it('replaces reducer', function () {
 })
 
 it('replays history since last state', function () {
-  var store = createStore(historyLine, { saveStateEvery: 2 })
+  var onMissedHistory = jest.fn()
+  var store = createStore(historyLine, {
+    onMissedHistory: onMissedHistory,
+    saveStateEvery: 2
+  })
   return Promise.all([
     store.add({ type: 'ADD', value: 'a' }, { reasons: ['first'] }),
     store.add({ type: 'ADD', value: 'b' }, { reasons: ['test'] }),
@@ -237,12 +241,16 @@ it('replays history since last state', function () {
       { id: [0, 'test', 0], reasons: ['test'] }
     )
   }).then(function () {
+    expect(onMissedHistory).toHaveBeenCalledWith({ type: 'ADD', value: '|' })
     expect(store.getState().value).toEqual('0abc|d')
   })
 })
 
 it('replays actions on missed history', function () {
-  var store = createStore(historyLine)
+  var onMissedHistory = jest.fn()
+  var store = createStore(historyLine, {
+    onMissedHistory: onMissedHistory
+  })
   return Promise.all([
     store.add({ type: 'ADD', value: 'a' }, { reasons: ['first'] }),
     store.add({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
@@ -254,6 +262,23 @@ it('replays actions on missed history', function () {
       { id: [0, 'test', 0], reasons: ['test'] }
     )
   }).then(function () {
+    expect(onMissedHistory).toHaveBeenCalledWith({ type: 'ADD', value: '|' })
     expect(store.getState().value).toEqual('0|b')
+  })
+})
+
+it('does not fall on missed onMissedHistory', function () {
+  var store = createStore(historyLine)
+  return Promise.all([
+    store.add({ type: 'ADD', value: 'a' }, { reasons: ['first'] })
+  ]).then(function () {
+    return store.log.removeReason('first')
+  }).then(function () {
+    return store.add(
+      { type: 'ADD', value: '|' },
+      { id: [0, 'test', 0], reasons: ['test'] }
+    )
+  }).then(function () {
+    expect(store.getState().value).toEqual('0|')
   })
 })
