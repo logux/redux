@@ -1179,8 +1179,8 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
 
 ejs@^2.5.6:
-  version "2.5.6"
-  resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.5.6.tgz#479636bfa3fe3b1debd52087f0acb204b4f19c88"
+  version "2.5.7"
+  resolved "https://registry.yarnpkg.com/ejs/-/ejs-2.5.7.tgz#cc872c168880ae3c7189762fd5ffc00896c9518a"
 
 elegant-spinner@^1.0.1:
   version "1.0.1"
@@ -2765,7 +2765,7 @@ log-update@^1.0.2:
 
 logux-client@logux/logux-client:
   version "0.1.0"
-  resolved "https://codeload.github.com/logux/logux-client/tar.gz/111eb0076bce533d75b7afe6653285f166a4b53e"
+  resolved "https://codeload.github.com/logux/logux-client/tar.gz/e145a5d08e26b8c40115ca9e711302f6a3c4e591"
   dependencies:
     logux-core logux/logux-core
     logux-sync logux/logux-sync
@@ -2774,7 +2774,7 @@ logux-client@logux/logux-client:
 
 logux-core@logux/logux-core:
   version "0.1.0"
-  resolved "https://codeload.github.com/logux/logux-core/tar.gz/740ebc209eaace8a5a5a0de95af04e40392e8d80"
+  resolved "https://codeload.github.com/logux/logux-core/tar.gz/c33ab4e49bed934db4be8ceb9f1ec00254f9b22f"
   dependencies:
     nanoevents "^0.3.0"
 
