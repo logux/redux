@@ -211,7 +211,7 @@ module.exports = createLoguxCreator
  *
  * @return {any} The current state tree of your application.
  *
- * @name getStore
+ * @name getState
  * @function
  * @memberof LoguxStore#
  */
