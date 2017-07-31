@@ -301,15 +301,15 @@ it('cleans action added by dispatch', function () {
   }
 
   var promise = Promise.resolve()
-  for (var i = 0; i < 50; i++) {
+  for (var i = 1; i <= 25; i++) {
     promise = promise.then(add(i))
   }
 
   return promise.then(function () {
     expect(actions(store.log)).toEqual([
-      { type: 'ADD', value: 49 },
-      { type: 'ADD', value: 48 },
-      { type: 'ADD', value: 47 }
+      { type: 'ADD', value: 25 },
+      { type: 'ADD', value: 24 },
+      { type: 'ADD', value: 23 }
     ])
   })
 })
