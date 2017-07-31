@@ -189,7 +189,7 @@ function createLoguxCreator (config) {
       if (meta.added > lastAdded) lastAdded = meta.added
       if (meta.dispatch) {
         dispatchCalls += 1
-        if (lastAdded > dispatchHistory && dispatchCalls % 50 === 0) {
+        if (lastAdded > dispatchHistory && dispatchCalls % 25 === 0) {
           store.log.removeReason('tab' + store.client.id, {
             maxAdded: lastAdded - dispatchHistory
           })
