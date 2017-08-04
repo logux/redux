@@ -81,7 +81,17 @@ function createLoguxCreator (config) {
     store.log = client.log
     var history = { }
 
-    store.add = function (action, meta) {
+    store.dispatchLocal = function (action, meta) {
+      meta.tab = client.id
+      return store.client.log.add(action, meta)
+    }
+
+    store.dispatchCrossTab = function (action, meta) {
+      return store.client.log.add(action, meta)
+    }
+
+    store.dispatchSync = function (action, meta) {
+      meta.sync = true
       return store.client.log.add(action, meta)
     }
 
@@ -108,7 +118,7 @@ function createLoguxCreator (config) {
         reasons: ['tab' + store.client.id],
         dispatch: true
       }
-      store.add(action, meta)
+      store.log.add(action, meta)
 
       prevMeta = meta
       originDispatch(action)
@@ -268,14 +278,41 @@ module.exports = createLoguxCreator
  * @memberof LoguxStore#
  */
 /**
- * Add action to log and update store state.
+ * Add local action to log and update store state.
+ * This action will be visible only for current tab.
  *
  * @param {Action} action The new action.
  * @param {Meta} [meta] Action’s metadata.
  *
  * @return {Promise} Promise when action will be saved to the log.
  *
- * @name add
+ * @name dispatchLocal
+ * @function
+ * @memberof LoguxStore#
+ */
+/**
+ * Add cross-tab action to log and update store state.
+ * This action will be visible only for all tabs.
+ *
+ * @param {Action} action The new action.
+ * @param {Meta} [meta] Action’s metadata.
+ *
+ * @return {Promise} Promise when action will be saved to the log.
+ *
+ * @name dispatchCrossTab
+ * @function
+ * @memberof LoguxStore#
+ */
+/**
+ * Add sync action to log and update store state.
+ * This action will be visible only for server and all browser tabs.
+ *
+ * @param {Action} action The new action.
+ * @param {Meta} [meta] Action’s metadata.
+ *
+ * @return {Promise} Promise when action will be saved to the log.
+ *
+ * @name dispatchSync
  * @function
  * @memberof LoguxStore#
  */
