@@ -1,9 +1,11 @@
+var TestPair = require('logux-sync').TestPair
+
 var createLoguxCreator = require('../create-logux-creator')
 
 function createStore (reducer, opts) {
   if (!opts) opts = { }
+  if (!opts.server) opts.server = 'wss://localhost:1337'
   opts.subprotocol = '1.0.0'
-  opts.server = 'wss://localhost:1337'
   opts.userId = 10
 
   var creator = createLoguxCreator(opts)
@@ -12,7 +14,7 @@ function createStore (reducer, opts) {
   var prev = 0
   store.log.generateId = function () {
     prev += 1
-    return [prev, 'test', 0]
+    return [prev, store.client.options.userId + ':uuid', 0]
   }
 
   return store
@@ -111,7 +113,7 @@ it('saves previous states', function () {
     expect(calls).toEqual(60)
     calls = 0
     return store.dispatchCrossTab(
-      { type: 'A' }, { id: [57, 'test', 1], reasons: ['test'] })
+      { type: 'A' }, { id: [57, '10:uuid', 1], reasons: ['test'] })
   }).then(function () {
     expect(calls).toEqual(10)
   })
@@ -134,7 +136,7 @@ it('changes history recording frequency', function () {
   ]).then(function () {
     calls = 0
     return store.dispatchCrossTab(
-      { type: 'A' }, { id: [3, 'test', 1], reasons: ['test'] })
+      { type: 'A' }, { id: [3, '10:uuid', 1], reasons: ['test'] })
   }).then(function () {
     expect(calls).toEqual(2)
   })
@@ -157,11 +159,11 @@ it('cleans its history on removing action', function () {
     store.dispatchCrossTab({ type: 'A' }, { reasons: ['test'] }),
     store.dispatchCrossTab({ type: 'A' }, { reasons: ['test'] })
   ]).then(function () {
-    return store.log.changeMeta([5, 'test', 0], { reasons: [] })
+    return store.log.changeMeta([5, '10:uuid', 0], { reasons: [] })
   }).then(function () {
     calls = 0
     return store.dispatchCrossTab(
-      { type: 'A' }, { id: [5, 'test', 1], reasons: ['test'] })
+      { type: 'A' }, { id: [5, '10:uuid', 1], reasons: ['test'] })
   }).then(function () {
     expect(calls).toEqual(3)
   })
@@ -178,7 +180,7 @@ it('changes history', function () {
     store.dispatch({ type: 'ADD', value: 'd' })
     return store.dispatchCrossTab(
       { type: 'ADD', value: '|' },
-      { id: [2, 'test', 1], reasons: ['test'] })
+      { id: [2, '10:uuid', 1], reasons: ['test'] })
   }).then(function () {
     expect(store.getState().value).toEqual('0ab|cd')
   })
@@ -194,7 +196,7 @@ it('undoes actions', function () {
   ]).then(function () {
     expect(store.getState().value).toEqual('0abc')
     return store.dispatchCrossTab(
-      { type: 'logux/undo', id: [2, 'test', 0] }, { reasons: ['test'] })
+      { type: 'logux/undo', id: [2, '10:uuid', 0] }, { reasons: ['test'] })
   }).then(function () {
     expect(store.getState().value).toEqual('0ac')
   })
@@ -208,8 +210,8 @@ it('warns about undoes cleaned action', function () {
     { type: 'logux/undo', id: [1, 't', 0] }, { reasons: [] }
   ).then(function () {
     expect(console.warn).toHaveBeenCalledWith(
-      'Logux can not undo action [1,"t",0], because it did not find ' +
-      'this action in the log. Maybe action was cleaned.'
+      'Logux can not undo action [1,"t",0], because log does not ' +
+      'contain this action. Maybe action was cleaned.'
     )
   })
 })
@@ -229,7 +231,7 @@ it('replaces reducer', function () {
   })
   return store.dispatchCrossTab(
     { type: 'ADD', value: 'z' },
-    { id: [1, 'test', 1], reasons: ['test'] }
+    { id: [1, '10:uuid', 1], reasons: ['test'] }
   ).then(function () {
     expect(store.getState().value).toEqual('0aZB')
   })
@@ -251,7 +253,7 @@ it('replays history since last state', function () {
   }).then(function () {
     return store.dispatchCrossTab(
       { type: 'ADD', value: '|' },
-      { id: [0, 'test', 0], reasons: ['test'] }
+      { id: [0, '10:uuid', 0], reasons: ['test'] }
     )
   }).then(function () {
     expect(onMissedHistory).toHaveBeenCalledWith({ type: 'ADD', value: '|' })
@@ -272,7 +274,7 @@ it('replays actions on missed history', function () {
   }).then(function () {
     return store.dispatchCrossTab(
       { type: 'ADD', value: '|' },
-      { id: [0, 'test', 0], reasons: ['test'] }
+      { id: [0, '10:uuid', 0], reasons: ['test'] }
     )
   }).then(function () {
     expect(onMissedHistory).toHaveBeenCalledWith({ type: 'ADD', value: '|' })
@@ -289,7 +291,7 @@ it('does not fall on missed onMissedHistory', function () {
   }).then(function () {
     return store.dispatchCrossTab(
       { type: 'ADD', value: '|' },
-      { id: [0, 'test', 0], reasons: ['test'] }
+      { id: [0, '10:uuid', 0], reasons: ['test'] }
     )
   }).then(function () {
     expect(store.getState().value).toEqual('0|')
@@ -342,9 +344,9 @@ it('copies reasons to undo action', function () {
     { type: 'INC' }, { reasons: ['a', 'b'] }
   ).then(function () {
     return store.dispatchCrossTab(
-      { type: 'logux/undo', id: [1, 'test', 0] }, { reasons: [] })
+      { type: 'logux/undo', id: [1, '10:uuid', 0] }, { reasons: [] })
   }).then(function () {
-    return store.log.byId([2, 'test', 0])
+    return store.log.byId([2, '10:uuid', 0])
   }).then(function (result) {
     expect(result[0].type).toEqual('logux/undo')
     expect(result[1].reasons).toEqual(['a', 'b'])
@@ -357,11 +359,11 @@ it('does not override undo action reasons', function () {
     { type: 'INC' }, { reasons: ['a', 'b'] }
   ).then(function () {
     return store.dispatchCrossTab(
-      { type: 'logux/undo', id: [1, 'test', 0] },
+      { type: 'logux/undo', id: [1, '10:uuid', 0] },
       { reasons: ['c'] }
     )
   }).then(function () {
-    return store.log.byId([2, 'test', 0])
+    return store.log.byId([2, '10:uuid', 0])
   }).then(function (result) {
     expect(result[0].type).toEqual('logux/undo')
     expect(result[1].reasons).toEqual(['c'])
@@ -384,9 +386,10 @@ it('dispatches sync actions', function () {
   return store.dispatchSync(
     { type: 'INC' }, { reasons: ['test'] }
   ).then(function () {
-    expect(store.log.store.created[0][0]).toEqual({ type: 'INC' })
-    expect(store.log.store.created[0][1].sync).toBeTruthy()
-    expect(store.log.store.created[0][1].reasons).toEqual(['test'])
+    var log = store.log.store.created
+    expect(log[0][0]).toEqual({ type: 'INC' })
+    expect(log[0][1].sync).toBeTruthy()
+    expect(log[0][1].reasons).toEqual(['test', 'waitForSync'])
   })
 })
 
@@ -401,4 +404,27 @@ it('throws on missed reasons', function () {
   expect(function () {
     store.dispatchSync({ type: 'INC' })
   }).toThrowError(/meta.reasons/)
+})
+
+it('cleans sync action after synchronization', function () {
+  var pair = new TestPair()
+  var store = createStore(increment, { server: pair.left })
+
+  store.client.start()
+  return pair.wait('left').then(function () {
+    var protocol = store.client.sync.localProtocol
+    pair.right.send(['connected', protocol, 'server', [0, 0]])
+    return store.client.sync.waitFor('synchronized')
+  }).then(function () {
+    store.dispatchSync({ type: 'INC' }, { reasons: [] })
+    return pair.wait('right')
+  }).then(function () {
+    expect(actions(store.log)).toEqual([{ type: 'INC' }])
+    pair.right.send(['synced', 1])
+    return store.client.sync.waitFor('synchronized')
+  }).then(function () {
+    return Promise.resolve()
+  }).then(function () {
+    expect(actions(store.log)).toEqual([])
+  })
 })

@@ -30,6 +30,7 @@
     "jest": "^20.0.4",
     "jsdoc": "^3.5.3",
     "lint-staged": "^4.0.2",
+    "logux-sync": "logux/logux-sync",
     "pre-commit": "^1.2.2",
     "rimraf": "^2.6.1",
     "size-limit": "^0.8.0",

@@ -2,14 +2,6 @@ var CrossTabClient = require('logux-client/cross-tab-client')
 var isFirstOlder = require('logux-core/is-first-older')
 var createStore = require('redux').createStore
 
-function warnBadUndo (id) {
-  var json = JSON.stringify(id)
-  console.warn(
-    'Logux can not undo action ' + json + ', because it did not ' +
-    'find this action in the log. Maybe action was cleaned.'
-  )
-}
-
 function hackReducer (reducer) {
   return function (state, action) {
     if (action.type === 'logux/state') {
@@ -18,6 +10,14 @@ function hackReducer (reducer) {
       return reducer(state, action)
     }
   }
+}
+
+function warnBadUndo (id) {
+  var json = JSON.stringify(id)
+  console.warn(
+    'Logux can not undo action ' + json + ', because log does not ' +
+    'contain this action. Maybe action was cleaned.'
+  )
 }
 
 function checkReasons (meta) {
@@ -73,6 +73,7 @@ function createLoguxCreator (config) {
   delete config.onMissedHistory
 
   var client = new CrossTabClient(config)
+  var log = client.log
 
   /**
    * Creates Redux store and connect Logux Client to it.
@@ -87,24 +88,25 @@ function createLoguxCreator (config) {
     var store = createStore(hackReducer(reducer), preloadedState, enhancer)
 
     store.client = client
-    store.log = client.log
+    store.log = log
     var history = { }
 
     store.dispatchLocal = function (action, meta) {
       checkReasons(meta)
       meta.tab = client.id
-      return store.client.log.add(action, meta)
+      return log.add(action, meta)
     }
 
     store.dispatchCrossTab = function (action, meta) {
       checkReasons(meta)
-      return store.client.log.add(action, meta)
+      return log.add(action, meta)
     }
 
     store.dispatchSync = function (action, meta) {
       checkReasons(meta)
       meta.sync = true
-      return store.client.log.add(action, meta)
+      meta.reasons.push('waitForSync')
+      return log.add(action, meta)
     }
 
     var actionCount = 0
@@ -125,12 +127,12 @@ function createLoguxCreator (config) {
     var originDispatch = store.dispatch
     store.dispatch = function dispatch (action) {
       var meta = {
-        id: client.log.generateId(),
+        id: log.generateId(),
         tab: store.client.id,
         reasons: ['tab' + store.client.id],
         dispatch: true
       }
-      store.log.add(action, meta)
+      log.add(action, meta)
 
       prevMeta = meta
       originDispatch(action)
@@ -155,7 +157,7 @@ function createLoguxCreator (config) {
       var newAction
       var collecting = true
 
-      client.log.each(function (action, meta) {
+      log.each(function (action, meta) {
         var id = meta.id.join('\t')
 
         if (collecting || !history[id]) {
@@ -199,7 +201,7 @@ function createLoguxCreator (config) {
       })
     }
 
-    client.log.on('preadd', function (action, meta) {
+    log.on('preadd', function (action, meta) {
       if (action.type === 'logux/undo' && meta.reasons.length === 0) {
         meta.reasons.push('reasonsLoading')
       }
@@ -212,7 +214,7 @@ function createLoguxCreator (config) {
       if (meta.dispatch) {
         dispatchCalls += 1
         if (lastAdded > dispatchHistory && dispatchCalls % 25 === 0) {
-          store.log.removeReason('tab' + store.client.id, {
+          log.removeReason('tab' + store.client.id, {
             maxAdded: lastAdded - dispatchHistory
           })
         }
@@ -221,15 +223,15 @@ function createLoguxCreator (config) {
 
       if (action.type === 'logux/undo') {
         var reasons = meta.reasons
-        client.log.byId(action.id).then(function (result) {
+        log.byId(action.id).then(function (result) {
           if (result[0]) {
             if (reasons.length === 1 && reasons[0] === 'reasonsLoading') {
-              client.log.changeMeta(meta.id, { reasons: result[1].reasons })
+              log.changeMeta(meta.id, { reasons: result[1].reasons })
             }
             delete history[action.id.join('\t')]
             replay(action.id)
           } else {
-            client.log.changeMeta(meta.id, { reasons: [] })
+            log.changeMeta(meta.id, { reasons: [] })
             warnBadUndo(action.id)
           }
         })
@@ -247,6 +249,12 @@ function createLoguxCreator (config) {
 
     client.on('clean', function (action, meta) {
       delete history[meta.id.join('\t')]
+    })
+
+    client.sync.on('state', function () {
+      if (client.sync.state === 'synchronized') {
+        log.removeReason('waitForSync', { maxAdded: client.sync.lastSent })
+      }
     })
 
     return store
