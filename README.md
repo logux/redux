@@ -21,8 +21,8 @@ Create Redux store by `createLoguxCreator`. It returns original Redux `createSto
 
 +const createStore = createLoguxCreator({
 +  subprotocol: '1.0.0',
-+  userId: 10,
-+  url: 'wss://localhost:1337'
++  server: 'wss://localhost:1337',
++  userId: 10
 +})
 
 function reducer (state, action) {

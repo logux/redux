@@ -3,8 +3,8 @@ var createLoguxCreator = require('../create-logux-creator')
 function createStore (reducer, opts) {
   if (!opts) opts = { }
   opts.subprotocol = '1.0.0'
+  opts.server = 'wss://localhost:1337'
   opts.userId = 10
-  opts.url = 'wss://localhost:1337'
 
   var creator = createLoguxCreator(opts)
   var store = creator(reducer, { value: 0 })
@@ -48,7 +48,7 @@ afterEach(function () {
 it('throws error on missed config', function () {
   expect(function () {
     createLoguxCreator()
-  }).toThrowError('Missed url option in Logux client')
+  }).toThrowError('Missed server option in Logux client')
 })
 
 it('creates Redux store', function () {
