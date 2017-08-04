@@ -33,7 +33,7 @@ function checkReasons (meta) {
  * Creates Logux client and connect it to Redux createStore function.
  *
  * @param {object} config Logux Client config.
- * @param {string} config.url Server URL.
+ * @param {string|Connection} config.server Server URL.
  * @param {string} config.subprotocol Client subprotocol version
  *                                    in SemVer format.
  * @param {number|string|false} config.userId User ID. Pass `false` if no user.

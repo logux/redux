@@ -1049,7 +1049,7 @@ debug@2.6.7:
   dependencies:
     ms "2.0.0"
 
-debug@^2.1.1, debug@^2.2.0, debug@^2.6.3, debug@^2.6.8:
+debug@2.6.8, debug@^2.1.1, debug@^2.2.0, debug@^2.6.3, debug@^2.6.8:
   version "2.6.8"
   resolved "https://registry.yarnpkg.com/debug/-/debug-2.6.8.tgz#e731531ca2ede27d188222427da17821d68ff4fc"
   dependencies:
@@ -1647,10 +1647,10 @@ fill-range@^2.1.0:
     repeat-string "^1.5.2"
 
 finalhandler@~1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/finalhandler/-/finalhandler-1.0.3.tgz#ef47e77950e999780e86022a560e3217e0d0cc89"
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/finalhandler/-/finalhandler-1.0.4.tgz#18574f2e7c4b98b8ae3b230c21f201f31bdb3fb7"
   dependencies:
-    debug "2.6.7"
+    debug "2.6.8"
     encodeurl "~1.0.1"
     escape-html "~1.0.3"
     on-finished "~2.3.0"
@@ -2760,7 +2760,7 @@ log-update@^1.0.2:
 
 logux-client@logux/logux-client:
   version "0.1.0"
-  resolved "https://codeload.github.com/logux/logux-client/tar.gz/e145a5d08e26b8c40115ca9e711302f6a3c4e591"
+  resolved "https://codeload.github.com/logux/logux-client/tar.gz/a1dd672cf6f7181532223da75bd855c722574a53"
   dependencies:
     logux-core logux/logux-core
     logux-sync logux/logux-sync
@@ -2775,7 +2775,7 @@ logux-core@logux/logux-core:
 
 logux-sync@logux/logux-sync:
   version "0.1.2"
-  resolved "https://codeload.github.com/logux/logux-sync/tar.gz/c46ff65d40bfd88adefa72dbbf67141d18d75126"
+  resolved "https://codeload.github.com/logux/logux-sync/tar.gz/213645a768b9e06b3912a96dac22eac62bbac206"
   dependencies:
     nanoevents "^0.3.0"
 
