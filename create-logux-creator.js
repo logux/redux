@@ -20,6 +20,15 @@ function hackReducer (reducer) {
   }
 }
 
+function checkReasons (meta) {
+  if (!meta || !meta.reasons) {
+    throw new Error(
+      'All Logux action must have meta.reasons: ' +
+      'dispatchLocal(action, { reasons: [] })'
+    )
+  }
+}
+
 /**
  * Creates Logux client and connect it to Redux createStore function.
  *
@@ -82,15 +91,18 @@ function createLoguxCreator (config) {
     var history = { }
 
     store.dispatchLocal = function (action, meta) {
+      checkReasons(meta)
       meta.tab = client.id
       return store.client.log.add(action, meta)
     }
 
     store.dispatchCrossTab = function (action, meta) {
+      checkReasons(meta)
       return store.client.log.add(action, meta)
     }
 
     store.dispatchSync = function (action, meta) {
+      checkReasons(meta)
       meta.sync = true
       return store.client.log.add(action, meta)
     }
@@ -282,7 +294,9 @@ module.exports = createLoguxCreator
  * This action will be visible only for current tab.
  *
  * @param {Action} action The new action.
- * @param {Meta} [meta] Action’s metadata.
+ * @param {Meta} meta Action’s metadata.
+ * @param {string[]} meta.reasons Code of reasons, why action should
+ *                                be kept in log.
  *
  * @return {Promise} Promise when action will be saved to the log.
  *
@@ -295,7 +309,9 @@ module.exports = createLoguxCreator
  * This action will be visible only for all tabs.
  *
  * @param {Action} action The new action.
- * @param {Meta} [meta] Action’s metadata.
+ * @param {Meta} meta Action’s metadata.
+ * @param {string[]} meta.reasons Code of reasons, why action should
+ *                                be kept in log.
  *
  * @return {Promise} Promise when action will be saved to the log.
  *
@@ -308,7 +324,9 @@ module.exports = createLoguxCreator
  * This action will be visible only for server and all browser tabs.
  *
  * @param {Action} action The new action.
- * @param {Meta} [meta] Action’s metadata.
+ * @param {Meta} meta Action’s metadata.
+ * @param {string[]} meta.reasons Code of reasons, why action should
+ *                                be kept in log.
  *
  * @return {Promise} Promise when action will be saved to the log.
  *
