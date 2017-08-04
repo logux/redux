@@ -23,6 +23,9 @@
     "CrossTabClient",
     "nextReducer",
     "replaceReducer",
-    "storeCreator"
+    "storeCreator",
+    "dispatchLocal",
+    "dispatchCrossTab",
+    "dispatchSync"
   ]
 }
