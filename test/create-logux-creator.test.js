@@ -205,7 +205,7 @@ it('warns about undoes cleaned action', function () {
   var store = createStore(increment)
 
   return store.dispatchCrossTab(
-    { type: 'logux/undo', id: [1, 't', 0] }
+    { type: 'logux/undo', id: [1, 't', 0] }, { reasons: [] }
   ).then(function () {
     expect(console.warn).toHaveBeenCalledWith(
       'Logux can not undo action [1,"t",0], because it did not find ' +
@@ -341,7 +341,8 @@ it('copies reasons to undo action', function () {
   return store.dispatchCrossTab(
     { type: 'INC' }, { reasons: ['a', 'b'] }
   ).then(function () {
-    return store.dispatchCrossTab({ type: 'logux/undo', id: [1, 'test', 0] })
+    return store.dispatchCrossTab(
+      { type: 'logux/undo', id: [1, 'test', 0] }, { reasons: [] })
   }).then(function () {
     return store.log.byId([2, 'test', 0])
   }).then(function (result) {
@@ -387,4 +388,17 @@ it('dispatches sync actions', function () {
     expect(store.log.store.created[0][1].sync).toBeTruthy()
     expect(store.log.store.created[0][1].reasons).toEqual(['test'])
   })
+})
+
+it('throws on missed reasons', function () {
+  var store = createStore(increment)
+  expect(function () {
+    store.dispatchLocal({ type: 'INC' })
+  }).toThrowError(/meta.reasons/)
+  expect(function () {
+    store.dispatchCrossTab({ type: 'INC' }, { })
+  }).toThrowError(/meta.reasons/)
+  expect(function () {
+    store.dispatchSync({ type: 'INC' })
+  }).toThrowError(/meta.reasons/)
 })
