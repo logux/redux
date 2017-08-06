@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "docdash": "^0.4.0",
-    "eslint": "^4.3.0",
+    "eslint": "^4.4.0",
     "eslint-config-logux": "^16.0.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-es5": "^1.1.0",
@@ -28,7 +28,7 @@
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-standard": "^3.0.1",
     "jest": "^20.0.4",
-    "jsdoc": "^3.5.3",
+    "jsdoc": "^3.5.4",
     "lint-staged": "^4.0.2",
     "logux-sync": "logux/logux-sync",
     "pre-commit": "^1.2.2",
@@ -57,7 +57,7 @@
   "size-limit": [
     {
       "path": "index.js",
-      "limit": "13KB"
+      "limit": "12KB"
     }
   ],
   "lint-staged": {
