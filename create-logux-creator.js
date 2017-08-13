@@ -257,6 +257,25 @@ function createLoguxCreator (config) {
       }
     })
 
+    var previous = []
+    var ignores = { }
+    log.each(function (action, meta) {
+      if (!meta.tab) {
+        if (action.type === 'logux/undo') {
+          ignores[action.id.join('\t')] = true
+        } else if (!ignores[meta.id.join('\t')]) {
+          previous.push(action)
+        }
+      }
+    }).then(function () {
+      if (previous.length > 0) {
+        var newState = previous.reduceRight(function (state, i) {
+          return reducer(state, i)
+        }, store.getState())
+        originDispatch({ type: 'logux/state', state: newState })
+      }
+    })
+
     return store
   }
 }

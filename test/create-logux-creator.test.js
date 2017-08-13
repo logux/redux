@@ -428,3 +428,31 @@ it('cleans sync action after synchronization', function () {
     expect(actions(store.log)).toEqual([])
   })
 })
+
+it('applies old actions from store', function () {
+  var store1 = createStore(historyLine)
+  store1.dispatchCrossTab({ type: 'ADD', value: 'a' }, { reasons: ['test'] })
+  store1.dispatchCrossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
+  store1.dispatchCrossTab({ type: 'ADD', value: 'c' }, { reasons: ['test'] })
+  store1.dispatchCrossTab(
+    { type: 'logux/undo', id: [2, '10:uuid', 0] }, { reasons: ['test'] })
+  store1.dispatchCrossTab(
+    { type: 'ADD', value: 'd' }, { reasons: ['test'], tab: store1.client.id })
+
+  var store2
+  return Promise.resolve().then(function () {
+    return Promise.resolve()
+  }).then(function () {
+    return Promise.resolve()
+  }).then(function () {
+    expect(store1.getState().value).toEqual('0acd')
+    store2 = createStore(historyLine, {
+      store: store1.log.store
+    })
+    return Promise.resolve()
+  }).then(function () {
+    return Promise.resolve()
+  }).then(function () {
+    expect(store2.getState().value).toEqual('0ac')
+  })
+})
