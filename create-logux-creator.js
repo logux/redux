@@ -91,18 +91,18 @@ function createLoguxCreator (config) {
     store.log = log
     var history = { }
 
-    store.dispatchLocal = function (action, meta) {
+    store.dispatchLocal = function dispatchLocal (action, meta) {
       checkReasons(meta)
       meta.tab = client.id
       return log.add(action, meta)
     }
 
-    store.dispatchCrossTab = function (action, meta) {
+    store.dispatchCrossTab = function dispatchCrossTab (action, meta) {
       checkReasons(meta)
       return log.add(action, meta)
     }
 
-    store.dispatchSync = function (action, meta) {
+    store.dispatchSync = function dispatchSync (action, meta) {
       checkReasons(meta)
       meta.sync = true
       meta.reasons.push('waitForSync')
