@@ -24,7 +24,7 @@ function checkReasons (meta) {
   if (!meta || !meta.reasons) {
     throw new Error(
       'All Logux action must have meta.reasons: ' +
-      'dispatchLocal(action, { reasons: [] })'
+      'dispatch.local(action, { reasons: [] })'
     )
   }
 }
@@ -91,24 +91,6 @@ function createLoguxCreator (config) {
     store.log = log
     var history = { }
 
-    store.dispatchLocal = function dispatchLocal (action, meta) {
-      checkReasons(meta)
-      meta.tab = client.id
-      return log.add(action, meta)
-    }
-
-    store.dispatchCrossTab = function dispatchCrossTab (action, meta) {
-      checkReasons(meta)
-      return log.add(action, meta)
-    }
-
-    store.dispatchSync = function dispatchSync (action, meta) {
-      checkReasons(meta)
-      meta.sync = true
-      meta.reasons.push('waitForSync')
-      return log.add(action, meta)
-    }
-
     var actionCount = 0
     function saveHistory (meta) {
       actionCount += 1
@@ -137,6 +119,24 @@ function createLoguxCreator (config) {
       prevMeta = meta
       originDispatch(action)
       saveHistory(meta)
+    }
+
+    store.dispatch.local = function local (action, meta) {
+      checkReasons(meta)
+      meta.tab = client.id
+      return log.add(action, meta)
+    }
+
+    store.dispatch.crossTab = function crossTab (action, meta) {
+      checkReasons(meta)
+      return log.add(action, meta)
+    }
+
+    store.dispatch.sync = function sync (action, meta) {
+      checkReasons(meta)
+      meta.sync = true
+      meta.reasons.push('waitForSync')
+      return log.add(action, meta)
     }
 
     function replaceState (state, actions) {
@@ -317,51 +317,6 @@ module.exports = createLoguxCreator
  * @memberof LoguxStore#
  */
 /**
- * Add local action to log and update store state.
- * This action will be visible only for current tab.
- *
- * @param {Action} action The new action.
- * @param {Meta} meta Action’s metadata.
- * @param {string[]} meta.reasons Code of reasons, why action should
- *                                be kept in log.
- *
- * @return {Promise} Promise when action will be saved to the log.
- *
- * @name dispatchLocal
- * @function
- * @memberof LoguxStore#
- */
-/**
- * Add cross-tab action to log and update store state.
- * This action will be visible only for all tabs.
- *
- * @param {Action} action The new action.
- * @param {Meta} meta Action’s metadata.
- * @param {string[]} meta.reasons Code of reasons, why action should
- *                                be kept in log.
- *
- * @return {Promise} Promise when action will be saved to the log.
- *
- * @name dispatchCrossTab
- * @function
- * @memberof LoguxStore#
- */
-/**
- * Add sync action to log and update store state.
- * This action will be visible only for server and all browser tabs.
- *
- * @param {Action} action The new action.
- * @param {Meta} meta Action’s metadata.
- * @param {string[]} meta.reasons Code of reasons, why action should
- *                                be kept in log.
- *
- * @return {Promise} Promise when action will be saved to the log.
- *
- * @name dispatchSync
- * @function
- * @memberof LoguxStore#
- */
-/**
  * Reads the state tree managed by the store.
  *
  * @return {any} The current state tree of your application.
@@ -387,11 +342,23 @@ module.exports = createLoguxCreator
  * You should use it only in legacy code.
  * There is noway to set metadata in this method.
  * As result there is no way to cleaning control.
- * Use {@link LoguxStore#add} instead.
+ *
+ * Use {@link dispatchLocal}, {@link dispatchCrossTab} or {@link dispatchSync}
+ * instead.
  *
  * @param {Object} action A plain object representing “what changed”.
  *
  * @return {Object} For convenience, the same action object you dispatched.
+ *
+ * @property {dispatchLocal} local Add sync action to log and update
+ *                                 store state. This action will be visible
+ *                                 only for current tab.
+ * @property {dispatchCrossTab} crossTab Add sync action to log and update
+ *                                       store state. This action will be
+ *                                       visible for all tabs.
+ * @property {dispatchSync} sync Add sync action to log and update store state.
+ *                               This action will be visible for server
+ *                               and all browser tabs.
  *
  * @name dispatch
  * @function
@@ -416,4 +383,68 @@ module.exports = createLoguxCreator
  * @name observable
  * @function
  * @memberof LoguxStore#
+ */
+
+/**
+ * Add local action to log and update store state.
+ * This action will be visible only for current tab.
+ *
+ * @param {Action} action The new action.
+ * @param {Meta} meta Action’s metadata.
+ * @param {string[]} meta.reasons Code of reasons, why action should
+ *                                be kept in log.
+ *
+ * @return {Promise} Promise when action will be saved to the log.
+ *
+ * @example
+ * store.dispatch.local(
+ *   { type: 'OPEN_MENU' },
+ *   { reasons: ['lastMenu'] }
+ * ).then(meta => {
+ *   store.log.removeReason('lastMenu', { maxAdded: meta.added - 1 })
+ * })
+ *
+ * @callback dispatchLocal
+ */
+/**
+ * Add cross-tab action to log and update store state.
+ * This action will be visible only for all tabs.
+ *
+ * @param {Action} action The new action.
+ * @param {Meta} meta Action’s metadata.
+ * @param {string[]} meta.reasons Code of reasons, why action should
+ *                                be kept in log.
+ *
+ * @return {Promise} Promise when action will be saved to the log.
+ *
+ * @example
+ * store.dispatch.crossTab(
+ *   { type: 'CHANGE_FAVICON', favicon },
+ *   { reasons: ['lastFavicon'] }
+ * ).then(meta => {
+ *   store.log.removeReason('lastFavicon', { maxAdded: meta.added - 1 })
+ * })
+ *
+ * @callback dispatchCrossTab
+ */
+/**
+ * Add sync action to log and update store state.
+ * This action will be visible only for server and all browser tabs.
+ *
+ * @param {Action} action The new action.
+ * @param {Meta} meta Action’s metadata.
+ * @param {string[]} meta.reasons Code of reasons, why action should
+ *                                be kept in log.
+ *
+ * @return {Promise} Promise when action will be saved to the log.
+ *
+ * @example
+ * store.dispatch.crossTab(
+ *   { type: 'CHANGE_NAME', name },
+ *   { reasons: ['lastName'] }
+ * ).then(meta => {
+ *   store.log.removeReason('lastName', { maxAdded: meta.added - 1 })
+ * })
+ *
+ * @callback dispatchSync
  */
