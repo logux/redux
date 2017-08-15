@@ -40,6 +40,7 @@ const store = createStore( reducer, preloadedState, enhancer )
 
 +store.client.start()
 ```
+
 See also [Logux Status] for UX best practices.
 
 [Logux Status]: https://github.com/logux/logux-status
@@ -48,3 +49,38 @@ See also [Logux Status] for UX best practices.
   <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
        alt="Sponsored by Evil Martians" width="236" height="54">
 </a>
+
+## Dispatch
+
+Instead of Redux, in Logux Redux you have 4 ways to dispatch action:
+
+* `store.dispatch(action)` is legacy API. Try to avoid it since you can’t
+  specify how clean this actions.
+* `store.dispatch.local(action, meta)` — action will be visible only to current
+  browser tab.
+* `store.dispatch.crossTab(action, meta)` — action will be visible
+  to all browser tab.
+* `store.dispatch.sync(action, meta)` — action will be visible to server
+  and all browser tabs.
+
+In all 3 new dispatch methods you must to specify `meta.reasons` with array
+of “reasons”. It is code names of reasons, why this action should be still
+in the log.
+
+```js
+store.dispatch.crossTab(
+  { type: 'CHANGE_NAME', name }, { reasons: ['lastName'] }
+)
+```
+
+When you don’t need some actions, you can remove reasons from them:
+
+```js
+store.dispatch.crossTab(
+  { type: 'CHANGE_NAME', name }, { reasons: ['lastName'] }
+).then(meta => {
+  store.log.removeReason('lastName', { maxAdded: meta.added - 1 })
+})
+```
+
+Action with empty reasons will be removed from log.

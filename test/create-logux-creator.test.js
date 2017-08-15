@@ -78,7 +78,7 @@ it('sets tab ID', function () {
 
 it('has shortcut for add', function () {
   var store = createStore(increment)
-  return store.dispatchCrossTab(
+  return store.dispatch.crossTab(
     { type: 'INC' }, { reasons: ['test'] }
   ).then(function () {
     expect(store.getState()).toEqual({ value: 1 })
@@ -103,7 +103,7 @@ it('saves previous states', function () {
   for (var i = 0; i < 60; i++) {
     if (i % 2 === 0) {
       promise = promise.then(function () {
-        return store.dispatchCrossTab({ type: 'A' }, { reasons: ['test'] })
+        return store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] })
       })
     } else {
       store.dispatch({ type: 'A' })
@@ -112,7 +112,7 @@ it('saves previous states', function () {
   return promise.then(function () {
     expect(calls).toEqual(60)
     calls = 0
-    return store.dispatchCrossTab(
+    return store.dispatch.crossTab(
       { type: 'A' }, { id: [57, '10:uuid', 1], reasons: ['test'] })
   }).then(function () {
     expect(calls).toEqual(10)
@@ -129,13 +129,13 @@ it('changes history recording frequency', function () {
   })
 
   return Promise.all([
-    store.dispatchCrossTab({ type: 'A' }, { reasons: ['test'] }),
-    store.dispatchCrossTab({ type: 'A' }, { reasons: ['test'] }),
-    store.dispatchCrossTab({ type: 'A' }, { reasons: ['test'] }),
-    store.dispatchCrossTab({ type: 'A' }, { reasons: ['test'] })
+    store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] })
   ]).then(function () {
     calls = 0
-    return store.dispatchCrossTab(
+    return store.dispatch.crossTab(
       { type: 'A' }, { id: [3, '10:uuid', 1], reasons: ['test'] })
   }).then(function () {
     expect(calls).toEqual(2)
@@ -152,17 +152,17 @@ it('cleans its history on removing action', function () {
   })
 
   return Promise.all([
-    store.dispatchCrossTab({ type: 'A' }, { reasons: ['test'] }),
-    store.dispatchCrossTab({ type: 'A' }, { reasons: ['test'] }),
-    store.dispatchCrossTab({ type: 'A' }, { reasons: ['test'] }),
-    store.dispatchCrossTab({ type: 'A' }, { reasons: ['test'] }),
-    store.dispatchCrossTab({ type: 'A' }, { reasons: ['test'] }),
-    store.dispatchCrossTab({ type: 'A' }, { reasons: ['test'] })
+    store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] })
   ]).then(function () {
     return store.log.changeMeta([5, '10:uuid', 0], { reasons: [] })
   }).then(function () {
     calls = 0
-    return store.dispatchCrossTab(
+    return store.dispatch.crossTab(
       { type: 'A' }, { id: [5, '10:uuid', 1], reasons: ['test'] })
   }).then(function () {
     expect(calls).toEqual(3)
@@ -173,12 +173,12 @@ it('changes history', function () {
   var store = createStore(historyLine)
 
   return Promise.all([
-    store.dispatchCrossTab({ type: 'ADD', value: 'a' }, { reasons: ['test'] }),
-    store.dispatchCrossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
+    store.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
   ]).then(function () {
     store.dispatch({ type: 'ADD', value: 'c' })
     store.dispatch({ type: 'ADD', value: 'd' })
-    return store.dispatchCrossTab(
+    return store.dispatch.crossTab(
       { type: 'ADD', value: '|' },
       { id: [2, '10:uuid', 1], reasons: ['test'] })
   }).then(function () {
@@ -190,12 +190,12 @@ it('undoes actions', function () {
   var store = createStore(historyLine)
 
   return Promise.all([
-    store.dispatchCrossTab({ type: 'ADD', value: 'a' }, { reasons: ['test'] }),
-    store.dispatchCrossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] }),
-    store.dispatchCrossTab({ type: 'ADD', value: 'c' }, { reasons: ['test'] })
+    store.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'ADD', value: 'c' }, { reasons: ['test'] })
   ]).then(function () {
     expect(store.getState().value).toEqual('0abc')
-    return store.dispatchCrossTab(
+    return store.dispatch.crossTab(
       { type: 'logux/undo', id: [2, '10:uuid', 0] }, { reasons: ['test'] })
   }).then(function () {
     expect(store.getState().value).toEqual('0ac')
@@ -206,7 +206,7 @@ it('warns about undoes cleaned action', function () {
   console.warn = jest.fn()
   var store = createStore(increment)
 
-  return store.dispatchCrossTab(
+  return store.dispatch.crossTab(
     { type: 'logux/undo', id: [1, 't', 0] }, { reasons: [] }
   ).then(function () {
     expect(console.warn).toHaveBeenCalledWith(
@@ -229,7 +229,7 @@ it('replaces reducer', function () {
       return state
     }
   })
-  return store.dispatchCrossTab(
+  return store.dispatch.crossTab(
     { type: 'ADD', value: 'z' },
     { id: [1, '10:uuid', 1], reasons: ['test'] }
   ).then(function () {
@@ -244,14 +244,14 @@ it('replays history since last state', function () {
     saveStateEvery: 2
   })
   return Promise.all([
-    store.dispatchCrossTab({ type: 'ADD', value: 'a' }, { reasons: ['first'] }),
-    store.dispatchCrossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] }),
-    store.dispatchCrossTab({ type: 'ADD', value: 'c' }, { reasons: ['test'] }),
-    store.dispatchCrossTab({ type: 'ADD', value: 'd' }, { reasons: ['test'] })
+    store.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['one'] }),
+    store.dispatch.crossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'ADD', value: 'c' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'ADD', value: 'd' }, { reasons: ['test'] })
   ]).then(function () {
-    return store.log.removeReason('first')
+    return store.log.removeReason('one')
   }).then(function () {
-    return store.dispatchCrossTab(
+    return store.dispatch.crossTab(
       { type: 'ADD', value: '|' },
       { id: [0, '10:uuid', 0], reasons: ['test'] }
     )
@@ -267,12 +267,12 @@ it('replays actions on missed history', function () {
     onMissedHistory: onMissedHistory
   })
   return Promise.all([
-    store.dispatchCrossTab({ type: 'ADD', value: 'a' }, { reasons: ['first'] }),
-    store.dispatchCrossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
+    store.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['one'] }),
+    store.dispatch.crossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
   ]).then(function () {
-    return store.log.removeReason('first')
+    return store.log.removeReason('one')
   }).then(function () {
-    return store.dispatchCrossTab(
+    return store.dispatch.crossTab(
       { type: 'ADD', value: '|' },
       { id: [0, '10:uuid', 0], reasons: ['test'] }
     )
@@ -285,11 +285,11 @@ it('replays actions on missed history', function () {
 it('does not fall on missed onMissedHistory', function () {
   var store = createStore(historyLine)
   return Promise.all([
-    store.dispatchCrossTab({ type: 'ADD', value: 'a' }, { reasons: ['first'] })
+    store.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['first'] })
   ]).then(function () {
     return store.log.removeReason('first')
   }).then(function () {
-    return store.dispatchCrossTab(
+    return store.dispatch.crossTab(
       { type: 'ADD', value: '|' },
       { id: [0, '10:uuid', 0], reasons: ['test'] }
     )
@@ -340,10 +340,10 @@ it('cleans last 1000 by default', function () {
 
 it('copies reasons to undo action', function () {
   var store = createStore(increment)
-  return store.dispatchCrossTab(
+  return store.dispatch.crossTab(
     { type: 'INC' }, { reasons: ['a', 'b'] }
   ).then(function () {
-    return store.dispatchCrossTab(
+    return store.dispatch.crossTab(
       { type: 'logux/undo', id: [1, '10:uuid', 0] }, { reasons: [] })
   }).then(function () {
     return store.log.byId([2, '10:uuid', 0])
@@ -355,10 +355,10 @@ it('copies reasons to undo action', function () {
 
 it('does not override undo action reasons', function () {
   var store = createStore(increment)
-  return store.dispatchCrossTab(
+  return store.dispatch.crossTab(
     { type: 'INC' }, { reasons: ['a', 'b'] }
   ).then(function () {
-    return store.dispatchCrossTab(
+    return store.dispatch.crossTab(
       { type: 'logux/undo', id: [1, '10:uuid', 0] },
       { reasons: ['c'] }
     )
@@ -372,7 +372,7 @@ it('does not override undo action reasons', function () {
 
 it('dispatches local actions', function () {
   var store = createStore(increment)
-  return store.dispatchLocal(
+  return store.dispatch.local(
     { type: 'INC' }, { reasons: ['test'] }
   ).then(function () {
     expect(store.log.store.created[0][0]).toEqual({ type: 'INC' })
@@ -383,7 +383,7 @@ it('dispatches local actions', function () {
 
 it('dispatches sync actions', function () {
   var store = createStore(increment)
-  return store.dispatchSync(
+  return store.dispatch.sync(
     { type: 'INC' }, { reasons: ['test'] }
   ).then(function () {
     var log = store.log.store.created
@@ -396,13 +396,13 @@ it('dispatches sync actions', function () {
 it('throws on missed reasons', function () {
   var store = createStore(increment)
   expect(function () {
-    store.dispatchLocal({ type: 'INC' })
+    store.dispatch.local({ type: 'INC' })
   }).toThrowError(/meta.reasons/)
   expect(function () {
-    store.dispatchCrossTab({ type: 'INC' }, { })
+    store.dispatch.crossTab({ type: 'INC' }, { })
   }).toThrowError(/meta.reasons/)
   expect(function () {
-    store.dispatchSync({ type: 'INC' })
+    store.dispatch.sync({ type: 'INC' })
   }).toThrowError(/meta.reasons/)
 })
 
@@ -416,7 +416,7 @@ it('cleans sync action after synchronization', function () {
     pair.right.send(['connected', protocol, 'server', [0, 0]])
     return store.client.sync.waitFor('synchronized')
   }).then(function () {
-    store.dispatchSync({ type: 'INC' }, { reasons: [] })
+    store.dispatch.sync({ type: 'INC' }, { reasons: [] })
     return pair.wait('right')
   }).then(function () {
     expect(actions(store.log)).toEqual([{ type: 'INC' }])
@@ -431,12 +431,12 @@ it('cleans sync action after synchronization', function () {
 
 it('applies old actions from store', function () {
   var store1 = createStore(historyLine)
-  store1.dispatchCrossTab({ type: 'ADD', value: 'a' }, { reasons: ['test'] })
-  store1.dispatchCrossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
-  store1.dispatchCrossTab({ type: 'ADD', value: 'c' }, { reasons: ['test'] })
-  store1.dispatchCrossTab(
+  store1.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['test'] })
+  store1.dispatch.crossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
+  store1.dispatch.crossTab({ type: 'ADD', value: 'c' }, { reasons: ['test'] })
+  store1.dispatch.crossTab(
     { type: 'logux/undo', id: [2, '10:uuid', 0] }, { reasons: ['test'] })
-  store1.dispatchCrossTab(
+  store1.dispatch.crossTab(
     { type: 'ADD', value: 'd' }, { reasons: ['test'], tab: store1.client.id })
 
   var store2
