@@ -404,6 +404,9 @@ it('throws on missed reasons', function () {
   expect(function () {
     store.dispatch.sync({ type: 'INC' })
   }).toThrowError(/meta.reasons/)
+  expect(function () {
+    store.dispatch.sync({ type: 'INC' }, { keepLast: 'a' })
+  }).not.toThrow()
 })
 
 it('cleans sync action after synchronization', function () {

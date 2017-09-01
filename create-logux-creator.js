@@ -21,12 +21,10 @@ function warnBadUndo (id) {
 }
 
 function checkReasons (meta) {
-  if (!meta || !meta.reasons) {
-    throw new Error(
-      'All Logux action must have meta.reasons: ' +
-      'dispatch.local(action, { reasons: [] })'
-    )
+  if (!meta || (!meta.reasons && !meta.keepLast)) {
+    throw new Error('All Logux action must have meta.reasons or meta.keepLast')
   }
+  if (!meta.reasons) meta.reasons = []
 }
 
 /**
