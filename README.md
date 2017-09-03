@@ -9,12 +9,15 @@ between clients and server logs.
 This library provides Redux compatible API.
 
 ### Install
-```shell
+
+```sh
 npm install logux-redux
 ```
 
 ### Usage
+
 Create Redux store by `createLoguxCreator`. It returns original Redux `createStore` function with Logux inside
+
 ```diff js
 -import { createStore } from 'redux'
 +import { createLoguxCreator } from 'logux-redux'
