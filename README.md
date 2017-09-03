@@ -8,13 +8,13 @@ between clients and server logs.
 
 This library provides Redux compatible API.
 
-### Install
+## Install
 
 ```sh
-npm install logux-redux
+npm install --save logux-redux
 ```
 
-### Usage
+## Usage
 
 Create Redux store by `createLoguxCreator`. It returns original Redux `createStore` function with Logux inside
 
