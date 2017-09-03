@@ -39,7 +39,7 @@
   "scripts": {
     "lint-staged": "lint-staged",
     "spellcheck": "yarn docs && yaspeller-ci *.md docs/*.html",
-    "clean": "rimraf docs/ coverage/ test/demo/build/",
+    "clean": "rimraf docs/ coverage/",
     "lint": "eslint *.js test/{**/,}*.js",
     "docs": "jsdoc --configure .jsdocrc *.js",
     "test": "jest --coverage && yarn lint && size-limit && yarn spellcheck"
