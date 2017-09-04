@@ -20,7 +20,7 @@ Create Redux store by `createLoguxCreator`. It returns original Redux `createSto
 
 ```diff js
 -import { createStore } from 'redux'
-+import { createLoguxCreator } from 'logux-redux'
++import createLoguxCreator from 'logux-redux/create-logux-creator'
 
 +const createStore = createLoguxCreator({
 +  subprotocol: '1.0.0',
