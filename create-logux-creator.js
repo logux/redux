@@ -103,6 +103,11 @@ function createLoguxCreator (config) {
       return originReplace(hackReducer(newReducer))
     }
 
+    var init
+    store.initialize = new Promise(function (resolve) {
+      init = resolve
+    })
+
     var prevMeta
     var originDispatch = store.dispatch
     store.dispatch = function dispatch (action) {
@@ -146,7 +151,7 @@ function createLoguxCreator (config) {
       originDispatch({ type: 'logux/state', state: newState })
     }
 
-    function replay (actionId) {
+    function replay (actionId, replayIsSafe) {
       var until = actionId.join('\t')
 
       var ignore = { }
@@ -156,6 +161,7 @@ function createLoguxCreator (config) {
       var collecting = true
 
       log.each(function (action, meta) {
+        if (meta.tab && meta.tab !== client.id) return true
         var id = meta.id.join('\t')
 
         if (collecting || !history[id]) {
@@ -180,16 +186,21 @@ function createLoguxCreator (config) {
         if (replayed) return
         if (onMissedHistory) onMissedHistory(newAction)
 
-        var full = actions.slice(0)
-        while (actions.length > 0) {
-          var last = actions[actions.length - 1]
-          actions.pop()
-          if (history[last[1]]) {
-            replayed = true
-            replaceState(history[last[1]], actions.concat([
-              [newAction, until]
-            ]))
-            break
+        var full
+        if (replayIsSafe) {
+          full = actions
+        } else {
+          full = actions.slice(0)
+          while (actions.length > 0) {
+            var last = actions[actions.length - 1]
+            actions.pop()
+            if (history[last[1]]) {
+              replayed = true
+              replaceState(history[last[1]], actions.concat([
+                [newAction, until]
+              ]))
+              break
+            }
           }
         }
 
@@ -205,20 +216,7 @@ function createLoguxCreator (config) {
       }
     })
 
-    var lastAdded = 0
-    var dispatchCalls = 0
-    client.on('add', function (action, meta) {
-      if (meta.added > lastAdded) lastAdded = meta.added
-      if (meta.dispatch) {
-        dispatchCalls += 1
-        if (lastAdded > dispatchHistory && dispatchCalls % 25 === 0) {
-          log.removeReason('tab' + store.client.id, {
-            maxAdded: lastAdded - dispatchHistory
-          })
-        }
-        return
-      }
-
+    function process (action, meta, replayIsSafe) {
       if (action.type === 'logux/undo') {
         var reasons = meta.reasons
         log.byId(action.id).then(function (result) {
@@ -241,8 +239,25 @@ function createLoguxCreator (config) {
         originDispatch(action)
         saveHistory(meta)
       } else {
-        replay(meta.id)
+        replay(meta.id, replayIsSafe)
       }
+    }
+
+    var lastAdded = 0
+    var dispatchCalls = 0
+    client.on('add', function (action, meta) {
+      if (meta.added > lastAdded) lastAdded = meta.added
+      if (meta.dispatch) {
+        dispatchCalls += 1
+        if (lastAdded > dispatchHistory && dispatchCalls % 25 === 0) {
+          log.removeReason('tab' + store.client.id, {
+            maxAdded: lastAdded - dispatchHistory
+          })
+        }
+        return
+      }
+
+      process(action, meta)
     })
 
     client.on('clean', function (action, meta) {
@@ -262,16 +277,17 @@ function createLoguxCreator (config) {
         if (action.type === 'logux/undo') {
           ignores[action.id.join('\t')] = true
         } else if (!ignores[meta.id.join('\t')]) {
-          previous.push(action)
+          previous.push([action, meta])
         }
       }
     }).then(function () {
       if (previous.length > 0) {
-        var newState = previous.reduceRight(function (state, i) {
-          return reducer(state, i)
-        }, store.getState())
-        originDispatch({ type: 'logux/state', state: newState })
+        previous.forEach(function (i) {
+          process(i[0], i[1], true)
+        })
       }
+
+      init()
     })
 
     return store

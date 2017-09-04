@@ -434,28 +434,39 @@ it('cleans sync action after synchronization', function () {
 
 it('applies old actions from store', function () {
   var store1 = createStore(historyLine)
-  store1.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['test'] })
-  store1.dispatch.crossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
-  store1.dispatch.crossTab({ type: 'ADD', value: 'c' }, { reasons: ['test'] })
-  store1.dispatch.crossTab(
-    { type: 'logux/undo', id: [2, '10:uuid', 0] }, { reasons: ['test'] })
-  store1.dispatch.crossTab(
-    { type: 'ADD', value: 'd' }, { reasons: ['test'], tab: store1.client.id })
-
   var store2
-  return Promise.resolve().then(function () {
-    return Promise.resolve()
+  return Promise.all([
+    store1.dispatch.crossTab(
+      { type: 'ADD', value: '1' }, { id: [0, '10:x', 1], reasons: ['test'] }
+    ),
+    store1.dispatch.crossTab(
+      { type: 'ADD', value: '2' }, { id: [0, '10:x', 2], reasons: ['test'] }
+    ),
+    store1.dispatch.crossTab(
+      { type: 'ADD', value: '3' }, { id: [0, '10:x', 3], reasons: ['test'] }
+    ),
+    store1.dispatch.crossTab(
+      { type: 'ADD', value: '4' }, { id: [0, '10:x', 4], reasons: ['test'] }
+    ),
+    store1.log.add(
+      { type: 'ADD', value: '5' },
+      { id: [0, '10:x', 5], reasons: ['test'], tab: store1.client.id }
+    ),
+    store1.dispatch.crossTab(
+      { type: 'logux/undo', id: [0, '10:x', 2] },
+      { id: [0, '10:x', 6], reasons: ['test'] }
+    )
+  ]).then(function () {
+    store2 = createStore(historyLine, { store: store1.log.store })
+
+    store2.dispatch({ type: 'ADD', value: 'a' })
+    store2.dispatch.crossTab(
+      { type: 'ADD', value: 'b' }, { reasons: ['test'] }
+    )
+    expect(store2.getState().value).toEqual('0a')
+
+    return store2.initialize
   }).then(function () {
-    return Promise.resolve()
-  }).then(function () {
-    expect(store1.getState().value).toEqual('0acd')
-    store2 = createStore(historyLine, {
-      store: store1.log.store
-    })
-    return Promise.resolve()
-  }).then(function () {
-    return Promise.resolve()
-  }).then(function () {
-    expect(store2.getState().value).toEqual('0ac')
+    expect(store2.getState().value).toEqual('0134ab')
   })
 })
