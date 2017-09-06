@@ -393,22 +393,6 @@ it('dispatches sync actions', function () {
   })
 })
 
-it('throws on missed reasons', function () {
-  var store = createStore(increment)
-  expect(function () {
-    store.dispatch.local({ type: 'INC' })
-  }).toThrowError(/meta.reasons/)
-  expect(function () {
-    store.dispatch.crossTab({ type: 'INC' }, { })
-  }).toThrowError(/meta.reasons/)
-  expect(function () {
-    store.dispatch.sync({ type: 'INC' })
-  }).toThrowError(/meta.reasons/)
-  expect(function () {
-    store.dispatch.sync({ type: 'INC' }, { keepLast: 'a' })
-  }).not.toThrow()
-})
-
 it('cleans sync action after synchronization', function () {
   var pair = new TestPair()
   var store = createStore(increment, { server: pair.left })
@@ -419,7 +403,7 @@ it('cleans sync action after synchronization', function () {
     pair.right.send(['connected', protocol, 'server', [0, 0]])
     return store.client.sync.waitFor('synchronized')
   }).then(function () {
-    store.dispatch.sync({ type: 'INC' }, { reasons: [] })
+    store.dispatch.sync({ type: 'INC' })
     return pair.wait('right')
   }).then(function () {
     expect(actions(store.log)).toEqual([{ type: 'INC' }])
