@@ -20,13 +20,6 @@ function warnBadUndo (id) {
   )
 }
 
-function checkReasons (meta) {
-  if (!meta || (!meta.reasons && !meta.keepLast)) {
-    throw new Error('All Logux action must have meta.reasons or meta.keepLast')
-  }
-  if (!meta.reasons) meta.reasons = []
-}
-
 /**
  * Creates Logux client and connect it to Redux createStore function.
  *
@@ -125,20 +118,21 @@ function createLoguxCreator (config) {
     }
 
     store.dispatch.local = function local (action, meta) {
-      checkReasons(meta)
       meta.tab = client.id
       return log.add(action, meta)
     }
 
     store.dispatch.crossTab = function crossTab (action, meta) {
-      checkReasons(meta)
       return log.add(action, meta)
     }
 
     store.dispatch.sync = function sync (action, meta) {
-      checkReasons(meta)
+      if (!meta) meta = { }
+      if (!meta.reasons) meta.reasons = []
+
       meta.sync = true
       meta.reasons.push('waitForSync')
+
       return log.add(action, meta)
     }
 
