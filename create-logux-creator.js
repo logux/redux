@@ -15,8 +15,7 @@ function hackReducer (reducer) {
 function warnBadUndo (id) {
   var json = JSON.stringify(id)
   console.warn(
-    'Logux can not undo action ' + json + ', because log does not ' +
-    'contain this action. Maybe action was cleaned.'
+    'Logux can not find ' + json + ' to undo it. Maybe action was cleaned.'
   )
 }
 

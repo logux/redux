@@ -210,8 +210,7 @@ it('warns about undoes cleaned action', function () {
     { type: 'logux/undo', id: [1, 't', 0] }, { reasons: [] }
   ).then(function () {
     expect(console.warn).toHaveBeenCalledWith(
-      'Logux can not undo action [1,"t",0], because log does not ' +
-      'contain this action. Maybe action was cleaned.'
+      'Logux can not find [1,"t",0] to undo it. Maybe action was cleaned.'
     )
   })
 })
