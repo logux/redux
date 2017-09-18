@@ -135,6 +135,9 @@ function createLoguxCreator (config) {
       return log.add(action, meta)
     }
 
+    var now = log.generateId()
+    var started = { id: now, time: now[0] }
+
     function replaceState (state, actions) {
       var newState = actions.reduceRight(function (prev, i) {
         var changed = reducer(prev, i[0])
@@ -144,6 +147,7 @@ function createLoguxCreator (config) {
       originDispatch({ type: 'logux/state', state: newState })
     }
 
+    var replaying
     function replay (actionId, replayIsSafe) {
       var until = actionId.join('\t')
 
@@ -153,53 +157,59 @@ function createLoguxCreator (config) {
       var newAction
       var collecting = true
 
-      log.each(function (action, meta) {
-        if (meta.tab && meta.tab !== client.id) return true
-        var id = meta.id.join('\t')
+      replaying = new Promise(function (resolve) {
+        log.each(function (action, meta) {
+          if (meta.tab && meta.tab !== client.id) return true
+          var id = meta.id.join('\t')
 
-        if (collecting || !history[id]) {
-          if (action.type === 'logux/undo') {
-            ignore[action.id.join('\t')] = true
+          if (collecting || !history[id]) {
+            if (action.type === 'logux/undo') {
+              ignore[action.id.join('\t')] = true
+              return true
+            }
+
+            if (!ignore[id]) actions.push([action, id])
+            if (id === until) {
+              newAction = action
+              collecting = false
+            }
+
             return true
+          } else {
+            replayed = true
+            replaceState(history[id], actions)
+            return false
           }
+        }).then(function () {
+          if (!replayed) {
+            if (onMissedHistory) onMissedHistory(newAction)
 
-          if (!ignore[id]) actions.push([action, id])
-          if (id === until) {
-            newAction = action
-            collecting = false
-          }
+            var full
+            if (replayIsSafe) {
+              full = actions
+            } else {
+              full = actions.slice(0)
+              while (actions.length > 0) {
+                var last = actions[actions.length - 1]
+                actions.pop()
+                if (history[last[1]]) {
+                  replayed = true
+                  replaceState(history[last[1]], actions.concat([
+                    [newAction, until]
+                  ]))
+                  break
+                }
+              }
+            }
 
-          return true
-        } else {
-          replayed = true
-          replaceState(history[id], actions)
-          return false
-        }
-      }).then(function () {
-        if (replayed) return
-        if (onMissedHistory) onMissedHistory(newAction)
-
-        var full
-        if (replayIsSafe) {
-          full = actions
-        } else {
-          full = actions.slice(0)
-          while (actions.length > 0) {
-            var last = actions[actions.length - 1]
-            actions.pop()
-            if (history[last[1]]) {
-              replayed = true
-              replaceState(history[last[1]], actions.concat([
-                [newAction, until]
-              ]))
-              break
+            if (!replayed) {
+              replaceState(preloadedState, full)
             }
           }
-        }
 
-        if (!replayed) {
-          replaceState(preloadedState, full)
-        }
+          replaying = false
+          resolve()
+        })
       })
     }
 
@@ -210,6 +220,12 @@ function createLoguxCreator (config) {
     })
 
     function process (action, meta, replayIsSafe) {
+      if (replaying) {
+        replaying.then(function () {
+          process(action, meta, replayIsSafe)
+        })
+        return
+      }
       if (action.type === 'logux/undo') {
         var reasons = meta.reasons
         log.byId(action.id).then(function (result) {
@@ -250,7 +266,7 @@ function createLoguxCreator (config) {
         return
       }
 
-      process(action, meta)
+      process(action, meta, isFirstOlder(meta, started))
     })
 
     client.on('clean', function (action, meta) {
