@@ -1,4 +1,5 @@
 var TestPair = require('logux-sync').TestPair
+var TestTime = require('logux-core').TestTime
 
 var createLoguxCreator = require('../create-logux-creator')
 
@@ -88,7 +89,7 @@ it('has shortcut for add', function () {
 
 it('listen for action from other tabs', function () {
   var store = createStore(increment)
-  store.client.emitter.emit('add', { type: 'INC' }, { })
+  store.client.emitter.emit('add', { type: 'INC' }, { id: [1, 't', 0] })
   expect(store.getState()).toEqual({ value: 1 })
 })
 
@@ -240,7 +241,8 @@ it('replays history since last state', function () {
   var onMissedHistory = jest.fn()
   var store = createStore(historyLine, {
     onMissedHistory: onMissedHistory,
-    saveStateEvery: 2
+    saveStateEvery: 2,
+    time: new TestTime()
   })
   return Promise.all([
     store.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['one'] }),
@@ -252,11 +254,32 @@ it('replays history since last state', function () {
   }).then(function () {
     return store.dispatch.crossTab(
       { type: 'ADD', value: '|' },
-      { id: [0, '10:uuid', 0], reasons: ['test'] }
+      { id: [1, '10:uuid', 0], reasons: ['test'] }
     )
   }).then(function () {
     expect(onMissedHistory).toHaveBeenCalledWith({ type: 'ADD', value: '|' })
     expect(store.getState().value).toEqual('0abc|d')
+  })
+})
+
+it('replays actions before staring since initial state', function () {
+  var onMissedHistory = jest.fn()
+  var store = createStore(historyLine, {
+    onMissedHistory: onMissedHistory,
+    saveStateEvery: 2,
+    time: new TestTime()
+  })
+  return Promise.all([
+    store.dispatch.crossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'ADD', value: 'c' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'ADD', value: 'd' }, { reasons: ['test'] })
+  ]).then(function () {
+    return store.dispatch.crossTab(
+      { type: 'ADD', value: '|' },
+      { id: [0, '10:uuid', 0], reasons: ['test'] }
+    )
+  }).then(function () {
+    expect(store.getState().value).toEqual('0|bcd')
   })
 })
 
