@@ -33,7 +33,7 @@
     "logux-sync": "logux/logux-sync",
     "pre-commit": "^1.2.2",
     "rimraf": "^2.6.2",
-    "size-limit": "^0.11.3",
+    "size-limit": "^0.11.4",
     "yaspeller-ci": "^0.7.0"
   },
   "scripts": {
