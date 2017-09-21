@@ -26,7 +26,7 @@ function UserPhoto (props) {
   return h('img', { src: props.id + '.jpg' })
 }
 var SubscribeUserPhoto = subscribe(function (props) {
-  return { name: 'users/' + props.id, fields: ['photo'] }
+  return { channel: 'users/' + props.id, fields: ['photo'] }
 })(UserPhoto)
 
 it('generates component name', function () {
@@ -93,8 +93,8 @@ it('subscribes', function () {
     h(SubscribeUser, { id: '2', key: 3 })
   ]))
   expect(component.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', name: 'users/1' },
-    { type: 'logux/subscribe', name: 'users/2' }
+    { type: 'logux/subscribe', channel: 'users/1' },
+    { type: 'logux/subscribe', channel: 'users/2' }
   ])
 })
 
@@ -120,19 +120,19 @@ it('unsubscribes', function () {
 
   var component = createComponent(h(UserList, { }))
   expect(component.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', name: 'users/1', fields: ['photo'] },
-    { type: 'logux/subscribe', name: 'users/2', fields: ['photo'] }
+    { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
+    { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
   ])
 
   component.toJSON().props.onClick([1, 2])
   expect(component.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', name: 'users/1', fields: ['photo'] },
-    { type: 'logux/subscribe', name: 'users/2', fields: ['photo'] }
+    { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
+    { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
   ])
 
   component.toJSON().props.onClick({ a: 1 })
   expect(component.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', name: 'users/1', fields: ['photo'] }
+    { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
   ])
 })
 
@@ -155,12 +155,12 @@ it('changes subscription', function () {
 
   var component = createComponent(h(Profile, { }))
   expect(component.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', name: 'users/1', fields: ['photo'] }
+    { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
   ])
 
   component.toJSON().props.onClick(2)
   expect(component.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', name: 'users/2', fields: ['photo'] }
+    { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
   ])
 })
 
@@ -196,6 +196,6 @@ it('supports differnt store sources', function () {
 
   createComponent(h(Profile, { }))
   expect(store.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', name: 'users/1' }
+    { type: 'logux/subscribe', channel: 'users/1' }
   ])
 })

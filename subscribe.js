@@ -25,7 +25,7 @@ function merge (to, from) {
  * const subscribe = require('react-logux/subscribe')
  * class User extends React.Component { … }
  * const SubscribeUser = subscribe(props => {
- *   return { name: `user/${ props.id }`, fields: ['name'] }
+ *   return { channel: `user/${ props.id }`, fields: ['name'] }
  * })(User)
  */
 function subscribe (subscriber, options) {
@@ -65,7 +65,7 @@ function subscribe (subscriber, options) {
     SubscribeComponent.prototype.subscribe = function (props) {
       this.properties = subscriber(props)
       if (typeof this.properties === 'string') {
-        this.properties = { name: this.properties }
+        this.properties = { channel: this.properties }
       }
       this.json = JSON.stringify(props)
 
@@ -111,5 +111,5 @@ module.exports = subscribe
 /**
  * Details for subscription action.
  * @typedef {object} Subscription
- * @property {string} name The subscription name.
+ * @property {string} channel The channel name.
  */
