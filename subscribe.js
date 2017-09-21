@@ -63,33 +63,45 @@ function subscribe (subscriber, options) {
     }
 
     SubscribeComponent.prototype.subscribe = function (props) {
-      this.properties = subscriber(props)
-      if (typeof this.properties === 'string') {
-        this.properties = { channel: this.properties }
+      var subscriptions = subscriber(props)
+      if (!Array.isArray(subscriptions)) {
+        subscriptions = [subscriptions]
       }
-      this.json = JSON.stringify(props)
+      this.subscriptions = subscriptions.map(function (subscription) {
+        if (typeof subscription === 'string') {
+          return { channel: subscription }
+        } else {
+          return subscription
+        }
+      })
 
       var store = this.context[storeKey]
+      this.subscriptions.forEach(function (subscription) {
+        var json = JSON.stringify(subscription)
 
-      if (!store.subscribers) store.subscribers = { }
-      if (!store.subscribers[this.json]) store.subscribers[this.json] = 0
+        if (!store.subscribers) store.subscribers = { }
+        var subscribers = store.subscribers
+        if (!subscribers[json]) subscribers[json] = 0
 
-      if (store.subscribers[this.json] === 0) {
-        var action = merge({ type: 'logux/subscribe' }, this.properties)
-        store.log.add(action, { sync: true })
-      }
-      store.subscribers[this.json] += 1
+        if (subscribers[json] === 0) {
+          var action = merge({ type: 'logux/subscribe' }, subscription)
+          store.log.add(action, { sync: true })
+        }
+        subscribers[json] += 1
+      })
     }
 
     SubscribeComponent.prototype.unsubscribe = function () {
       var store = this.context[storeKey]
+      this.subscriptions.forEach(function (subscription) {
+        var json = JSON.stringify(subscription)
 
-      store.subscribers[this.json] -= 1
-
-      if (store.subscribers[this.json] === 0) {
-        var action = merge({ type: 'logux/unsubscribe' }, this.properties)
-        store.log.add(action, { sync: true })
-      }
+        store.subscribers[json] -= 1
+        if (store.subscribers[json] === 0) {
+          var action = merge({ type: 'logux/unsubscribe' }, subscription)
+          store.log.add(action, { sync: true })
+        }
+      })
     }
 
     SubscribeComponent.prototype.render = function () {

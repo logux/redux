@@ -164,6 +164,27 @@ it('changes subscription', function () {
   ])
 })
 
+it('supports multiple channels', function () {
+  function User () {
+    return null
+  }
+  var SubscribeUser = subscribe(function (props) {
+    return ['users/' + props.id, 'pictures/' + props.id]
+  })(User)
+
+  var component = createComponent(h('div', { }, [
+    h(SubscribeUser, { id: '1', key: 1 }),
+    h(SubscribeUser, { id: '1', key: 2 }),
+    h(SubscribeUser, { id: '2', key: 3 })
+  ]))
+  expect(component.client.subscriptions).toEqual([
+    { type: 'logux/subscribe', channel: 'users/1' },
+    { type: 'logux/subscribe', channel: 'pictures/1' },
+    { type: 'logux/subscribe', channel: 'users/2' },
+    { type: 'logux/subscribe', channel: 'pictures/2' }
+  ])
+})
+
 it('supports differnt store sources', function () {
   var LoguxUserPhoto = subscribe(function (props) {
     return 'users/' + props.id
