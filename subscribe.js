@@ -5,6 +5,45 @@ function merge (to, from) {
   return to
 }
 
+function isInclude (subscriptions, subscription) {
+  return subscriptions.some(function (i) {
+    return i[1] === subscription[1]
+  })
+}
+
+function getSubscriptions (subscriber, props) {
+  var subscriptions = subscriber(props)
+  if (!Array.isArray(subscriptions)) {
+    subscriptions = [subscriptions]
+  }
+  return subscriptions.map(function (subscription) {
+    if (typeof subscription === 'string') {
+      subscription = { channel: subscription }
+    }
+    return [subscription, JSON.stringify(subscription)]
+  })
+}
+
+function add (store, subscription, json) {
+  if (!store.subscribers) store.subscribers = { }
+  var subscribers = store.subscribers
+  if (!subscribers[json]) subscribers[json] = 0
+
+  if (subscribers[json] === 0) {
+    var action = merge({ type: 'logux/subscribe' }, subscription)
+    store.log.add(action, { sync: true })
+  }
+  subscribers[json] += 1
+}
+
+function remove (store, subscription, json) {
+  store.subscribers[json] -= 1
+  if (store.subscribers[json] === 0) {
+    var action = merge({ type: 'logux/unsubscribe' }, subscription)
+    store.log.add(action, { sync: true })
+  }
+}
+
 /**
  * Decorator to add subscribe action on component mount and unsubscribe
  * on unmount.
@@ -50,57 +89,38 @@ function subscribe (subscriber, options) {
     Object.setPrototypeOf(SubscribeComponent, React.Component)
 
     SubscribeComponent.prototype.componentWillMount = function () {
-      this.subscribe(this.props)
+      this.subscriptions = getSubscriptions(subscriber, this.props)
+
+      var store = this.context[storeKey]
+      this.subscriptions.forEach(function (i) {
+        add(store, i[0], i[1])
+      })
     }
 
     SubscribeComponent.prototype.componentWillReceiveProps = function (props) {
-      this.unsubscribe()
-      this.subscribe(props)
+      var store = this.context[storeKey]
+      var prev = this.subscriptions
+      var next = getSubscriptions(subscriber, props)
+
+      prev.forEach(function (i) {
+        if (!isInclude(next, i)) {
+          remove(store, i[0], i[1])
+        }
+      })
+
+      next.forEach(function (i) {
+        if (!isInclude(prev, i)) {
+          add(store, i[0], i[1])
+        }
+      })
+
+      this.subscriptions = next
     }
 
     SubscribeComponent.prototype.componentWillUnmount = function () {
-      this.unsubscribe()
-    }
-
-    SubscribeComponent.prototype.subscribe = function (props) {
-      var subscriptions = subscriber(props)
-      if (!Array.isArray(subscriptions)) {
-        subscriptions = [subscriptions]
-      }
-      this.subscriptions = subscriptions.map(function (subscription) {
-        if (typeof subscription === 'string') {
-          return { channel: subscription }
-        } else {
-          return subscription
-        }
-      })
-
       var store = this.context[storeKey]
-      this.subscriptions.forEach(function (subscription) {
-        var json = JSON.stringify(subscription)
-
-        if (!store.subscribers) store.subscribers = { }
-        var subscribers = store.subscribers
-        if (!subscribers[json]) subscribers[json] = 0
-
-        if (subscribers[json] === 0) {
-          var action = merge({ type: 'logux/subscribe' }, subscription)
-          store.log.add(action, { sync: true })
-        }
-        subscribers[json] += 1
-      })
-    }
-
-    SubscribeComponent.prototype.unsubscribe = function () {
-      var store = this.context[storeKey]
-      this.subscriptions.forEach(function (subscription) {
-        var json = JSON.stringify(subscription)
-
-        store.subscribers[json] -= 1
-        if (store.subscribers[json] === 0) {
-          var action = merge({ type: 'logux/unsubscribe' }, subscription)
-          store.log.add(action, { sync: true })
-        }
+      this.subscriptions.forEach(function (i) {
+        remove(store, i[0], i[1])
       })
     }
 

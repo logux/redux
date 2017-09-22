@@ -164,6 +164,34 @@ it('changes subscription', function () {
   ])
 })
 
+it('does not resubscribe on non-relevant props changes', function () {
+  var Profile = createReactClass({
+    getInitialState: function () {
+      return {
+        id: 1
+      }
+    },
+    change: function (id) {
+      this.setState({ id: id })
+    },
+    render: function () {
+      return h('div', { onClick: this.change },
+        h(SubscribeUserPhoto, { id: 1, nonId: this.state.id })
+      )
+    }
+  })
+
+  var component = createComponent(h(Profile, { }))
+
+  var resubscriptions = 0
+  component.client.log.on('add', function () {
+    resubscriptions += 1
+  })
+
+  component.toJSON().props.onClick(2)
+  expect(resubscriptions).toEqual(0)
+})
+
 it('supports multiple channels', function () {
   function User () {
     return null
