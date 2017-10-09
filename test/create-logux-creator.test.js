@@ -8,6 +8,7 @@ function createStore (reducer, opts) {
   if (!opts.server) opts.server = 'wss://localhost:1337'
   opts.subprotocol = '1.0.0'
   opts.userId = 10
+  opts.time = new TestTime()
 
   var creator = createLoguxCreator(opts)
   var store = creator(reducer, { value: 0 })
@@ -241,8 +242,7 @@ it('replays history since last state', function () {
   var onMissedHistory = jest.fn()
   var store = createStore(historyLine, {
     onMissedHistory: onMissedHistory,
-    saveStateEvery: 2,
-    time: new TestTime()
+    saveStateEvery: 2
   })
   return Promise.all([
     store.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['one'] }),
@@ -263,7 +263,7 @@ it('replays history since last state', function () {
 })
 
 it('replays history for reason-less action', function () {
-  var store = createStore(historyLine, { time: new TestTime() })
+  var store = createStore(historyLine)
   return Promise.all([
     store.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['test'] }),
     store.dispatch.crossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] }),
@@ -284,8 +284,7 @@ it('replays actions before staring since initial state', function () {
   var onMissedHistory = jest.fn()
   var store = createStore(historyLine, {
     onMissedHistory: onMissedHistory,
-    saveStateEvery: 2,
-    time: new TestTime()
+    saveStateEvery: 2
   })
   return Promise.all([
     store.dispatch.crossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] }),
