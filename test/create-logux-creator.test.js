@@ -262,6 +262,24 @@ it('replays history since last state', function () {
   })
 })
 
+it('replays history for reason-less action', function () {
+  var store = createStore(historyLine, { time: new TestTime() })
+  return Promise.all([
+    store.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] }),
+    store.dispatch.crossTab({ type: 'ADD', value: 'c' }, { reasons: ['test'] })
+  ]).then(function () {
+    return store.dispatch.crossTab(
+      { type: 'ADD', value: '|' }, { id: [1, '10:uuid', 1] }
+    )
+  }).then(function () {
+    return Promise.resolve()
+  }).then(function () {
+    expect(store.getState().value).toEqual('0a|bc')
+    expect(store.log.store.created.length).toEqual(3)
+  })
+})
+
 it('replays actions before staring since initial state', function () {
   var onMissedHistory = jest.fn()
   var store = createStore(historyLine, {
