@@ -211,11 +211,16 @@ function createLoguxCreator (config) {
           resolve()
         })
       })
+
+      return replaying
     }
 
     log.on('preadd', function (action, meta) {
       if (action.type === 'logux/undo' && meta.reasons.length === 0) {
         meta.reasons.push('reasonsLoading')
+      }
+      if (!isFirstOlder(prevMeta, meta) && meta.reasons.length === 0) {
+        meta.reasons.push('replay')
       }
     })
 
@@ -240,15 +245,20 @@ function createLoguxCreator (config) {
             warnBadUndo(action.id)
           }
         })
-      } else if (!meta.added) {
-        prevMeta = meta
-        originDispatch(action)
       } else if (isFirstOlder(prevMeta, meta)) {
         prevMeta = meta
         originDispatch(action)
-        saveHistory(meta)
+        if (meta.added) saveHistory(meta)
       } else {
-        replay(meta.id, replayIsSafe)
+        replay(meta.id, replayIsSafe).then(function () {
+          if (meta.reasons.indexOf('replay') !== -1) {
+            log.changeMeta(meta.id, {
+              reasons: meta.reasons.filter(function (i) {
+                return i !== 'replay'
+              })
+            })
+          }
+        })
       }
     }
 
