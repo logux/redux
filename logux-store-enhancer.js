@@ -1,6 +1,5 @@
 var CrossTabClient = require('logux-client/cross-tab-client')
 var isFirstOlder = require('logux-core/is-first-older')
-var createStore = require('redux').createStore
 
 function hackReducer (reducer, storeConfig) {
   return function (state, action) {
@@ -25,15 +24,21 @@ function warnBadUndo (id) {
   )
 }
 
-
 /**
- * Creates Redux store and connect Logux Client to it.
+ * Creates Redux store enhancer which has an extra function startLoguxClient.
+ * store.startLoguxClient(loguxClientConfig) can be used to start the client.
+ * The client wil be created when the function is called.
  *
- * @param {function} reducer Redux reducer.
- * @param {any} preloadedState Initial Redux state.
- * @param {function} enhancer Redux middleware.
+ * The store also support starting the client via 'logux/start' action.
+ * dispatch({ type: 'logux/start', config: {} })
  *
- * @return {object} Redux store with Logux hacks.
+ * After the store started, a 'logux/started' action will be dispatched.
+ *
+ * If logux-reducer is used, the state will have started = true
+ *
+ * @param {function} onClientStarted callback when client is started.
+ *
+ * @return {function} redux store enhancer
  */
 function loguxStoreEnhancer (onClientStarted) {
   return function (createStore) {
@@ -41,15 +46,15 @@ function loguxStoreEnhancer (onClientStarted) {
       var storeConfig = {}
       var store = storeConfig.store = createStore(
         hackReducer(reducer, storeConfig), preloadedState, enhancer
-      );
+      )
 
       // Before client started, treat all dispatch as local
       store.dispatch.local = store.dispatch
       store.dispatch.crossTab = store.dispatch
       store.dispatch.sync = store.dispatch
       store.log = {
-        add: () => {},
-        remove: () => {}
+        add: function () {},
+        remove: function () {}
       }
       store.startLoguxClient = function (config) {
         return startLoguxClient(store, reducer, preloadedState, config).then(
@@ -74,6 +79,9 @@ function loguxStoreEnhancer (onClientStarted) {
 /**
  * Creates Logux client and connect it to Redux createStore function.
  *
+ * @param {object} store Redux store to patch.
+ * @param {function} reducer Redux reducer.
+ * @param {any} preloadedState Initial Redux state.
  * @param {object} config Logux Client config.
  * @param {string|Connection} config.server Server URL.
  * @param {string} config.subprotocol Client subprotocol version
@@ -104,7 +112,7 @@ function loguxStoreEnhancer (onClientStarted) {
  *
  * @return {storeCreator} Redux createStore compatible function.
  */
-function startLoguxClient(store, reducer, preloadedState, config) {
+function startLoguxClient (store, reducer, preloadedState, config) {
   if (!config) config = { }
 
   var dispatchHistory = config.dispatchHistory || 1000
@@ -117,237 +125,237 @@ function startLoguxClient(store, reducer, preloadedState, config) {
   var client = new CrossTabClient(config)
   var log = client.log
 
-    store.client = client
-    store.log = log
-    var history = { }
+  store.client = client
+  store.log = log
+  var history = { }
 
-    var actionCount = 0
-    function saveHistory (meta) {
-      actionCount += 1
-      if (saveStateEvery === 1 || actionCount % saveStateEvery === 1) {
-        history[meta.id.join('\t')] = store.getState()
-      }
+  var actionCount = 0
+  function saveHistory (meta) {
+    actionCount += 1
+    if (saveStateEvery === 1 || actionCount % saveStateEvery === 1) {
+      history[meta.id.join('\t')] = store.getState()
     }
+  }
 
-    var originReplace = store.replaceReducer
-    store.replaceReducer = function replaceReducer (newReducer) {
-      reducer = newReducer
-      return originReplace(hackReducer(newReducer, { store }))
+  var originReplace = store.replaceReducer
+  store.replaceReducer = function replaceReducer (newReducer) {
+    reducer = newReducer
+    return originReplace(hackReducer(newReducer, { store: store }))
+  }
+
+  var init
+  var initialize = new Promise(function (resolve) {
+    init = resolve
+  })
+
+  var prevMeta
+  var originDispatch = store.dispatch
+  store.dispatch = function dispatch (action) {
+    var meta = {
+      id: log.generateId(),
+      tab: store.client.id,
+      reasons: ['tab' + store.client.id],
+      dispatch: true
     }
+    log.add(action, meta)
 
-    var init
-    var initialize = new Promise(function (resolve) {
-      init = resolve
-    })
+    prevMeta = meta
+    originDispatch(action)
+    saveHistory(meta)
+  }
 
-    var prevMeta
-    var originDispatch = store.dispatch
-    store.dispatch = function dispatch (action) {
-      var meta = {
-        id: log.generateId(),
-        tab: store.client.id,
-        reasons: ['tab' + store.client.id],
-        dispatch: true
-      }
-      log.add(action, meta)
+  store.dispatch.local = function local (action, meta) {
+    meta.tab = client.id
+    return log.add(action, meta)
+  }
 
-      prevMeta = meta
-      originDispatch(action)
-      saveHistory(meta)
-    }
+  store.dispatch.crossTab = function crossTab (action, meta) {
+    return log.add(action, meta)
+  }
 
-    store.dispatch.local = function local (action, meta) {
-      meta.tab = client.id
-      return log.add(action, meta)
-    }
+  store.dispatch.sync = function sync (action, meta) {
+    if (!meta) meta = { }
+    if (!meta.reasons) meta.reasons = []
 
-    store.dispatch.crossTab = function crossTab (action, meta) {
-      return log.add(action, meta)
-    }
+    meta.sync = true
+    meta.reasons.push('waitForSync')
 
-    store.dispatch.sync = function sync (action, meta) {
-      if (!meta) meta = { }
-      if (!meta.reasons) meta.reasons = []
+    return log.add(action, meta)
+  }
 
-      meta.sync = true
-      meta.reasons.push('waitForSync')
+  var now = log.generateId()
+  var started = { id: now, time: now[0] }
 
-      return log.add(action, meta)
-    }
+  function replaceState (state, actions) {
+    var newState = actions.reduceRight(function (prev, i) {
+      var changed = reducer(prev, i[0])
+      if (history[i[1]]) history[i[1]] = changed
+      return changed
+    }, state)
+    originDispatch({ type: 'logux/state', state: newState })
+  }
 
-    var now = log.generateId()
-    var started = { id: now, time: now[0] }
+  var replaying
+  function replay (actionId, replayIsSafe) {
+    var until = actionId.join('\t')
 
-    function replaceState (state, actions) {
-      var newState = actions.reduceRight(function (prev, i) {
-        var changed = reducer(prev, i[0])
-        if (history[i[1]]) history[i[1]] = changed
-        return changed
-      }, state)
-      originDispatch({ type: 'logux/state', state: newState })
-    }
+    var ignore = { }
+    var actions = []
+    var replayed = false
+    var newAction
+    var collecting = true
 
-    var replaying
-    function replay (actionId, replayIsSafe) {
-      var until = actionId.join('\t')
+    replaying = new Promise(function (resolve) {
+      log.each(function (action, meta) {
+        if (meta.tab && meta.tab !== client.id) return true
+        var id = meta.id.join('\t')
 
-      var ignore = { }
-      var actions = []
-      var replayed = false
-      var newAction
-      var collecting = true
-
-      replaying = new Promise(function (resolve) {
-        log.each(function (action, meta) {
-          if (meta.tab && meta.tab !== client.id) return true
-          var id = meta.id.join('\t')
-
-          if (collecting || !history[id]) {
-            if (action.type === 'logux/undo') {
-              ignore[action.id.join('\t')] = true
-              return true
-            }
-
-            if (!ignore[id]) actions.push([action, id])
-            if (id === until) {
-              newAction = action
-              collecting = false
-            }
-
+        if (collecting || !history[id]) {
+          if (action.type === 'logux/undo') {
+            ignore[action.id.join('\t')] = true
             return true
-          } else {
-            replayed = true
-            replaceState(history[id], actions)
-            return false
           }
-        }).then(function () {
-          if (!replayed) {
-            if (onMissedHistory) onMissedHistory(newAction)
 
-            var full
-            if (replayIsSafe) {
-              full = actions
-            } else {
-              full = actions.slice(0)
-              while (actions.length > 0) {
-                var last = actions[actions.length - 1]
-                actions.pop()
-                if (history[last[1]]) {
-                  replayed = true
-                  replaceState(history[last[1]], actions.concat([
-                    [newAction, until]
-                  ]))
-                  break
-                }
+          if (!ignore[id]) actions.push([action, id])
+          if (id === until) {
+            newAction = action
+            collecting = false
+          }
+
+          return true
+        } else {
+          replayed = true
+          replaceState(history[id], actions)
+          return false
+        }
+      }).then(function () {
+        if (!replayed) {
+          if (onMissedHistory) onMissedHistory(newAction)
+
+          var full
+          if (replayIsSafe) {
+            full = actions
+          } else {
+            full = actions.slice(0)
+            while (actions.length > 0) {
+              var last = actions[actions.length - 1]
+              actions.pop()
+              if (history[last[1]]) {
+                replayed = true
+                replaceState(history[last[1]], actions.concat([
+                  [newAction, until]
+                ]))
+                break
               }
             }
-
-            if (!replayed) {
-              replaceState(preloadedState, full)
-            }
           }
 
-          replaying = false
-          resolve()
-        })
+          if (!replayed) {
+            replaceState(preloadedState, full)
+          }
+        }
+
+        replaying = false
+        resolve()
       })
-
-      return replaying
-    }
-
-    log.on('preadd', function (action, meta) {
-      if (action.type === 'logux/undo' && meta.reasons.length === 0) {
-        meta.reasons.push('reasonsLoading')
-      }
-      if (!isFirstOlder(prevMeta, meta) && meta.reasons.length === 0) {
-        meta.reasons.push('replay')
-      }
     })
 
-    function process (action, meta, replayIsSafe) {
-      if (replaying) {
-        replaying.then(function () {
-          process(action, meta, replayIsSafe)
-        })
-        return
-      }
-      if (action.type === 'logux/undo') {
-        var reasons = meta.reasons
-        log.byId(action.id).then(function (result) {
-          if (result[0]) {
-            if (reasons.length === 1 && reasons[0] === 'reasonsLoading') {
-              log.changeMeta(meta.id, { reasons: result[1].reasons })
-            }
-            delete history[action.id.join('\t')]
-            replay(action.id)
-          } else {
-            log.changeMeta(meta.id, { reasons: [] })
-            warnBadUndo(action.id)
-          }
-        })
-      } else if (isFirstOlder(prevMeta, meta)) {
-        prevMeta = meta
-        originDispatch(action)
-        if (meta.added) saveHistory(meta)
-      } else {
-        replay(meta.id, replayIsSafe).then(function () {
-          if (meta.reasons.indexOf('replay') !== -1) {
-            log.changeMeta(meta.id, {
-              reasons: meta.reasons.filter(function (i) {
-                return i !== 'replay'
-              })
-            })
-          }
-        })
-      }
-    }
+    return replaying
+  }
 
-    var lastAdded = 0
-    var dispatchCalls = 0
-    client.on('add', function (action, meta) {
-      if (meta.added > lastAdded) lastAdded = meta.added
-      if (meta.dispatch) {
-        dispatchCalls += 1
-        if (lastAdded > dispatchHistory && dispatchCalls % 25 === 0) {
-          log.removeReason('tab' + store.client.id, {
-            maxAdded: lastAdded - dispatchHistory
+  log.on('preadd', function (action, meta) {
+    if (action.type === 'logux/undo' && meta.reasons.length === 0) {
+      meta.reasons.push('reasonsLoading')
+    }
+    if (!isFirstOlder(prevMeta, meta) && meta.reasons.length === 0) {
+      meta.reasons.push('replay')
+    }
+  })
+
+  function process (action, meta, replayIsSafe) {
+    if (replaying) {
+      replaying.then(function () {
+        process(action, meta, replayIsSafe)
+      })
+      return
+    }
+    if (action.type === 'logux/undo') {
+      var reasons = meta.reasons
+      log.byId(action.id).then(function (result) {
+        if (result[0]) {
+          if (reasons.length === 1 && reasons[0] === 'reasonsLoading') {
+            log.changeMeta(meta.id, { reasons: result[1].reasons })
+          }
+          delete history[action.id.join('\t')]
+          replay(action.id)
+        } else {
+          log.changeMeta(meta.id, { reasons: [] })
+          warnBadUndo(action.id)
+        }
+      })
+    } else if (isFirstOlder(prevMeta, meta)) {
+      prevMeta = meta
+      originDispatch(action)
+      if (meta.added) saveHistory(meta)
+    } else {
+      replay(meta.id, replayIsSafe).then(function () {
+        if (meta.reasons.indexOf('replay') !== -1) {
+          log.changeMeta(meta.id, {
+            reasons: meta.reasons.filter(function (i) {
+              return i !== 'replay'
+            })
           })
         }
-        return
-      }
+      })
+    }
+  }
 
-      process(action, meta, isFirstOlder(meta, started))
-    })
-
-    client.on('clean', function (action, meta) {
-      delete history[meta.id.join('\t')]
-    })
-
-    client.sync.on('state', function () {
-      if (client.sync.state === 'synchronized') {
-        log.removeReason('waitForSync', { maxAdded: client.sync.lastSent })
-      }
-    })
-
-    var previous = []
-    var ignores = { }
-    log.each(function (action, meta) {
-      if (!meta.tab) {
-        if (action.type === 'logux/undo') {
-          ignores[action.id.join('\t')] = true
-        } else if (!ignores[meta.id.join('\t')]) {
-          previous.push([action, meta])
-        }
-      }
-    }).then(function () {
-      if (previous.length > 0) {
-        previous.forEach(function (i) {
-          process(i[0], i[1], true)
+  var lastAdded = 0
+  var dispatchCalls = 0
+  client.on('add', function (action, meta) {
+    if (meta.added > lastAdded) lastAdded = meta.added
+    if (meta.dispatch) {
+      dispatchCalls += 1
+      if (lastAdded > dispatchHistory && dispatchCalls % 25 === 0) {
+        log.removeReason('tab' + store.client.id, {
+          maxAdded: lastAdded - dispatchHistory
         })
       }
+      return
+    }
 
-      init()
-    })
+    process(action, meta, isFirstOlder(meta, started))
+  })
+
+  client.on('clean', function (action, meta) {
+    delete history[meta.id.join('\t')]
+  })
+
+  client.sync.on('state', function () {
+    if (client.sync.state === 'synchronized') {
+      log.removeReason('waitForSync', { maxAdded: client.sync.lastSent })
+    }
+  })
+
+  var previous = []
+  var ignores = { }
+  log.each(function (action, meta) {
+    if (!meta.tab) {
+      if (action.type === 'logux/undo') {
+        ignores[action.id.join('\t')] = true
+      } else if (!ignores[meta.id.join('\t')]) {
+        previous.push([action, meta])
+      }
+    }
+  }).then(function () {
+    if (previous.length > 0) {
+      previous.forEach(function (i) {
+        process(i[0], i[1], true)
+      })
+    }
+
+    init()
+  })
 
   return initialize
 }
