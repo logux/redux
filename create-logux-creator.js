@@ -1,3 +1,4 @@
+var createStore = require('redux').createStore
 var loguxStoreEnhancer = require('./logux-store-enhancer')
 
 /**
@@ -34,10 +35,17 @@ var loguxStoreEnhancer = require('./logux-store-enhancer')
  * @return {storeCreator} Redux createStore compatible function.
  */
 function createLoguxCreator (config) {
-  var createStore = loguxStoreEnhancer()
-  var store = createStore()
-  store.startLoguxClient(Object.assign({}, config, { legacy: true }))
-  return store
+  if (!config) {
+    throw new Error('Missed server option in Logux client')
+  }
+  return function createLoguxStore (reducer, preloadedState, enhancer) {
+    var enhancedCreateStore = loguxStoreEnhancer()(createStore)
+    var store = enhancedCreateStore(reducer, preloadedState, enhancer)
+    store.initialize = store.startLoguxClient(
+      Object.assign({}, config, { legacy: true })
+    )
+    return store
+  }
 }
 
 module.exports = createLoguxCreator

@@ -59,10 +59,12 @@ function loguxStoreEnhancer (onClientStarted) {
       store.startLoguxClient = function (config) {
         return startLoguxClient(store, reducer, preloadedState, config).then(
           function () {
-            var client = store.client
-            if (!config.legacy) {
-              client.start()
+            if (config.legacy) {
+              return
             }
+
+            var client = store.client
+            client.start()
 
             if (onClientStarted) {
               onClientStarted(client)
