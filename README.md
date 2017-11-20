@@ -18,7 +18,7 @@ npm install --save logux-redux
 
 Create Redux store by `createLoguxCreator`. It returns original Redux `createStore` function with Logux inside
 
-```diff js
+```diff
 -import { createStore } from 'redux'
 +import createLoguxCreator from 'logux-redux/create-logux-creator'
 
