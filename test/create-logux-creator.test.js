@@ -276,7 +276,7 @@ it('replays history for reason-less action', function () {
     return Promise.resolve()
   }).then(function () {
     expect(store.getState().value).toEqual('0a|bc')
-    expect(store.log.store.created.length).toEqual(3)
+    expect(store.log.store.created).toHaveLength(3)
   })
 })
 
@@ -373,7 +373,7 @@ it('cleans last 1000 by default', function () {
   }
 
   return promise.then(function () {
-    expect(actions(store.log).length).toEqual(1000)
+    expect(actions(store.log)).toHaveLength(1000)
   })
 })
 
