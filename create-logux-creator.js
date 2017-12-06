@@ -224,10 +224,17 @@ function createLoguxCreator (config) {
       }
     })
 
+    var wait = { }
+
     function process (action, meta, replayIsSafe) {
       if (replaying) {
+        var key = meta.id.join('\t')
+        wait[key] = true
         replaying.then(function () {
-          process(action, meta, replayIsSafe)
+          if (wait[key]) {
+            process(action, meta, replayIsSafe)
+            delete wait[key]
+          }
         })
         return
       }
@@ -280,7 +287,9 @@ function createLoguxCreator (config) {
     })
 
     client.on('clean', function (action, meta) {
-      delete history[meta.id.join('\t')]
+      var key = meta.id.join('\t')
+      delete wait[key]
+      delete history[key]
     })
 
     client.sync.on('state', function () {
