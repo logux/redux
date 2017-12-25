@@ -75,7 +75,7 @@ function createLoguxCreator (config) {
    * @return {object} Redux store with Logux hacks.
    */
   return function createLoguxStore (reducer, preloadedState, enhancer) {
-    var store = createStore(hackReducer(reducer), preloadedState, enhancer)
+    var store = createStore(hackReducer(reducer), preloadedState)
 
     store.client = client
     store.log = log
@@ -102,7 +102,7 @@ function createLoguxCreator (config) {
 
     var prevMeta
     var originDispatch = store.dispatch
-    store.dispatch = function dispatch (action) {
+    function dispatch (action) {
       var meta = {
         id: log.generateId(),
         tab: store.client.id,
@@ -114,6 +114,18 @@ function createLoguxCreator (config) {
       prevMeta = meta
       originDispatch(action)
       saveHistory(meta)
+    }
+
+    if (enhancer) {
+      var middlewared = enhancer(function () {
+        return {
+          getState: store.getState,
+          dispatch: dispatch
+        }
+      })(reducer, preloadedState)
+      store.dispatch = middlewared.dispatch
+    } else {
+      store.dispatch = dispatch
     }
 
     store.dispatch.local = function local (action, meta) {

@@ -1,9 +1,10 @@
+var applyMiddleware = require('redux').applyMiddleware
 var TestPair = require('logux-sync').TestPair
 var TestTime = require('logux-core').TestTime
 
 var createLoguxCreator = require('../create-logux-creator')
 
-function createStore (reducer, opts) {
+function createStore (reducer, opts, enhancer) {
   if (!opts) opts = { }
   if (!opts.server) opts.server = 'wss://localhost:1337'
   opts.subprotocol = '1.0.0'
@@ -11,7 +12,7 @@ function createStore (reducer, opts) {
   opts.time = new TestTime()
 
   var creator = createLoguxCreator(opts)
-  var store = creator(reducer, { value: 0 })
+  var store = creator(reducer, { value: 0 }, enhancer)
 
   var prev = 0
   store.log.generateId = function () {
@@ -492,4 +493,20 @@ it('applies old actions from store', function () {
   }).then(function () {
     expect(store2.getState().value).toEqual('0134ab')
   })
+})
+
+it('supports middlewares', function () {
+  var store = createStore(historyLine, { }, applyMiddleware(function () {
+    return function (dispatch) {
+      return function (action) {
+        if (action.value !== 'a') {
+          dispatch(action)
+        }
+      }
+    }
+  }))
+
+  store.dispatch({ type: 'ADD', value: 'a' })
+  store.dispatch({ type: 'ADD', value: 'b' })
+  expect(store.getState().value).toEqual('0b')
 })
