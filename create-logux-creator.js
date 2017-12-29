@@ -215,7 +215,8 @@ function createLoguxCreator (config) {
             }
 
             if (!replayed) {
-              replaceState(preloadedState, full)
+              var start = [[{ type: '@@redux/INIT' }]]
+              replaceState(preloadedState, start.concat(full))
             }
           }
 
