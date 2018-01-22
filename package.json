@@ -17,23 +17,23 @@
   },
   "devDependencies": {
     "docdash": "^0.4.0",
-    "eslint": "^4.14.0",
-    "eslint-config-logux": "^17.0.0",
+    "eslint": "^4.16.0",
+    "eslint-config-logux": "^18.0.0",
     "eslint-config-standard": "^10.2.1",
-    "eslint-plugin-es5": "^1.1.0",
+    "eslint-plugin-es5": "^1.2.0",
     "eslint-plugin-import": "^2.8.0",
-    "eslint-plugin-jest": "^21.5.0",
+    "eslint-plugin-jest": "^21.7.0",
     "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-standard": "^3.0.1",
-    "jest": "^22.0.4",
+    "jest": "^22.1.4",
     "jsdoc": "^3.5.5",
-    "lint-staged": "^6.0.0",
+    "lint-staged": "^6.0.1",
     "logux-sync": "^0.2.3",
     "pre-commit": "^1.2.2",
     "rimraf": "^2.6.2",
-    "size-limit": "^0.13.2",
+    "size-limit": "^0.14.0",
     "yaspeller-ci": "^1.0.0"
   },
   "scripts": {
@@ -57,7 +57,7 @@
   "size-limit": [
     {
       "path": "index.js",
-      "limit": "12.7 KB"
+      "limit": "12.8 KB"
     }
   ],
   "lint-staged": {
