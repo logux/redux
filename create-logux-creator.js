@@ -129,6 +129,7 @@ function createLoguxCreator (config) {
     }
 
     store.dispatch.local = function local (action, meta) {
+      if (!meta) meta = { }
       meta.tab = client.id
       return log.add(action, meta)
     }

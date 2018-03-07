@@ -421,6 +421,16 @@ it('dispatches local actions', function () {
   })
 })
 
+it('allows to miss meta for local actions', function () {
+  var store = createStore(increment)
+  store.log.on('preadd', function (action, meta) {
+    meta.reasons.push('preadd')
+  })
+  return store.dispatch.local({ type: 'INC' }).then(function () {
+    expect(store.log.store.created[0][0]).toEqual({ type: 'INC' })
+  })
+})
+
 it('dispatches sync actions', function () {
   var store = createStore(increment)
   return store.dispatch.sync(
