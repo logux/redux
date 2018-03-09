@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.1.5
+* Fix time traveling algorithm.
+
 ## 0.1.4
 * Allow to miss `meta` in `dispatch.local()`.
 
