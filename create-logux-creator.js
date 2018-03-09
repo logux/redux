@@ -55,6 +55,8 @@ function warnBadUndo (id) {
 function createLoguxCreator (config) {
   if (!config) config = { }
 
+  var checkEvery = config.checkEvery || 25
+  delete config.checkEvery
   var dispatchHistory = config.dispatchHistory || 1000
   delete config.dispatchHistory
   var saveStateEvery = config.saveStateEvery || 50
@@ -79,6 +81,7 @@ function createLoguxCreator (config) {
 
     store.client = client
     store.log = log
+    var historyCleaned = false
     var history = { }
 
     var actionCount = 0
@@ -148,9 +151,6 @@ function createLoguxCreator (config) {
       return log.add(action, meta)
     }
 
-    var now = log.generateId()
-    var started = { id: now, time: now[0] }
-
     function replaceState (state, actions) {
       var newState = actions.reduceRight(function (prev, i) {
         var changed = reducer(prev, i[0])
@@ -161,7 +161,7 @@ function createLoguxCreator (config) {
     }
 
     var replaying
-    function replay (actionId, replayIsSafe) {
+    function replay (actionId) {
       var until = actionId.join('\t')
 
       var ignore = { }
@@ -195,19 +195,15 @@ function createLoguxCreator (config) {
           }
         }).then(function () {
           if (!replayed) {
-            if (onMissedHistory) onMissedHistory(newAction)
-
-            var full
-            if (replayIsSafe) {
-              full = actions
-            } else {
-              full = actions.slice(0)
-              while (actions.length > 0) {
-                var last = actions[actions.length - 1]
-                actions.pop()
-                if (history[last[1]]) {
+            if (historyCleaned) {
+              if (onMissedHistory) {
+                onMissedHistory(newAction)
+              }
+              for (var i = actions.length - 1; i >= 0; i--) {
+                var id = actions[i][1]
+                if (history[id]) {
                   replayed = true
-                  replaceState(history[last[1]], actions.concat([
+                  replaceState(history[id], actions.slice(0, i).concat([
                     [newAction, until]
                   ]))
                   break
@@ -216,8 +212,9 @@ function createLoguxCreator (config) {
             }
 
             if (!replayed) {
-              var start = [[{ type: '@@redux/INIT' }]]
-              replaceState(preloadedState, start.concat(full))
+              replaceState(preloadedState, actions.concat([
+                [{ type: '@@redux/INIT' }]
+              ]))
             }
           }
 
@@ -240,18 +237,20 @@ function createLoguxCreator (config) {
 
     var wait = { }
 
-    function process (action, meta, replayIsSafe) {
+    function process (action, meta) {
       if (replaying) {
         var key = meta.id.join('\t')
         wait[key] = true
-        replaying.then(function () {
+        return replaying.then(function () {
           if (wait[key]) {
-            process(action, meta, replayIsSafe)
             delete wait[key]
+            return process(action, meta)
+          } else {
+            return false
           }
         })
-        return
       }
+
       if (action.type === 'logux/undo') {
         var reasons = meta.reasons
         log.byId(action.id).then(function (result) {
@@ -271,7 +270,7 @@ function createLoguxCreator (config) {
         originDispatch(action)
         if (meta.added) saveHistory(meta)
       } else {
-        replay(meta.id, replayIsSafe).then(function () {
+        replay(meta.id).then(function () {
           if (meta.reasons.indexOf('replay') !== -1) {
             log.changeMeta(meta.id, {
               reasons: meta.reasons.filter(function (i) {
@@ -281,6 +280,8 @@ function createLoguxCreator (config) {
           }
         })
       }
+
+      return Promise.resolve()
     }
 
     var lastAdded = 0
@@ -289,7 +290,8 @@ function createLoguxCreator (config) {
       if (meta.added > lastAdded) lastAdded = meta.added
       if (meta.dispatch) {
         dispatchCalls += 1
-        if (lastAdded > dispatchHistory && dispatchCalls % 25 === 0) {
+        if (dispatchCalls % checkEvery === 0 && lastAdded > dispatchHistory) {
+          historyCleaned = true
           log.removeReason('tab' + store.client.id, {
             maxAdded: lastAdded - dispatchHistory
           })
@@ -297,7 +299,7 @@ function createLoguxCreator (config) {
         return
       }
 
-      process(action, meta, isFirstOlder(meta, started))
+      process(action, meta)
     })
 
     client.on('clean', function (action, meta) {
@@ -324,12 +326,12 @@ function createLoguxCreator (config) {
       }
     }).then(function () {
       if (previous.length > 0) {
-        previous.forEach(function (i) {
-          process(i[0], i[1], true)
-        })
+        Promise.all(previous.map(function (i) {
+          return process(i[0], i[1])
+        })).then(init)
+      } else {
+        init()
       }
-
-      init()
     })
 
     return store
