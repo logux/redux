@@ -316,12 +316,18 @@ it('replays actions on missed history', function () {
   store.dispatch({ type: 'ADD', value: 'd' })
   return Promise.resolve().then(function () {
     return store.dispatch.crossTab(
-      { type: 'ADD', value: '|' },
+      { type: 'ADD', value: '[' },
       { id: [0, '10:uuid', 0], reasons: ['test'] }
     )
   }).then(function () {
-    expect(store.getState().value).toEqual('0abc|d')
-    expect(onMissedHistory).toHaveBeenCalledWith({ type: 'ADD', value: '|' })
+    expect(store.getState().value).toEqual('0abc[d')
+    expect(onMissedHistory).toHaveBeenCalledWith({ type: 'ADD', value: '[' })
+    return store.dispatch.crossTab(
+      { type: 'ADD', value: ']' },
+      { id: [0, '10:uuid', 1], reasons: ['test'] }
+    )
+  }).then(function () {
+    expect(store.getState().value).toEqual('0abc[]d')
   })
 })
 

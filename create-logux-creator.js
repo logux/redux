@@ -151,13 +151,19 @@ function createLoguxCreator (config) {
       return log.add(action, meta)
     }
 
-    function replaceState (state, actions) {
+    function replaceState (state, actions, pushHistory) {
+      var last = actions[actions.length - 1]
       var newState = actions.reduceRight(function (prev, i) {
         var changed = reducer(prev, i[0])
-        if (history[i[1]]) history[i[1]] = changed
+        if (pushHistory && i === last) {
+          history[pushHistory] = changed
+        } else if (history[i[1]]) {
+          history[i[1]] = changed
+        }
         return changed
       }, state)
       originDispatch({ type: 'logux/state', state: newState })
+      return newState
     }
 
     var replaying
@@ -203,9 +209,11 @@ function createLoguxCreator (config) {
                 var id = actions[i][1]
                 if (history[id]) {
                   replayed = true
-                  replaceState(history[id], actions.slice(0, i).concat([
-                    [newAction, until]
-                  ]))
+                  replaceState(
+                    history[id],
+                    actions.slice(0, i).concat([[newAction, until]]),
+                    id
+                  )
                   break
                 }
               }
