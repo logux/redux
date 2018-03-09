@@ -239,7 +239,7 @@ it('replaces reducer', function () {
   })
 })
 
-it('replays history since last state', function () {
+it('ignores cleaned history from non-legacy actions', function () {
   var onMissedHistory = jest.fn()
   var store = createStore(historyLine, {
     onMissedHistory: onMissedHistory,
@@ -258,8 +258,8 @@ it('replays history since last state', function () {
       { id: [1, '10:uuid', 0], reasons: ['test'] }
     )
   }).then(function () {
-    expect(onMissedHistory).toHaveBeenCalledWith({ type: 'ADD', value: '|' })
-    expect(store.getState().value).toEqual('0abc|d')
+    expect(store.getState().value).toEqual('0|bcd')
+    expect(onMissedHistory).not.toHaveBeenCalledWith()
   })
 })
 
@@ -297,6 +297,7 @@ it('replays actions before staring since initial state', function () {
       { id: [0, '10:uuid', 0], reasons: ['test'] }
     )
   }).then(function () {
+    expect(onMissedHistory).not.toHaveBeenCalled()
     expect(store.getState().value).toEqual('0|bcd')
   })
 })
@@ -304,21 +305,41 @@ it('replays actions before staring since initial state', function () {
 it('replays actions on missed history', function () {
   var onMissedHistory = jest.fn()
   var store = createStore(historyLine, {
-    onMissedHistory: onMissedHistory
+    dispatchHistory: 2,
+    onMissedHistory: onMissedHistory,
+    saveStateEvery: 2,
+    checkEvery: 1
   })
-  return Promise.all([
-    store.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['one'] }),
-    store.dispatch.crossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
-  ]).then(function () {
-    return store.log.removeReason('one')
-  }).then(function () {
+  store.dispatch({ type: 'ADD', value: 'a' })
+  store.dispatch({ type: 'ADD', value: 'b' })
+  store.dispatch({ type: 'ADD', value: 'c' })
+  store.dispatch({ type: 'ADD', value: 'd' })
+  return Promise.resolve().then(function () {
     return store.dispatch.crossTab(
       { type: 'ADD', value: '|' },
       { id: [0, '10:uuid', 0], reasons: ['test'] }
     )
   }).then(function () {
+    expect(store.getState().value).toEqual('0abc|d')
     expect(onMissedHistory).toHaveBeenCalledWith({ type: 'ADD', value: '|' })
-    expect(store.getState().value).toEqual('0|b')
+  })
+})
+
+it('works without onMissedHistory', function () {
+  var store = createStore(historyLine, {
+    dispatchHistory: 2,
+    saveStateEvery: 2,
+    checkEvery: 1
+  })
+  store.dispatch({ type: 'ADD', value: 'a' })
+  store.dispatch({ type: 'ADD', value: 'b' })
+  store.dispatch({ type: 'ADD', value: 'c' })
+  store.dispatch({ type: 'ADD', value: 'd' })
+  return Promise.resolve().then(function () {
+    return store.dispatch.crossTab(
+      { type: 'ADD', value: '|' },
+      { id: [0, '10:uuid', 0], reasons: ['test'] }
+    )
   })
 })
 
@@ -467,7 +488,7 @@ it('cleans sync action after synchronization', function () {
 })
 
 it('applies old actions from store', function () {
-  var store1 = createStore(historyLine)
+  var store1 = createStore(historyLine, { dispatchHistory: 2 })
   var store2
   return Promise.all([
     store1.dispatch.crossTab(
@@ -494,14 +515,17 @@ it('applies old actions from store', function () {
     store2 = createStore(historyLine, { store: store1.log.store })
 
     store2.dispatch({ type: 'ADD', value: 'a' })
+    store2.dispatch({ type: 'ADD', value: 'b' })
     store2.dispatch.crossTab(
-      { type: 'ADD', value: 'b' }, { reasons: ['test'] }
+      { type: 'ADD', value: 'c' }, { reasons: ['test'] }
     )
-    expect(store2.getState().value).toEqual('0a')
+    store2.dispatch({ type: 'ADD', value: 'd' })
+    store2.dispatch({ type: 'ADD', value: 'e' })
+    expect(store2.getState().value).toEqual('0abde')
 
     return store2.initialize
   }).then(function () {
-    expect(store2.getState().value).toEqual('0134ab')
+    expect(store2.getState().value).toEqual('0134abcde')
   })
 })
 
@@ -519,4 +543,52 @@ it('supports middlewares', function () {
   store.dispatch({ type: 'ADD', value: 'a' })
   store.dispatch({ type: 'ADD', value: 'b' })
   expect(store.getState().value).toEqual('0b')
+})
+
+it('waits for replaying', function () {
+  var store = createStore(historyLine)
+  var run
+  var waiting = new Promise(function (resolve) {
+    run = resolve
+  })
+
+  var first = true
+  var originEach = store.log.each
+  store.log.each = function () {
+    var result = originEach.apply(this, arguments)
+    if (first) {
+      first = false
+      return waiting.then(function () {
+        return result
+      })
+    } else {
+      return result
+    }
+  }
+
+  return store.dispatch.crossTab(
+    { type: 'ADD', value: 'b' },
+    { reasons: ['t'] }
+  ).then(function () {
+    return store.dispatch.crossTab(
+      { type: 'ADD', value: 'a' },
+      { id: [0, 'test', 0], reasons: ['t'] }
+    )
+  }).then(function () {
+    return Promise.all([
+      store.dispatch.crossTab({ type: 'ADD', value: 'c' }, { reasons: ['o'] }),
+      store.dispatch.crossTab({ type: 'ADD', value: 'd' }, { reasons: ['t'] })
+    ])
+  }).then(function () {
+    expect(store.getState().value).toEqual('0b')
+    store.log.removeReason('o')
+    run()
+    return Promise.resolve()
+  }).then(function () {
+    return Promise.resolve()
+  }).then(function () {
+    return Promise.resolve()
+  }).then(function () {
+    expect(store.getState().value).toEqual('0abd')
+  })
 })
