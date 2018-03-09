@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.1.6
+* Fix time traveling to the same position with 2 actions.
+
 ## 0.1.5
 * Fix time traveling algorithm.
 
