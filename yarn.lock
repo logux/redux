@@ -3588,27 +3588,20 @@ log-update@^1.0.2:
     ansi-escapes "^1.0.0"
     cli-cursor "^1.0.2"
 
-logux-client@^0.2.10:
+logux-client@logux/logux-client:
   version "0.2.10"
-  resolved "https://registry.yarnpkg.com/logux-client/-/logux-client-0.2.10.tgz#6bfdf766742774ec435610c2c381c12e08698810"
+  resolved "https://codeload.github.com/logux/logux-client/tar.gz/f5bec2026f5b28193b273bb4a5cbec51df01bbbd"
   dependencies:
-    logux-core "^0.2.1"
-    logux-sync "^0.2.3"
-    nanoevents "^1.0.2"
-    nanoid "^1.0.2"
+    logux-core logux/logux-core
+    nanoevents "^1.0.4"
+    nanoid "^1.0.4"
     promise "^8.0.1"
 
-logux-core@^0.2.1, logux-core@^0.2.2:
+logux-core@logux/logux-core:
   version "0.2.2"
-  resolved "https://registry.yarnpkg.com/logux-core/-/logux-core-0.2.2.tgz#b0603adad1db99e673d72594790c80d11462466d"
+  resolved "https://codeload.github.com/logux/logux-core/tar.gz/e7344946c9c026090a649a697e85326494cf9186"
   dependencies:
-    nanoevents "^1.0.2"
-
-logux-sync@^0.2.3, logux-sync@^0.2.6:
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/logux-sync/-/logux-sync-0.2.6.tgz#f9689ac439418a1c3c8800ecbc55a42bd0346a67"
-  dependencies:
-    nanoevents "^1.0.2"
+    nanoevents "^1.0.4"
 
 long@^3.2.0:
   version "3.2.0"
@@ -3866,13 +3859,13 @@ nan@^2.9.2:
   version "2.10.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.10.0.tgz#96d0cd610ebd58d4b4de9cc0c6828cda99c7548f"
 
-nanoevents@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-1.0.2.tgz#5078a4f8d3e4318aa585c5f2c633cc57fc06ac0f"
+nanoevents@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-1.0.4.tgz#cad8bd7bd77d0f0b2c87cdff8770c5b461b49d7f"
 
-nanoid@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-1.0.2.tgz#15d2b5e76b6dbfb15cac1000cb457d4bfc845bdb"
+nanoid@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-1.0.4.tgz#29ffb9a4fcbb671fca98da5e14e5c5e21ba76cd4"
 
 nanomatch@^1.2.9:
   version "1.2.9"

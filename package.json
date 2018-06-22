@@ -11,8 +11,8 @@
   "license": "MIT",
   "repository": "logux/logux-redux",
   "dependencies": {
-    "logux-client": "^0.2.10",
-    "logux-core": "^0.2.2",
+    "logux-client": "logux/logux-client",
+    "logux-core": "logux/logux-core",
     "redux": "^4.0.0"
   },
   "devDependencies": {
@@ -30,7 +30,6 @@
     "jest": "^22.4.3",
     "jsdoc": "^3.5.5",
     "lint-staged": "^7.1.0",
-    "logux-sync": "^0.2.6",
     "pre-commit": "^1.2.2",
     "rimraf": "^2.6.2",
     "size-limit": "^0.17.1",

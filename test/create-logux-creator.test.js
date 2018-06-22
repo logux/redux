@@ -1,5 +1,5 @@
 var applyMiddleware = require('redux').applyMiddleware
-var TestPair = require('logux-sync').TestPair
+var TestPair = require('logux-core').TestPair
 var TestTime = require('logux-core').TestTime
 
 var createLoguxCreator = require('../create-logux-creator')
