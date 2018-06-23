@@ -43,26 +43,6 @@
     "docs": "jsdoc --configure .jsdocrc *.js",
     "test": "jest --coverage && yarn lint && size-limit && yarn spellcheck"
   },
-  "jest": {
-    "coverageThreshold": {
-      "global": {
-        "statements": 100
-      }
-    }
-  },
-  "eslintConfig": {
-    "extends": "eslint-config-logux/browser"
-  },
-  "size-limit": [
-    {
-      "path": "index.js",
-      "limit": "12.6 KB"
-    }
-  ],
-  "lint-staged": {
-    "*.md": "yaspeller-ci",
-    "*.js": "eslint"
-  },
   "pre-commit": [
     "lint-staged"
   ]
