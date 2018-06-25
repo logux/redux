@@ -405,10 +405,6 @@ module.exports = createLoguxCreator
 /**
  * Add action to log with Redux compatible API.
  *
- * You should use it only in legacy code.
- * There is noway to set metadata in this method.
- * As result there is no way to cleaning control.
- *
  * Use {@link dispatchLocal}, {@link dispatchCrossTab} or {@link dispatchSync}
  * instead.
  *
