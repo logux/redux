@@ -13,9 +13,8 @@ function hackReducer (reducer) {
 }
 
 function warnBadUndo (id) {
-  var json = JSON.stringify(id)
   console.warn(
-    'Logux can not find ' + json + ' to undo it. Maybe action was cleaned.'
+    'Logux can not find "' + id + '" to undo it. Maybe action was cleaned.'
   )
 }
 
@@ -88,7 +87,7 @@ function createLoguxCreator (config) {
     function saveHistory (meta) {
       actionCount += 1
       if (saveStateEvery === 1 || actionCount % saveStateEvery === 1) {
-        history[meta.id.join('\t')] = store.getState()
+        history[meta.id] = store.getState()
       }
     }
 
@@ -168,8 +167,6 @@ function createLoguxCreator (config) {
 
     var replaying
     function replay (actionId) {
-      var until = actionId.join('\t')
-
       var ignore = { }
       var actions = []
       var replayed = false
@@ -179,16 +176,15 @@ function createLoguxCreator (config) {
       replaying = new Promise(function (resolve) {
         log.each(function (action, meta) {
           if (meta.tab && meta.tab !== client.id) return true
-          var id = meta.id.join('\t')
 
-          if (collecting || !history[id]) {
+          if (collecting || !history[meta.id]) {
             if (action.type === 'logux/undo') {
-              ignore[action.id.join('\t')] = true
+              ignore[action.id] = true
               return true
             }
 
-            if (!ignore[id]) actions.push([action, id])
-            if (id === until) {
+            if (!ignore[meta.id]) actions.push([action, meta.id])
+            if (meta.id === actionId) {
               newAction = action
               collecting = false
             }
@@ -196,7 +192,7 @@ function createLoguxCreator (config) {
             return true
           } else {
             replayed = true
-            replaceState(history[id], actions)
+            replaceState(history[meta.id], actions)
             return false
           }
         }).then(function () {
@@ -211,7 +207,7 @@ function createLoguxCreator (config) {
                   replayed = true
                   replaceState(
                     history[id],
-                    actions.slice(0, i).concat([[newAction, until]]),
+                    actions.slice(0, i).concat([[newAction, actionId]]),
                     id
                   )
                   break
@@ -247,11 +243,10 @@ function createLoguxCreator (config) {
 
     function process (action, meta) {
       if (replaying) {
-        var key = meta.id.join('\t')
-        wait[key] = true
+        wait[meta.id] = true
         return replaying.then(function () {
-          if (wait[key]) {
-            delete wait[key]
+          if (wait[meta.id]) {
+            delete wait[meta.id]
             return process(action, meta)
           } else {
             return false
@@ -266,7 +261,7 @@ function createLoguxCreator (config) {
             if (reasons.length === 1 && reasons[0] === 'reasonsLoading') {
               log.changeMeta(meta.id, { reasons: result[1].reasons })
             }
-            delete history[action.id.join('\t')]
+            delete history[action.id]
             replay(action.id)
           } else {
             log.changeMeta(meta.id, { reasons: [] })
@@ -311,9 +306,8 @@ function createLoguxCreator (config) {
     })
 
     client.on('clean', function (action, meta) {
-      var key = meta.id.join('\t')
-      delete wait[key]
-      delete history[key]
+      delete wait[meta.id]
+      delete history[meta.id]
     })
 
     client.sync.on('state', function () {
@@ -327,8 +321,8 @@ function createLoguxCreator (config) {
     log.each(function (action, meta) {
       if (!meta.tab) {
         if (action.type === 'logux/undo') {
-          ignores[action.id.join('\t')] = true
-        } else if (!ignores[meta.id.join('\t')]) {
+          ignores[action.id] = true
+        } else if (!ignores[meta.id]) {
           previous.push([action, meta])
         }
       }

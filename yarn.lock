@@ -3511,16 +3511,15 @@ log-update@^1.0.2:
 
 logux-client@logux/logux-client:
   version "0.2.10"
-  resolved "https://codeload.github.com/logux/logux-client/tar.gz/57130d1b33162d7c6fffe8d27b42ea0a69408e93"
+  resolved "https://codeload.github.com/logux/logux-client/tar.gz/7005df79cf1c787e60ac61bb58c01fc731380fd1"
   dependencies:
     logux-core logux/logux-core
     nanoevents "^1.0.4"
     nanoid "^1.0.4"
-    promise "^8.0.1"
 
 logux-core@logux/logux-core:
   version "0.2.2"
-  resolved "https://codeload.github.com/logux/logux-core/tar.gz/e6298fb315757b256b251144516b6876a354694e"
+  resolved "https://codeload.github.com/logux/logux-core/tar.gz/0e696b4a8037a47f8c6865c13eb5250e5e2454c8"
   dependencies:
     nanoevents "^1.0.4"
 
