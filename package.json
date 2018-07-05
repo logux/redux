@@ -10,12 +10,16 @@
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
   "repository": "logux/logux-redux",
+  "peerDependencies": {
+    "react": "^15.0.0 || ^16.0.0"
+  },
   "dependencies": {
     "logux-client": "logux/logux-client",
     "logux-core": "logux/logux-core",
     "redux": "^4.0.0"
   },
   "devDependencies": {
+    "create-react-class": "^15.6.3",
     "docdash": "^0.4.0",
     "eslint": "^5.0.1",
     "eslint-config-logux": "^23.0.2",
@@ -31,6 +35,9 @@
     "jsdoc": "^3.5.5",
     "lint-staged": "^7.2.0",
     "pre-commit": "^1.2.2",
+    "react": "^16.4.1",
+    "react-redux": "^5.0.7",
+    "react-test-renderer": "^16.4.1",
     "rimraf": "^2.6.2",
     "size-limit": "^0.18.3",
     "yaspeller-ci": "^1.0.0"

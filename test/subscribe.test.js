@@ -1,4 +1,4 @@
-var createLoguxCreator = require('logux-redux/create-logux-creator')
+var createLoguxCreator = require('../create-logux-creator')
 var createReactClass = require('create-react-class')
 var Provider = require('react-redux').Provider
 var renderer = require('react-test-renderer')

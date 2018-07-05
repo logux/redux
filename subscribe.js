@@ -56,12 +56,12 @@ function remove (store, subscription, json) {
  * @return {function} Class wrapper.
  *
  * @example
- * const subscribe = require('react-logux/subscribe')
+ * const subscribe = require('logux-redux/subscribe')
  * @subscribe(({ id }) => `user/${ id }')
  * class User extends React.Component { … }
  *
  * @example
- * const subscribe = require('react-logux/subscribe')
+ * const subscribe = require('logux-redux/subscribe')
  * class User extends React.Component { … }
  * const SubscribeUser = subscribe(props => {
  *   return { channel: `user/${ props.id }`, fields: ['name'] }

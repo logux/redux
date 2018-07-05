@@ -26,6 +26,7 @@
     "storeCreator",
     "dispatchLocal",
     "dispatchCrossTab",
-    "dispatchSync"
+    "dispatchSync",
+    "unsubscribe"
   ]
 }
