@@ -310,9 +310,9 @@ function createLoguxCreator (config) {
       delete history[meta.id]
     })
 
-    client.sync.on('state', function () {
-      if (client.sync.state === 'synchronized') {
-        log.removeReason('waitForSync', { maxAdded: client.sync.lastSent })
+    client.node.on('state', function () {
+      if (client.node.state === 'synchronized') {
+        log.removeReason('waitForSync', { maxAdded: client.node.lastSent })
       }
     })
 

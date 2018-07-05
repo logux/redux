@@ -470,16 +470,16 @@ it('cleans sync action after synchronization', function () {
 
   store.client.start()
   return pair.wait('left').then(function () {
-    var protocol = store.client.sync.localProtocol
+    var protocol = store.client.node.localProtocol
     pair.right.send(['connected', protocol, 'server', [0, 0]])
-    return store.client.sync.waitFor('synchronized')
+    return store.client.node.waitFor('synchronized')
   }).then(function () {
     store.dispatch.sync({ type: 'INC' })
     return pair.wait('right')
   }).then(function () {
     expect(store.log.actions()).toEqual([{ type: 'INC' }])
     pair.right.send(['synced', 1])
-    return store.client.sync.waitFor('synchronized')
+    return store.client.node.waitFor('synchronized')
   }).then(function () {
     return Promise.resolve()
   }).then(function () {
