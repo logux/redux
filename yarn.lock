@@ -3561,7 +3561,7 @@ log-update@^1.0.2:
 
 logux-client@logux/logux-client:
   version "0.2.10"
-  resolved "https://codeload.github.com/logux/logux-client/tar.gz/dea2bef3705e19da25a282014631069f6fca48ac"
+  resolved "https://codeload.github.com/logux/logux-client/tar.gz/3d3b18e8543ea2d7db40cfab924b230cdb00bec1"
   dependencies:
     logux-core logux/logux-core
     nanoevents "^1.0.4"
@@ -3569,7 +3569,7 @@ logux-client@logux/logux-client:
 
 logux-core@logux/logux-core:
   version "0.2.2"
-  resolved "https://codeload.github.com/logux/logux-core/tar.gz/660eb78ab5246e6231848391d464cd1d4372ac90"
+  resolved "https://codeload.github.com/logux/logux-core/tar.gz/df62c954d56236fbba50346529ed25af65cf04b1"
   dependencies:
     nanoevents "^1.0.4"
 

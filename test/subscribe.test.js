@@ -285,15 +285,14 @@ it('reports about subscription end', function () {
   })
 
   var component = createComponent(h(Profile, { }))
-  var nodeId = 'false:' + component.client.id
   var log = component.client.log
   return Promise.resolve().then(function () {
     expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
     component.toJSON().props.onClick(2)
-    return log.add({ type: 'logux/processed', id: '1 ' + nodeId + ' 0' })
+    return log.add({ type: 'logux/processed', id: '1 false:test1 0' })
   }).then(function () {
     expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
-    return log.add({ type: 'logux/processed', id: '3 ' + nodeId + ' 0' })
+    return log.add({ type: 'logux/processed', id: '3 false:test1 0' })
   }).then(function () {
     expect(component.toJSON().children[0].props.isSubscribing).toBeFalsy()
   })
@@ -310,14 +309,13 @@ it('allows to change subscribing prop', function () {
   })(UserPhoto2)
 
   var component = createComponent(h(SubscribeUserPhoto2, { one: 1 }))
-  var nodeId = 'false:' + component.client.id
   var log = component.client.log
   return Promise.resolve().then(function () {
     expect(component.toJSON().props).toEqual({
       isLoading: true,
       one: 1
     })
-    return log.add({ type: 'logux/processed', id: '1 ' + nodeId + ' 0' })
+    return log.add({ type: 'logux/processed', id: '1 false:test1 0' })
   }).then(function () {
     expect(component.toJSON().props).toEqual({
       isLoading: false,
