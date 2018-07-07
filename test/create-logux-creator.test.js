@@ -1,6 +1,7 @@
 var applyMiddleware = require('redux').applyMiddleware
 var TestPair = require('logux-core').TestPair
 var TestTime = require('logux-core').TestTime
+var delay = require('nanodelay')
 
 var createLoguxCreator = require('../create-logux-creator')
 
@@ -454,36 +455,48 @@ it('allows to miss meta for local actions', function () {
 
 it('dispatches sync actions', function () {
   var store = createStore(increment)
-  return store.dispatch.sync(
-    { type: 'INC' }, { reasons: ['test'] }
-  ).then(function () {
+  store.dispatch.sync({ type: 'INC' }, { reasons: ['test'] })
+  return Promise.resolve().then(function () {
     var log = store.log.store.created
     expect(log[0][0]).toEqual({ type: 'INC' })
     expect(log[0][1].sync).toBeTruthy()
-    expect(log[0][1].reasons).toEqual(['test', 'waitForSync'])
+    expect(log[0][1].reasons).toEqual(['test', 'processing'])
   })
 })
 
-it('cleans sync action after synchronization', function () {
+it('cleans sync action after processing', function () {
+  console.warn = jest.fn()
   var pair = new TestPair()
   var store = createStore(increment, { server: pair.left })
+  var resultA, resultB
 
-  store.client.start()
-  return pair.wait('left').then(function () {
-    var protocol = store.client.node.localProtocol
-    pair.right.send(['connected', protocol, 'server', [0, 0]])
-    return store.client.node.waitFor('synchronized')
+  store.dispatch.sync({ type: 'A' }).then(function () {
+    resultA = 'processed'
+  }).catch(function () {
+    resultA = 'error'
+  })
+  store.dispatch.sync({ type: 'B' }, { id: '3 10:uuid 0' }).then(function () {
+    resultB = 'processed'
+  }).catch(function () {
+    resultB = 'error'
+  })
+  return store.log.add(
+    { type: 'logux/processed', id: '0 10:uuid 0' }
+  ).then(function () {
+    expect(resultA).toBeUndefined()
+    expect(resultB).toBeUndefined()
+    expect(store.log.actions()).toEqual([{ type: 'A' }, { type: 'B' }])
+    return store.log.add({ type: 'logux/processed', id: '1 10:uuid 0' })
   }).then(function () {
-    store.dispatch.sync({ type: 'INC' })
-    return pair.wait('right')
+    expect(resultA).toEqual('processed')
+    expect(resultB).toBeUndefined()
+    expect(store.log.actions()).toEqual([{ type: 'B' }])
+    store.log.add({ type: 'logux/undo', id: '3 10:uuid 0' })
+    return delay(1)
   }).then(function () {
-    expect(store.log.actions()).toEqual([{ type: 'INC' }])
-    pair.right.send(['synced', 1])
-    return store.client.node.waitFor('synchronized')
-  }).then(function () {
-    return Promise.resolve()
-  }).then(function () {
+    expect(resultB).toEqual('error')
     expect(store.log.actions()).toEqual([])
+    expect(console.warn).not.toHaveBeenCalled()
   })
 })
 

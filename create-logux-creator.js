@@ -83,6 +83,8 @@ function createLoguxCreator (config) {
     var historyCleaned = false
     var history = { }
 
+    var processing = { }
+
     var actionCount = 0
     function saveHistory (meta) {
       actionCount += 1
@@ -145,9 +147,16 @@ function createLoguxCreator (config) {
       if (!meta.reasons) meta.reasons = []
 
       meta.sync = true
-      meta.reasons.push('waitForSync')
+      meta.reasons.push('processing')
 
-      return log.add(action, meta)
+      if (typeof meta.id === 'undefined') {
+        meta.id = log.generateId()
+      }
+
+      return new Promise(function (resolve, reject) {
+        processing[meta.id] = [resolve, reject]
+        log.add(action, meta)
+      })
     }
 
     function replaceState (state, actions, pushHistory) {
@@ -259,13 +268,23 @@ function createLoguxCreator (config) {
         log.byId(action.id).then(function (result) {
           if (result[0]) {
             if (reasons.length === 1 && reasons[0] === 'reasonsLoading') {
-              log.changeMeta(meta.id, { reasons: result[1].reasons })
+              log.changeMeta(meta.id, {
+                reasons: result[1].reasons.filter(function (reason) {
+                  return reason !== 'processing'
+                })
+              })
             }
             delete history[action.id]
-            replay(action.id)
+            return replay(action.id)
           } else {
             log.changeMeta(meta.id, { reasons: [] })
-            warnBadUndo(action.id)
+            return warnBadUndo(action.id)
+          }
+        }).then(function () {
+          if (processing[action.id]) {
+            processing[action.id][1]()
+            delete processing[action.id]
+            log.removeReason('processing', { id: action.id })
           }
         })
       } else if (isFirstOlder(prevMeta, meta)) {
@@ -291,6 +310,15 @@ function createLoguxCreator (config) {
     var dispatchCalls = 0
     client.on('add', function (action, meta) {
       if (meta.added > lastAdded) lastAdded = meta.added
+
+      if (action.type === 'logux/processed') {
+        if (processing[action.id]) {
+          processing[action.id][0]()
+          delete processing[action.id]
+          log.removeReason('processing', { id: action.id })
+        }
+      }
+
       if (meta.dispatch) {
         dispatchCalls += 1
         if (dispatchCalls % checkEvery === 0 && lastAdded > dispatchHistory) {
@@ -308,12 +336,6 @@ function createLoguxCreator (config) {
     client.on('clean', function (action, meta) {
       delete wait[meta.id]
       delete history[meta.id]
-    })
-
-    client.node.on('state', function () {
-      if (client.node.state === 'synchronized') {
-        log.removeReason('waitForSync', { maxAdded: client.node.lastSent })
-      }
     })
 
     var previous = []
