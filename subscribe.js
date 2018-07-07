@@ -97,10 +97,10 @@ function subscribe (subscriber, options) {
       })
     }
 
-    SubscribeComponent.prototype.componentWillReceiveProps = function (props) {
+    SubscribeComponent.prototype.componentDidUpdate = function () {
       var store = this.context[storeKey]
       var prev = this.subscriptions
-      var next = getSubscriptions(subscriber, props)
+      var next = getSubscriptions(subscriber, this.props)
 
       prev.forEach(function (i) {
         if (!isInclude(next, i)) {
