@@ -1,10 +1,5 @@
 var React = require('react')
 
-function merge (to, from) {
-  for (var i in from) to[i] = from[i]
-  return to
-}
-
 function isInclude (subscriptions, subscription) {
   return subscriptions.some(function (i) {
     return i[1] === subscription[1]
@@ -29,17 +24,19 @@ function add (store, subscription, json) {
   var subscribers = store.subscribers
   if (!subscribers[json]) subscribers[json] = 0
 
-  if (subscribers[json] === 0) {
-    var action = merge({ type: 'logux/subscribe' }, subscription)
-    store.log.add(action, { sync: true })
-  }
   subscribers[json] += 1
+  if (subscribers[json] === 1) {
+    var action = Object.assign({ type: 'logux/subscribe' }, subscription)
+    return store.dispatch.sync(action)
+  } else {
+    return undefined
+  }
 }
 
 function remove (store, subscription, json) {
   store.subscribers[json] -= 1
   if (store.subscribers[json] === 0) {
-    var action = merge({ type: 'logux/unsubscribe' }, subscription)
+    var action = Object.assign({ type: 'logux/unsubscribe' }, subscription)
     store.log.add(action, { sync: true })
   }
 }
@@ -51,7 +48,10 @@ function remove (store, subscription, json) {
  * @param {subscriber} subscriber Callback to return subscribe action
  *                                properties according to component props.
  * @param {object} [options] Redux options.
- * @param {string} [options.storeKey] The store key name in context.
+ * @param {string} [options.storeKey='store'] The store key name in context.
+ * @param {string} [options.subscribingProp='isSubscribing'] Change default
+ *                                                          `isSubscribing`
+ *                                                           property.
  *
  * @return {function} Class wrapper.
  *
@@ -69,13 +69,22 @@ function remove (store, subscription, json) {
  */
 function subscribe (subscriber, options) {
   var storeKey = 'store'
-  if (options && options.storeKey) storeKey = options.storeKey
+  if (options && options.storeKey) {
+    storeKey = options.storeKey
+  }
+
+  var subscribingProp = 'isSubscribing'
+  if (options && options.subscribingProp) {
+    subscribingProp = options.subscribingProp
+  }
 
   return function (Wrapped) {
     var wrappedName = Wrapped.displayName || Wrapped.name || 'Component'
 
     function SubscribeComponent () {
       React.Component.apply(this, arguments)
+      this.last = 0
+      this.state = { process: true }
     }
 
     SubscribeComponent.displayName = 'Subscribe' + wrappedName
@@ -88,16 +97,13 @@ function subscribe (subscriber, options) {
     })
     Object.setPrototypeOf(SubscribeComponent, React.Component)
 
-    SubscribeComponent.prototype.componentWillMount = function () {
-      this.subscriptions = getSubscriptions(subscriber, this.props)
-
-      var store = this.context[storeKey]
-      this.subscriptions.forEach(function (i) {
-        add(store, i[0], i[1])
-      })
+    SubscribeComponent.prototype.componentDidMount = function () {
+      this.sub(getSubscriptions(subscriber, this.props))
     }
 
-    SubscribeComponent.prototype.componentDidUpdate = function () {
+    SubscribeComponent.prototype.componentDidUpdate = function (prevProps) {
+      if (prevProps === this.props) return
+
       var store = this.context[storeKey]
       var prev = this.subscriptions
       var next = getSubscriptions(subscriber, this.props)
@@ -108,13 +114,11 @@ function subscribe (subscriber, options) {
         }
       })
 
-      next.forEach(function (i) {
-        if (!isInclude(prev, i)) {
-          add(store, i[0], i[1])
-        }
-      })
-
-      this.subscriptions = next
+      var self = this
+      self.setState({ process: true })
+      this.sub(next.filter(function (i) {
+        return !isInclude(prev, i)
+      }))
     }
 
     SubscribeComponent.prototype.componentWillUnmount = function () {
@@ -122,10 +126,28 @@ function subscribe (subscriber, options) {
       this.subscriptions.forEach(function (i) {
         remove(store, i[0], i[1])
       })
+      this.last += 1
+    }
+
+    SubscribeComponent.prototype.sub = function (next) {
+      var store = this.context[storeKey]
+      this.last += 1
+      Promise.all(next.map(function (i) {
+        return add(store, i[0], i[1])
+      })).then(this.finish.bind(this, this.last))
+      this.subscriptions = next
+    }
+
+    SubscribeComponent.prototype.finish = function (request) {
+      if (this.last === request) {
+        this.setState({ process: false })
+      }
     }
 
     SubscribeComponent.prototype.render = function () {
-      return React.createElement(Wrapped, this.props)
+      var props = Object.assign({ }, this.props)
+      props[subscribingProp] = this.state.process
+      return React.createElement(Wrapped, props)
     }
 
     return SubscribeComponent

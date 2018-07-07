@@ -2,6 +2,7 @@ var createLoguxCreator = require('../create-logux-creator')
 var createReactClass = require('create-react-class')
 var Provider = require('react-redux').Provider
 var renderer = require('react-test-renderer')
+var TestTime = require('logux-core').TestTime
 var React = require('react')
 
 var subscribe = require('../subscribe')
@@ -12,7 +13,8 @@ function createComponent (content) {
   var createStore = createLoguxCreator({
     subprotocol: '0.0.0',
     server: 'wss://localhost:1337',
-    userId: false
+    userId: false,
+    time: new TestTime()
   })
   var store = createStore(function () {
     return { }
@@ -23,7 +25,10 @@ function createComponent (content) {
 }
 
 function UserPhoto (props) {
-  return h('img', { src: props.id + '.jpg' })
+  return h('img', {
+    isSubscribing: props.isSubscribing,
+    src: props.id + '.jpg'
+  })
 }
 var SubscribeUserPhoto = subscribe(function (props) {
   return { channel: 'users/' + props.id, fields: ['photo'] }
@@ -92,10 +97,12 @@ it('subscribes', function () {
     h(SubscribeUser, { id: '1', key: 2 }),
     h(SubscribeUser, { id: '2', key: 3 })
   ]))
-  expect(component.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', channel: 'users/1' },
-    { type: 'logux/subscribe', channel: 'users/2' }
-  ])
+  return Promise.resolve().then(function () {
+    expect(component.client.subscriptions).toEqual([
+      { type: 'logux/subscribe', channel: 'users/1' },
+      { type: 'logux/subscribe', channel: 'users/2' }
+    ])
+  })
 })
 
 it('unsubscribes', function () {
@@ -119,21 +126,25 @@ it('unsubscribes', function () {
   })
 
   var component = createComponent(h(UserList, { }))
-  expect(component.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
-    { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
-  ])
-
-  component.toJSON().props.onClick([1, 2])
-  expect(component.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
-    { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
-  ])
-
-  component.toJSON().props.onClick({ a: 1 })
-  expect(component.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
-  ])
+  return Promise.resolve().then(function () {
+    expect(component.client.subscriptions).toEqual([
+      { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
+      { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
+    ])
+    component.toJSON().props.onClick([1, 2])
+    return Promise.resolve()
+  }).then(function () {
+    expect(component.client.subscriptions).toEqual([
+      { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
+      { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
+    ])
+    component.toJSON().props.onClick({ a: 1 })
+    return Promise.resolve()
+  }).then(function () {
+    expect(component.client.subscriptions).toEqual([
+      { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
+    ])
+  })
 })
 
 it('changes subscription', function () {
@@ -154,14 +165,17 @@ it('changes subscription', function () {
   })
 
   var component = createComponent(h(Profile, { }))
-  expect(component.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
-  ])
-
-  component.toJSON().props.onClick(2)
-  expect(component.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
-  ])
+  return Promise.resolve().then(function () {
+    expect(component.client.subscriptions).toEqual([
+      { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
+    ])
+    component.toJSON().props.onClick(2)
+    return Promise.resolve()
+  }).then(function () {
+    expect(component.client.subscriptions).toEqual([
+      { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
+    ])
+  })
 })
 
 it('does not resubscribe on non-relevant props changes', function () {
@@ -205,15 +219,17 @@ it('supports multiple channels', function () {
     h(SubscribeUser, { id: '1', key: 2 }),
     h(SubscribeUser, { id: '2', key: 3 })
   ]))
-  expect(component.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', channel: 'users/1' },
-    { type: 'logux/subscribe', channel: 'pictures/1' },
-    { type: 'logux/subscribe', channel: 'users/2' },
-    { type: 'logux/subscribe', channel: 'pictures/2' }
-  ])
+  return Promise.resolve().then(function () {
+    expect(component.client.subscriptions).toEqual([
+      { type: 'logux/subscribe', channel: 'users/1' },
+      { type: 'logux/subscribe', channel: 'pictures/1' },
+      { type: 'logux/subscribe', channel: 'users/2' },
+      { type: 'logux/subscribe', channel: 'pictures/2' }
+    ])
+  })
 })
 
-it('supports differnt store sources', function () {
+it('supports different store sources', function () {
   var LoguxUserPhoto = subscribe(function (props) {
     return 'users/' + props.id
   }, {
@@ -244,7 +260,68 @@ it('supports differnt store sources', function () {
   })
 
   createComponent(h(Profile, { }))
-  expect(store.client.subscriptions).toEqual([
-    { type: 'logux/subscribe', channel: 'users/1' }
-  ])
+  return Promise.resolve().then(function () {
+    expect(store.client.subscriptions).toEqual([
+      { type: 'logux/subscribe', channel: 'users/1' }
+    ])
+  })
+})
+
+it('reports about subscription end', function () {
+  var Profile = createReactClass({
+    getInitialState: function () {
+      return {
+        id: 1
+      }
+    },
+    change: function (id) {
+      this.setState({ id: id })
+    },
+    render: function () {
+      return h('div', { onClick: this.change },
+        h(SubscribeUserPhoto, { id: this.state.id })
+      )
+    }
+  })
+
+  var component = createComponent(h(Profile, { }))
+  var nodeId = 'false:' + component.client.id
+  var log = component.client.log
+  return Promise.resolve().then(function () {
+    expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
+    component.toJSON().props.onClick(2)
+    return log.add({ type: 'logux/processed', id: '1 ' + nodeId + ' 0' })
+  }).then(function () {
+    expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
+    return log.add({ type: 'logux/processed', id: '3 ' + nodeId + ' 0' })
+  }).then(function () {
+    expect(component.toJSON().children[0].props.isSubscribing).toBeFalsy()
+  })
+})
+
+it('allows to change subscribing prop', function () {
+  function UserPhoto2 (props) {
+    return h('img', props)
+  }
+  var SubscribeUserPhoto2 = subscribe(function () {
+    return 'user/2'
+  }, {
+    subscribingProp: 'isLoading'
+  })(UserPhoto2)
+
+  var component = createComponent(h(SubscribeUserPhoto2, { one: 1 }))
+  var nodeId = 'false:' + component.client.id
+  var log = component.client.log
+  return Promise.resolve().then(function () {
+    expect(component.toJSON().props).toEqual({
+      isLoading: true,
+      one: 1
+    })
+    return log.add({ type: 'logux/processed', id: '1 ' + nodeId + ' 0' })
+  }).then(function () {
+    expect(component.toJSON().props).toEqual({
+      isLoading: false,
+      one: 1
+    })
+  })
 })
