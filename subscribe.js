@@ -19,26 +19,34 @@ function getSubscriptions (subscriber, props) {
   })
 }
 
-function add (store, subscription, json) {
+function add (store, subscriptions) {
+  if (!store.subscriptions) store.subscriptions = { }
   if (!store.subscribers) store.subscribers = { }
-  var subscribers = store.subscribers
-  if (!subscribers[json]) subscribers[json] = 0
 
-  subscribers[json] += 1
-  if (subscribers[json] === 1) {
-    var action = Object.assign({ type: 'logux/subscribe' }, subscription)
-    return store.dispatch.sync(action)
-  } else {
-    return undefined
-  }
+  subscriptions.forEach(function (i) {
+    var subscription = i[0]
+    var json = i[1]
+    if (!store.subscribers[json]) store.subscribers[json] = 0
+    store.subscribers[json] += 1
+    if (store.subscribers[json] === 1) {
+      var action = Object.assign({ type: 'logux/subscribe' }, subscription)
+      store.subscriptions[json] = store.dispatch.sync(action).then(function () {
+        delete store.subscriptions[json]
+      })
+    }
+  })
 }
 
-function remove (store, subscription, json) {
-  store.subscribers[json] -= 1
-  if (store.subscribers[json] === 0) {
-    var action = Object.assign({ type: 'logux/unsubscribe' }, subscription)
-    store.log.add(action, { sync: true })
-  }
+function remove (store, subscriptions) {
+  subscriptions.forEach(function (i) {
+    var subscription = i[0]
+    var json = i[1]
+    store.subscribers[json] -= 1
+    if (store.subscribers[json] === 0) {
+      var action = Object.assign({ type: 'logux/unsubscribe' }, subscription)
+      store.log.add(action, { sync: true })
+    }
+  })
 }
 
 /**
@@ -98,7 +106,10 @@ function subscribe (subscriber, options) {
     Object.setPrototypeOf(SubscribeComponent, React.Component)
 
     SubscribeComponent.prototype.componentDidMount = function () {
-      this.sub(getSubscriptions(subscriber, this.props))
+      var store = this.context[storeKey]
+      this.subscriptions = getSubscriptions(subscriber, this.props)
+      add(store, this.subscriptions)
+      this.wait(store)
     }
 
     SubscribeComponent.prototype.componentDidUpdate = function (prevProps) {
@@ -108,40 +119,37 @@ function subscribe (subscriber, options) {
       var prev = this.subscriptions
       var next = getSubscriptions(subscriber, this.props)
 
-      prev.forEach(function (i) {
-        if (!isInclude(next, i)) {
-          remove(store, i[0], i[1])
-        }
+      remove(store, prev.filter(function (i) {
+        return !isInclude(next, i)
+      }))
+
+      var diff = next.filter(function (i) {
+        return !isInclude(prev, i)
       })
 
-      var self = this
-      self.setState({ process: true })
-      this.sub(next.filter(function (i) {
-        return !isInclude(prev, i)
-      }))
+      this.subscriptions = next
+      if (diff.length > 0) {
+        this.setState({ process: true })
+        add(store, diff)
+        this.wait(store)
+      }
     }
 
     SubscribeComponent.prototype.componentWillUnmount = function () {
-      var store = this.context[storeKey]
-      this.subscriptions.forEach(function (i) {
-        remove(store, i[0], i[1])
+      remove(this.context[storeKey], this.subscriptions)
+      this.last += 1
+    }
+
+    SubscribeComponent.prototype.wait = function (store) {
+      var request = ++this.last
+      var self = this
+      Promise.all(this.subscriptions.map(function (i) {
+        return store.subscriptions[i[1]]
+      })).then(function () {
+        if (self.last === request) {
+          self.setState({ process: false })
+        }
       })
-      this.last += 1
-    }
-
-    SubscribeComponent.prototype.sub = function (next) {
-      var store = this.context[storeKey]
-      this.last += 1
-      Promise.all(next.map(function (i) {
-        return add(store, i[0], i[1])
-      })).then(this.finish.bind(this, this.last))
-      this.subscriptions = next
-    }
-
-    SubscribeComponent.prototype.finish = function (request) {
-      if (this.last === request) {
-        this.setState({ process: false })
-      }
     }
 
     SubscribeComponent.prototype.render = function () {

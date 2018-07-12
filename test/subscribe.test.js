@@ -288,7 +288,14 @@ it('reports about subscription end', function () {
   var log = component.client.log
   return Promise.resolve().then(function () {
     expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
+    component.toJSON().props.onClick(1)
+    return Promise.resolve()
+  }).then(function () {
+    expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
     component.toJSON().props.onClick(2)
+    return Promise.resolve()
+  }).then(function () {
+    expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
     return log.add({ type: 'logux/processed', id: '1 false:test1 0' })
   }).then(function () {
     expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
