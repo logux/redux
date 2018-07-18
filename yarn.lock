@@ -3509,7 +3509,7 @@ logux-client@logux/logux-client:
   dependencies:
     logux-core logux/logux-core
     nanoevents "^1.0.4"
-    nanoid "^1.0.7"
+    nanoid "^1.0.5"
 
 logux-core@logux/logux-core:
   version "0.2.2"
@@ -3777,7 +3777,7 @@ nanodelay@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/nanodelay/-/nanodelay-0.1.4.tgz#1cc7e37ac10d107ca009b4803a25c8474ca636bf"
 
-nanoevents@^1.0.4:
+nanoevents@^1.0.4, nanoevents@^1.0.5:
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-1.0.5.tgz#4c75bba23c516cb0cab51b01f9d1f5220a9a9076"
 

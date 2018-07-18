@@ -1,6 +1,7 @@
 var CrossTabClient = require('logux-client/cross-tab-client')
 var isFirstOlder = require('logux-core/is-first-older')
 var createStore = require('redux').createStore
+var NanoEvents = require('nanoevents')
 
 function hackReducer (reducer) {
   return function (state, action) {
@@ -78,6 +79,8 @@ function createLoguxCreator (config) {
   return function createLoguxStore (reducer, preloadedState, enhancer) {
     var store = createStore(hackReducer(reducer), preloadedState)
 
+    var emitter = new NanoEvents()
+
     store.client = client
     store.log = log
     var historyCleaned = false
@@ -99,6 +102,25 @@ function createLoguxCreator (config) {
       return originReplace(hackReducer(newReducer))
     }
 
+    /**
+     * Subscribe for store events.
+     *
+     * @param {"change"} event The event name.
+     * @param {changeListener} listener The listener function.
+     *
+     * @return {function} Unbind listener from event.
+     *
+     * @example
+     * store.on('change', (state, prevState, action, meta) => {
+     *   console.log(state, prevState, action, meta)
+     * })
+     *
+     * @name on
+     * @function
+     * @memberof LoguxStore#
+     */
+    store.on = emitter.on.bind(emitter)
+
     var init
     store.initialize = new Promise(function (resolve) {
       init = resolve
@@ -116,7 +138,9 @@ function createLoguxCreator (config) {
       log.add(action, meta)
 
       prevMeta = meta
+      var prevState = store.getState()
       originDispatch(action)
+      emitter.emit('change', store.getState(), prevState, action, meta)
       saveHistory(meta)
     }
 
@@ -265,7 +289,7 @@ function createLoguxCreator (config) {
 
       if (action.type === 'logux/undo') {
         var reasons = meta.reasons
-        log.byId(action.id).then(function (result) {
+        return log.byId(action.id).then(function (result) {
           if (result[0]) {
             if (reasons.length === 1 && reasons[0] === 'reasonsLoading') {
               log.changeMeta(meta.id, {
@@ -291,8 +315,9 @@ function createLoguxCreator (config) {
         prevMeta = meta
         originDispatch(action)
         if (meta.added) saveHistory(meta)
+        return Promise.resolve()
       } else {
-        replay(meta.id).then(function () {
+        return replay(meta.id).then(function () {
           if (meta.reasons.indexOf('replay') !== -1) {
             log.changeMeta(meta.id, {
               reasons: meta.reasons.filter(function (i) {
@@ -302,8 +327,6 @@ function createLoguxCreator (config) {
           }
         })
       }
-
-      return Promise.resolve()
     }
 
     var lastAdded = 0
@@ -330,7 +353,10 @@ function createLoguxCreator (config) {
         return
       }
 
-      process(action, meta)
+      var prevState = store.getState()
+      process(action, meta).then(function () {
+        emitter.emit('change', store.getState(), prevState, action, meta)
+      })
     })
 
     client.on('clean', function (action, meta) {
@@ -525,4 +551,12 @@ module.exports = createLoguxCreator
  * })
  *
  * @callback dispatchSync
+ */
+
+/**
+ * @callback changeListener
+ * @param {any} state Current state of the store
+ * @param {any} prevState The state before new action.
+ * @param {Action} action The new action, which changed the store.
+ * @param {Meta} meta Action’s metadata.
  */

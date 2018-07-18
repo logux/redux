@@ -16,6 +16,7 @@
   "dependencies": {
     "logux-client": "logux/logux-client",
     "logux-core": "logux/logux-core",
+    "nanoevents": "^1.0.5",
     "redux": "^4.0.0"
   },
   "devDependencies": {

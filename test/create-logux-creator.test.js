@@ -599,3 +599,41 @@ it('waits for replaying', function () {
     expect(store.getState().value).toEqual('0abd')
   })
 })
+
+it('emits change event', function () {
+  var store = createStore(historyLine)
+
+  store.log.on('preadd', function (action, meta) {
+    meta.reasons.push('test')
+  })
+
+  var calls = []
+  store.on('change', function (state, prevState, action, meta) {
+    expect(typeof meta.id).toEqual('string')
+    calls.push([state, prevState, action])
+  })
+
+  store.dispatch({ type: 'ADD', value: 'a' })
+  return store.dispatch.local({ type: 'ADD', value: 'c' }).then(function () {
+    store.dispatch.local({ type: 'ADD', value: 'b' }, { id: '1 10:test1 1' })
+    return delay(10)
+  }).then(function () {
+    expect(calls).toEqual([
+      [
+        { value: '0a' },
+        { value: 0 },
+        { type: 'ADD', value: 'a' }
+      ],
+      [
+        { value: '0ac' },
+        { value: '0a' },
+        { type: 'ADD', value: 'c' }
+      ],
+      [
+        { value: '0abc' },
+        { value: '0ac' },
+        { type: 'ADD', value: 'b' }
+      ]
+    ])
+  })
+})
