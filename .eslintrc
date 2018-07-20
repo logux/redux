@@ -1,6 +1,0 @@
-{
-  "extends": "eslint-config-logux/browser",
-  "rules": {
-    "es5/no-es6-static-methods": "off"
-  }
-}

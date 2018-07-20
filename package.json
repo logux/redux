@@ -21,7 +21,6 @@
   },
   "devDependencies": {
     "create-react-class": "^15.6.3",
-    "docdash": "^0.4.0",
     "eslint": "^5.1.0",
     "eslint-config-logux": "^23.0.4",
     "eslint-config-standard": "^11.0.0",
@@ -49,10 +48,75 @@
     "spellcheck": "yarn docs && yaspeller-ci *.md docs/*.html",
     "clean": "rimraf docs/ coverage/",
     "lint": "eslint *.js test/{**/,}*.js",
-    "docs": "jsdoc --configure .jsdocrc *.js",
+    "docs": "jsdoc -d docs/ *.js",
     "test": "jest --coverage && yarn lint && size-limit && yarn spellcheck"
   },
   "pre-commit": [
     "lint-staged"
-  ]
+  ],
+  "lint-staged": {
+    "*.md": "yaspeller-ci",
+    "*.js": "eslint"
+  },
+  "jest": {
+    "coverageThreshold": {
+      "global": {
+        "statements": 100
+      }
+    }
+  },
+  "eslintConfig": {
+    "extends": "eslint-config-logux/browser",
+    "rules": {
+      "es5/no-es6-static-methods": "off"
+    }
+  },
+  "size-limit": [
+    {
+      "path": "index.js",
+      "limit": "12.7 KB"
+    }
+  ],
+  "yaspeller": {
+    "lang": "en",
+    "ignoreCapitalization": true,
+    "excludeFiles": [
+      "docs/*.js.html"
+    ],
+    "dictionary": [
+      "logux",
+      "createStore",
+      "docdash",
+      "JSDoc",
+      "js",
+      "JS",
+      "Versioning",
+      "Redux",
+      "UX",
+      "preloadedState",
+      "SemVer",
+      "reconnection",
+      "ws",
+      "subprotocol",
+      "getState",
+      "CrossTabClient",
+      "nextReducer",
+      "replaceReducer",
+      "storeCreator",
+      "dispatchLocal",
+      "dispatchCrossTab",
+      "dispatchSync",
+      "unsubscribe",
+      "changeListener",
+      "prevState",
+      "IndexedDB",
+      "IndexedStore",
+      "isSubscribing",
+      "GMT",
+      "Mon",
+      "Tue",
+      "Thu",
+      "Fri"
+    ]
+  }
 }
