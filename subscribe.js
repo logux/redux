@@ -136,7 +136,7 @@ function subscribe (subscriber, options) {
     }
 
     SubscribeComponent.prototype.componentWillUnmount = function () {
-      remove(this.context[storeKey], this.subscriptions)
+      remove(this.context[storeKey], this.subscriptions || [])
       this.last += 1
     }
 
