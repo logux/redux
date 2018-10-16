@@ -306,7 +306,7 @@ function createLoguxCreator (config) {
           }
         }).then(function () {
           if (processing[action.id]) {
-            processing[action.id][1]()
+            processing[action.id][1](action)
             delete processing[action.id]
             log.removeReason('processing', { id: action.id })
           }

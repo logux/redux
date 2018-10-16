@@ -466,13 +466,13 @@ it('cleans sync action after processing', function () {
 
   store.dispatch.sync({ type: 'A' }).then(function () {
     resultA = 'processed'
-  }).catch(function () {
-    resultA = 'error'
+  }).catch(function (undo) {
+    resultA = undo.reason
   })
   store.dispatch.sync({ type: 'B' }, { id: '3 10:test1 0' }).then(function () {
     resultB = 'processed'
-  }).catch(function () {
-    resultB = 'error'
+  }).catch(function (undo) {
+    resultB = undo.reason
   })
   return store.log.add(
     { type: 'logux/processed', id: '0 10:test1 0' }
@@ -485,7 +485,7 @@ it('cleans sync action after processing', function () {
     expect(resultA).toEqual('processed')
     expect(resultB).toBeUndefined()
     expect(store.log.actions()).toEqual([{ type: 'B' }])
-    store.log.add({ type: 'logux/undo', id: '3 10:test1 0' })
+    store.log.add({ type: 'logux/undo', reason: 'error', id: '3 10:test1 0' })
     return delay(1)
   }).then(function () {
     expect(resultB).toEqual('error')
