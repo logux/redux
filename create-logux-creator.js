@@ -306,7 +306,9 @@ function createLoguxCreator (config) {
           }
         }).then(function () {
           if (processing[action.id]) {
-            processing[action.id][1](action)
+            var error = new Error('Server asked to undo Logux action')
+            error.action = action
+            processing[action.id][1](error)
             delete processing[action.id]
             log.removeReason('processing', { id: action.id })
           }
