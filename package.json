@@ -7,6 +7,14 @@
     "client",
     "redux"
   ],
+  "scripts": {
+    "lint-staged": "lint-staged",
+    "spellcheck": "yarn docs && yaspeller-ci *.md docs/*.html",
+    "clean": "rimraf docs/ coverage/",
+    "lint": "eslint *.js test/{**/,}*.js",
+    "docs": "jsdoc -d docs/ *.js",
+    "test": "jest --coverage && yarn lint && size-limit && yarn spellcheck"
+  },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
   "repository": "logux/logux-redux",
@@ -42,14 +50,6 @@
     "rimraf": "^2.6.2",
     "size-limit": "^0.20.1",
     "yaspeller-ci": "^1.0.0"
-  },
-  "scripts": {
-    "lint-staged": "lint-staged",
-    "spellcheck": "yarn docs && yaspeller-ci *.md docs/*.html",
-    "clean": "rimraf docs/ coverage/",
-    "lint": "eslint *.js test/{**/,}*.js",
-    "docs": "jsdoc -d docs/ *.js",
-    "test": "jest --coverage && yarn lint && size-limit && yarn spellcheck"
   },
   "pre-commit": [
     "lint-staged"
