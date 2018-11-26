@@ -1,5 +1,5 @@
 {
-  "name": "logux-redux",
+  "name": "@logux/redux",
   "version": "0.1.7",
   "description": "Redux compatible API for Logux",
   "keywords": [
