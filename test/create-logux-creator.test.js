@@ -1,6 +1,6 @@
 var applyMiddleware = require('redux').applyMiddleware
-var TestPair = require('logux-core').TestPair
-var TestTime = require('logux-core').TestTime
+var TestPair = require('@logux/core').TestPair
+var TestTime = require('@logux/core').TestTime
 var delay = require('nanodelay')
 
 var createLoguxCreator = require('../create-logux-creator')
@@ -142,6 +142,7 @@ it('cleans its history on removing action', function () {
   }, {
     saveStateEvery: 2
   })
+  var nodeId = store.client.nodeId
 
   return Promise.all([
     store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] }),
@@ -151,11 +152,11 @@ it('cleans its history on removing action', function () {
     store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] }),
     store.dispatch.crossTab({ type: 'A' }, { reasons: ['test'] })
   ]).then(function () {
-    return store.log.changeMeta('5 10:test1 0', { reasons: [] })
+    return store.log.changeMeta('5 ' + nodeId + ' 0', { reasons: [] })
   }).then(function () {
     calls = 0
     return store.dispatch.crossTab(
-      { type: 'A' }, { id: '5 10:test1 1', reasons: ['test'] })
+      { type: 'A' }, { id: '5 ' + nodeId + ' 1', reasons: ['test'] })
   }).then(function () {
     expect(calls).toEqual(3)
   })
@@ -180,6 +181,7 @@ it('changes history', function () {
 
 it('undoes actions', function () {
   var store = createStore(historyLine)
+  var nodeId = store.client.nodeId
 
   return Promise.all([
     store.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['test'] }),
@@ -188,14 +190,14 @@ it('undoes actions', function () {
   ]).then(function () {
     expect(store.getState().value).toEqual('0abc')
     return store.dispatch.crossTab(
-      { type: 'logux/undo', id: '2 10:test1 0' }, { reasons: ['test'] })
+      { type: 'logux/undo', id: '2 ' + nodeId + ' 0' }, { reasons: ['test'] })
   }).then(function () {
     expect(store.getState().value).toEqual('0ac')
   })
 })
 
 it('warns about undoes cleaned action', function () {
-  console.warn = jest.fn()
+  jest.spyOn(console, 'warn').mockImplementation(function () { })
   var store = createStore(increment)
 
   return store.dispatch.crossTab(
@@ -396,13 +398,14 @@ it('cleans last 1000 by default', function () {
 
 it('copies reasons to undo action', function () {
   var store = createStore(increment)
+  var nodeId = store.client.nodeId
   return store.dispatch.crossTab(
     { type: 'INC' }, { reasons: ['a', 'b'] }
   ).then(function () {
     return store.dispatch.crossTab(
-      { type: 'logux/undo', id: '1 10:test1 0' }, { reasons: [] })
+      { type: 'logux/undo', id: '1 ' + nodeId + ' 0' }, { reasons: [] })
   }).then(function () {
-    return store.log.byId('2 10:test1 0')
+    return store.log.byId('2 ' + nodeId + ' 0')
   }).then(function (result) {
     expect(result[0].type).toEqual('logux/undo')
     expect(result[1].reasons).toEqual(['a', 'b'])
@@ -411,15 +414,16 @@ it('copies reasons to undo action', function () {
 
 it('does not override undo action reasons', function () {
   var store = createStore(increment)
+  var nodeId = store.client.nodeId
   return store.dispatch.crossTab(
     { type: 'INC' }, { reasons: ['a', 'b'] }
   ).then(function () {
     return store.dispatch.crossTab(
-      { type: 'logux/undo', id: '1 10:test1 0' },
+      { type: 'logux/undo', id: '1 ' + nodeId + ' 0' },
       { reasons: ['c'] }
     )
   }).then(function () {
-    return store.log.byId('2 10:test1 0')
+    return store.log.byId('2 ' + nodeId + ' 0')
   }).then(function (result) {
     expect(result[0].type).toEqual('logux/undo')
     expect(result[1].reasons).toEqual(['c'])
@@ -459,7 +463,7 @@ it('dispatches sync actions', function () {
 })
 
 it('cleans sync action after processing', function () {
-  console.warn = jest.fn()
+  jest.spyOn(console, 'warn').mockImplementation(function () { })
   var pair = new TestPair()
   var store = createStore(increment, { server: pair.left })
   var resultA, resultB
@@ -470,24 +474,24 @@ it('cleans sync action after processing', function () {
     expect(e.message).toContain('undo')
     resultA = e.action.reason
   })
-  store.dispatch.sync({ type: 'B' }, { id: '3 10:test1 0' }).then(function () {
+  store.dispatch.sync({ type: 'B' }, { id: '3 10:1:1 0' }).then(function () {
     resultB = 'processed'
   }).catch(function (e) {
     expect(e.message).toContain('undo')
     resultB = e.action.reason
   })
   return store.log.add(
-    { type: 'logux/processed', id: '0 10:test1 0' }
+    { type: 'logux/processed', id: '0 10:1:1 0' }
   ).then(function () {
     expect(resultA).toBeUndefined()
     expect(resultB).toBeUndefined()
     expect(store.log.actions()).toEqual([{ type: 'A' }, { type: 'B' }])
-    return store.log.add({ type: 'logux/processed', id: '1 10:test1 0' })
+    return store.log.add({ type: 'logux/processed', id: '1 10:1:1 0' })
   }).then(function () {
     expect(resultA).toEqual('processed')
     expect(resultB).toBeUndefined()
     expect(store.log.actions()).toEqual([{ type: 'B' }])
-    store.log.add({ type: 'logux/undo', reason: 'error', id: '3 10:test1 0' })
+    store.log.add({ type: 'logux/undo', reason: 'error', id: '3 10:1:1 0' })
     return delay(1)
   }).then(function () {
     expect(resultB).toEqual('error')

@@ -1,5 +1,5 @@
-var CrossTabClient = require('logux-client/cross-tab-client')
-var isFirstOlder = require('logux-core/is-first-older')
+var CrossTabClient = require('@logux/client/cross-tab-client')
+var isFirstOlder = require('@logux/core/is-first-older')
 var createStore = require('redux').createStore
 var NanoEvents = require('nanoevents')
 
