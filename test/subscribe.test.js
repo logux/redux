@@ -34,31 +34,6 @@ var SubscribeUserPhoto = subscribe(function (props) {
   return { channel: 'users/' + props.id, fields: ['photo'] }
 })(UserPhoto)
 
-it('generates component name', function () {
-  var User5 = createReactClass({
-    displayName: 'User5',
-    render: function () { }
-  })
-  var SubscribeUser5 = subscribe(function () {
-    return 'users/10'
-  })(User5)
-  expect(SubscribeUser5.displayName).toEqual('SubscribeUser5')
-
-  // eslint-disable-next-line es5/no-classes
-  class User6 extends React.Component {
-    render () { }
-  }
-  var SubscribeUser6 = subscribe(function () {
-    return 'users/10'
-  })(User6)
-  expect(SubscribeUser6.displayName).toEqual('SubscribeUser6')
-
-  var SubscribeNameless = subscribe(function () {
-    return 'users/10'
-  })(function () { })
-  expect(SubscribeNameless.displayName).toEqual('SubscribeComponent')
-})
-
 it('passes properties', function () {
   var Post = createReactClass({
     render: function () {
@@ -230,10 +205,12 @@ it('supports multiple channels', function () {
 })
 
 it('supports different store sources', function () {
+  var MyContext = React.createContext()
+
   var LoguxUserPhoto = subscribe(function (props) {
     return 'users/' + props.id
   }, {
-    storeKey: 'logux'
+    context: MyContext
   })(UserPhoto)
 
   var createStore = createLoguxCreator({
@@ -253,8 +230,10 @@ it('supports different store sources', function () {
       return { logux: store }
     },
     render: function () {
-      return h('div', { onClick: this.change },
-        h(LoguxUserPhoto, { id: 1 })
+      return h(Provider, { context: MyContext, store: store },
+        h('div', { onClick: this.change },
+          h(LoguxUserPhoto, { id: 1 })
+        )
       )
     }
   })

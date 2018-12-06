@@ -18,6 +18,7 @@
   "license": "MIT",
   "repository": "logux/redux",
   "peerDependencies": {
+    "react-redux": "^6.0.0",
     "react": "^16.3.0"
   },
   "dependencies": {
@@ -34,7 +35,7 @@
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-es5": "^1.3.1",
     "eslint-plugin-import": "^2.14.0",
-    "eslint-plugin-jest": "^22.0.1",
+    "eslint-plugin-jest": "^22.1.2",
     "eslint-plugin-node": "^8.0.0",
     "eslint-plugin-promise": "^4.0.1",
     "eslint-plugin-security": "^1.4.0",
@@ -45,7 +46,7 @@
     "lint-staged": "^8.1.0",
     "nanodelay": "^0.1.4",
     "react": "^16.6.3",
-    "react-redux": "^5.1.1",
+    "react-redux": "^6.0.0",
     "react-test-renderer": "^16.6.3",
     "rimraf": "^2.6.2",
     "size-limit": "^0.21.0",
