@@ -18,8 +18,8 @@
   "license": "MIT",
   "repository": "logux/redux",
   "peerDependencies": {
-    "react-redux": "^6.0.0",
-    "react": "^16.3.0"
+    "react": "^16.3.0",
+    "react-redux": "^6.0.0"
   },
   "dependencies": {
     "@logux/client": "logux/client",
