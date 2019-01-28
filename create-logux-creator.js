@@ -77,7 +77,7 @@ function createLoguxCreator (config) {
    * @return {object} Redux store with Logux hacks.
    */
   return function createLoguxStore (reducer, preloadedState, enhancer) {
-    var store = createStore(hackReducer(reducer), preloadedState)
+    var store = createStore(hackReducer(reducer), preloadedState, enhancer)
 
     var emitter = new NanoEvents()
 
@@ -144,17 +144,7 @@ function createLoguxCreator (config) {
       saveHistory(meta)
     }
 
-    if (enhancer) {
-      var middlewared = enhancer(function () {
-        return {
-          getState: store.getState,
-          dispatch: dispatch
-        }
-      })(reducer, preloadedState)
-      store.dispatch = middlewared.dispatch
-    } else {
-      store.dispatch = dispatch
-    }
+    store.dispatch = dispatch
 
     store.dispatch.local = function local (action, meta) {
       if (!meta) meta = { }
