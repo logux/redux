@@ -73,10 +73,10 @@ it('subscribes', function () {
     h(SubscribeUser, { id: '2', key: 3 })
   ]))
   return Promise.resolve().then(function () {
-    expect(component.client.subscriptions).toEqual([
-      { type: 'logux/subscribe', channel: 'users/1' },
-      { type: 'logux/subscribe', channel: 'users/2' }
-    ])
+    expect(component.client.subscriptions).toEqual({
+      '{"type":"logux/subscribe","channel":"users/1"}': 1,
+      '{"type":"logux/subscribe","channel":"users/2"}': 1
+    })
   })
 })
 
@@ -102,23 +102,23 @@ it('unsubscribes', function () {
 
   var component = createComponent(h(UserList, { }))
   return Promise.resolve().then(function () {
-    expect(component.client.subscriptions).toEqual([
-      { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
-      { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
-    ])
+    expect(component.client.subscriptions).toEqual({
+      '{"type":"logux/subscribe","channel":"users/1","fields":["photo"]}': 1,
+      '{"type":"logux/subscribe","channel":"users/2","fields":["photo"]}': 1
+    })
     component.toJSON().props.onClick([1, 2])
     return Promise.resolve()
   }).then(function () {
-    expect(component.client.subscriptions).toEqual([
-      { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
-      { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
-    ])
+    expect(component.client.subscriptions).toEqual({
+      '{"type":"logux/subscribe","channel":"users/1","fields":["photo"]}': 1,
+      '{"type":"logux/subscribe","channel":"users/2","fields":["photo"]}': 1
+    })
     component.toJSON().props.onClick({ a: 1 })
     return Promise.resolve()
   }).then(function () {
-    expect(component.client.subscriptions).toEqual([
-      { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
-    ])
+    expect(component.client.subscriptions).toEqual({
+      '{"type":"logux/subscribe","channel":"users/1","fields":["photo"]}': 1
+    })
   })
 })
 
@@ -141,15 +141,15 @@ it('changes subscription', function () {
 
   var component = createComponent(h(Profile, { }))
   return Promise.resolve().then(function () {
-    expect(component.client.subscriptions).toEqual([
-      { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
-    ])
+    expect(component.client.subscriptions).toEqual({
+      '{"type":"logux/subscribe","channel":"users/1","fields":["photo"]}': 1
+    })
     component.toJSON().props.onClick(2)
     return Promise.resolve()
   }).then(function () {
-    expect(component.client.subscriptions).toEqual([
-      { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
-    ])
+    expect(component.client.subscriptions).toEqual({
+      '{"type":"logux/subscribe","channel":"users/2","fields":["photo"]}': 1
+    })
   })
 })
 
@@ -195,12 +195,12 @@ it('supports multiple channels', function () {
     h(SubscribeUser, { id: '2', key: 3 })
   ]))
   return Promise.resolve().then(function () {
-    expect(component.client.subscriptions).toEqual([
-      { type: 'logux/subscribe', channel: 'users/1' },
-      { type: 'logux/subscribe', channel: 'pictures/1' },
-      { type: 'logux/subscribe', channel: 'users/2' },
-      { type: 'logux/subscribe', channel: 'pictures/2' }
-    ])
+    expect(component.client.subscriptions).toEqual({
+      '{"type":"logux/subscribe","channel":"pictures/1"}': 1,
+      '{"type":"logux/subscribe","channel":"pictures/2"}': 1,
+      '{"type":"logux/subscribe","channel":"users/1"}': 1,
+      '{"type":"logux/subscribe","channel":"users/2"}': 1
+    })
   })
 })
 
@@ -240,9 +240,9 @@ it('supports different store sources', function () {
 
   createComponent(h(Profile, { }))
   return Promise.resolve().then(function () {
-    expect(store.client.subscriptions).toEqual([
-      { type: 'logux/subscribe', channel: 'users/1' }
-    ])
+    expect(store.client.subscriptions).toEqual({
+      '{"type":"logux/subscribe","channel":"users/1"}': 1
+    })
   })
 })
 
