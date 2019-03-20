@@ -93,6 +93,7 @@ function subscribe (subscriber, options) {
     }
 
     SubscribeComponent.contextType = Context
+    SubscribeComponent.WrappedComponent = Wrapped
 
     var wrappedName = Wrapped.displayName || Wrapped.name
     SubscribeComponent.displayName = 'Subscribe(' + wrappedName + ')'

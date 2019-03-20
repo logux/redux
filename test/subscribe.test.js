@@ -59,6 +59,10 @@ it('passes properties', function () {
   })
 })
 
+it('returns wrapped component', function () {
+  expect(SubscribeUserPhoto.WrappedComponent).toBe(UserPhoto)
+})
+
 it('subscribes', function () {
   function User () {
     return null
