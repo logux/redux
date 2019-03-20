@@ -92,6 +92,8 @@ function subscribe (subscriber, options) {
       this.state = { process: true }
     }
 
+    SubscribeComponent.contextType = Context
+
     var wrappedName = Wrapped.displayName || Wrapped.name
     SubscribeComponent.displayName = 'Subscribe(' + wrappedName + ')'
 
@@ -101,18 +103,18 @@ function subscribe (subscriber, options) {
     Object.setPrototypeOf(SubscribeComponent, Component)
 
     SubscribeComponent.prototype.componentDidMount = function () {
-      this.subscriptions = getSubscriptions(subscriber, this.props.wrapperProps)
-      add(this.props.store, this.subscriptions)
-      this.wait(this.props.store)
+      this.subscriptions = getSubscriptions(subscriber, this.props)
+      add(this.context.store, this.subscriptions)
+      this.wait(this.context.store)
     }
 
     SubscribeComponent.prototype.componentDidUpdate = function (prevProps) {
       if (prevProps === this.props) return
 
       var prev = this.subscriptions
-      var next = getSubscriptions(subscriber, this.props.wrapperProps)
+      var next = getSubscriptions(subscriber, this.props)
 
-      remove(this.props.store, prev.filter(function (i) {
+      remove(this.context.store, prev.filter(function (i) {
         return !isInclude(next, i)
       }))
 
@@ -123,13 +125,13 @@ function subscribe (subscriber, options) {
       this.subscriptions = next
       if (diff.length > 0) {
         this.setState({ process: true })
-        add(this.props.store, diff)
-        this.wait(this.props.store)
+        add(this.context.store, diff)
+        this.wait(this.context.store)
       }
     }
 
     SubscribeComponent.prototype.componentWillUnmount = function () {
-      remove(this.props.store, this.subscriptions || [])
+      remove(this.context.store, this.subscriptions || [])
       this.last += 1
     }
 
@@ -146,18 +148,12 @@ function subscribe (subscriber, options) {
     }
 
     SubscribeComponent.prototype.render = function () {
-      var props = Object.assign({ }, this.props.wrapperProps)
+      var props = Object.assign({ }, this.props)
       props[subscribingProp] = this.state.process
       return createElement(Wrapped, props)
     }
 
-    return function (props) {
-      return createElement(Context.Consumer, null, function (ctx) {
-        return createElement(SubscribeComponent, {
-          store: ctx.store, wrapperProps: props
-        })
-      })
-    }
+    return SubscribeComponent
   }
 }
 
