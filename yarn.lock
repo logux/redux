@@ -297,18 +297,20 @@
     "@types/istanbul-lib-coverage" "^2.0.0"
     "@types/yargs" "^12.0.9"
 
-"@logux/client@logux/client":
-  version "0.2.10"
-  resolved "https://codeload.github.com/logux/client/tar.gz/20c1c07aed47b8e08bca9cc1b0239ecf7e8014f0"
+"@logux/client@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@logux/client/-/client-0.3.0.tgz#9e7188ac746fc54dd89daa966b3e7a98dfd62721"
+  integrity sha512-Zi3SD7WQLmTegixXszYDVhDMST8hLVKoeZgQLuxgIvckfyr01xy/cjt7Tf8EwnAaS+2/gZcmdaRzTc2Nrfpdnw==
   dependencies:
-    "@logux/core" logux/core
+    "@logux/core" "^0.3.0"
     browser-supports-log-styles "^1.1.7"
     nanoevents "^1.0.8"
     nanoid "^2.0.1"
 
-"@logux/core@logux/core":
-  version "0.2.2"
-  resolved "https://codeload.github.com/logux/core/tar.gz/4ced891e52592da9888c3c98bad83ca4a68393ee"
+"@logux/core@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@logux/core/-/core-0.3.0.tgz#b94a3a5ec9d28a41c0db0f5385357b2ed19a813e"
+  integrity sha512-PturxS6tHjJ2uxc97vMmexZHOFesK1dSv+lrZTD9BfEK3yvEMIb3+kUO+lWgo7QK9f28l25RAKvq3czng3aMJw==
   dependencies:
     nanoevents "^1.0.8"
 
