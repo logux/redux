@@ -67,7 +67,7 @@ function remove (store, subscriptions) {
  *
  * @example
  * const subscribe = require('logux-redux/subscribe')
- * @subscribe(({ id }) => `user/${ id }')
+ * @subscribe(({ id }) => `user/${ id }`)
  * class User extends React.Component { … }
  *
  * @example

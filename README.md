@@ -3,87 +3,74 @@
 <img align="right" width="95" height="95" title="Logux logo"
      src="https://cdn.rawgit.com/logux/logux/master/logo.svg">
 
-Logux is a client-server communication protocol. It synchronizes action
-between clients and server logs.
+Logux is a new way to connect client and server. Instead of sending
+HTTP requests (e.g., AJAX and GraphQL) it synchronizes log of operations
+between client, server, and other clients.
 
-This library provides Redux compatible API.
+**Documentation: [logux/logux]**
 
-## Install
-
-```sh
-npm install --save logux-redux
-```
-
-## Usage
-
-Create Redux store by `createLoguxCreator`. It returns original Redux `createStore` function with Logux inside
-
-```diff
--import { createStore } from 'redux'
-+import createLoguxCreator from 'logux-redux/create-logux-creator'
-
-+const createStore = createLoguxCreator({
-+  subprotocol: '1.0.0',
-+  server: 'wss://localhost:1337',
-+  userId: 10
-+})
-
-function reducer (state, action) {
-  switch (action.type) {
-    case 'INC':
-      return { value: state.value + 1 }
-    default:
-      return state
-  }
-}
-
-const preloadedState = { value: 0 }
-
-const store = createStore( reducer, preloadedState, enhancer )
-
-+store.client.start()
-```
-
-See also [Logux Status] for UX best practices.
-
-[Logux Status]: https://github.com/logux/logux-status
+This repository contains Redux compatible API on top of [Logux Client].
 
 <a href="https://evilmartians.com/?utm_source=logux-redux">
   <img src="https://evilmartians.com/badges/sponsored-by-evil-martians.svg"
        alt="Sponsored by Evil Martians" width="236" height="54">
 </a>
 
-## Dispatch
+[Logux Client]: https://github.com/logux/client
+[logux/logux]: https://github.com/logux/logux
 
-Instead of Redux, in Logux Redux you have 4 ways to dispatch action:
+## Install
 
-* `store.dispatch(action)` is legacy API. Try to avoid it since you can’t
-  specify how clean this actions.
-* `store.dispatch.local(action, meta)` — action will be visible only to current
-  browser tab.
-* `store.dispatch.crossTab(action, meta)` — action will be visible
-  to all browser tab.
-* `store.dispatch.sync(action, meta)` — action will be visible to server
-  and all browser tabs.
+```sh
+npm install @logux/redux
+```
 
-In all 3 new dispatch methods you must to specify `meta.reasons` with array
-of “reasons”. It is code names of reasons, why this action should be still
-in the log.
+## Usage
+
+See [documentation] for Logux API.
 
 ```js
-store.dispatch.crossTab(
-  { type: 'CHANGE_NAME', name }, { reasons: ['lastName'] }
+import createLoguxCreator from 'logux-redux/create-logux-creator'
+
+import log from '@logux/client/log'
+
+let userId = document.querySelector('meta[name=user]').content
+let userToken = document.querySelector('meta[name=token]').content
+
+const createStore = createLoguxCreator({
+  credentials: userToken,
+  subprotocol: '1.0.0',
+  server: 'wss://example.com:1337',
+  userId: userToken
+})
+
+const store = createStore(reducers, preloadedState)
+log(store.client)
+
+export default store
+```
+
+```js
+import { Provider } from 'react-redux'
+import ReactDOM from 'react-dom'
+
+import store from './store'
+import App from './App'
+
+ReactDOM.render(
+  <Provider store={store}><App /></Provider>,
+  document.getElementById('root')
 )
 ```
 
-When you don’t need some actions, you can remove reasons from them:
-
 ```js
-store.dispatch.crossTab(
-  { type: 'CHANGE_NAME', name }, { reasons: ['lastName'] }
-).then(meta => {
-  store.log.removeReason('lastName', { maxAdded: meta.added - 1 })
-})
+import subscribe from 'logux-redux/subscribe'
+
+class User extends React.Component {
+  …
+}
+
+export default subscribe(({ id }) => `user/${ id }`)(User)
 ```
 
-Action with empty reasons will be removed from log.
+[documentation]: https://github.com/logux/logux
