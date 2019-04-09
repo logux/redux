@@ -19,7 +19,7 @@
   "license": "MIT",
   "repository": "logux/redux",
   "peerDependencies": {
-    "react": "^16.0.0",
+    "react": "^16.8.4",
     "react-redux": "^6.0.0"
   },
   "dependencies": {
@@ -48,7 +48,8 @@
     "lint-staged": "^8.1.5",
     "nanodelay": "^0.1.4",
     "react": "^16.8.6",
-    "react-redux": "^6.0.1",
+    "react-dom": "^16.8.6",
+    "react-redux": "^7.0.1",
     "react-test-renderer": "^16.8.6",
     "rimraf": "^2.6.3",
     "size-limit": "^1.0.1",
