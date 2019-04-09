@@ -29,7 +29,7 @@
     "redux": "^4.0.1"
   },
   "devDependencies": {
-    "@logux/eslint-config": "^28.0.0",
+    "@logux/eslint-config": "^28.1.0",
     "clean-publish": "^1.1.2",
     "create-react-class": "^15.6.3",
     "eslint": "^5.16.0",

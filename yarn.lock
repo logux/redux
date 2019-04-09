@@ -314,10 +314,10 @@
   dependencies:
     nanoevents "^1.0.8"
 
-"@logux/eslint-config@^28.0.0":
-  version "28.0.0"
-  resolved "https://registry.yarnpkg.com/@logux/eslint-config/-/eslint-config-28.0.0.tgz#63f1e73a1abcc1e362d2f7d7cd3f0751369d7d6d"
-  integrity sha512-6tEfAImJ+dGhhy99MjewwPKVFAUf0f6XhVQ7D/h3pOvhcF4FoQdzGdw8hpPP0fYLx5q9yif/idRPMgbG43ZbLw==
+"@logux/eslint-config@^28.1.0":
+  version "28.1.0"
+  resolved "https://registry.yarnpkg.com/@logux/eslint-config/-/eslint-config-28.1.0.tgz#11a502ada9c716548f3e0d7a83134df056c78c94"
+  integrity sha512-EnrjA+L6gWsWIfsPQZa4zuUqaxRdXCaNuk2vbREQLrPqq+UqW0WKBCbCDeuEFIlX/b8Khb1I2usOgeXC9ZrEjw==
   dependencies:
     globals "^11.11.0"
 
