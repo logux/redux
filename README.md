@@ -64,13 +64,16 @@ ReactDOM.render(
 ```
 
 ```js
-import subscribe from 'logux-redux/subscribe'
+import useSubscription from 'logux-redux/use-subscription'
 
-class User extends React.Component {
-  …
+export const User = ({ id, name }) => {
+  const isSubscribing = useSubscription([`user/${ id }`])
+  if (isSubscribing) {
+    return <Loader />
+  } else {
+    return <h1>{ name }</h1>
+  }
 }
-
-export default subscribe(({ id }) => `user/${ id }`)(User)
 ```
 
 [documentation]: https://github.com/logux/logux

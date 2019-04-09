@@ -32,9 +32,7 @@ function add (store, subscriptions) {
     store.subscribers[json] += 1
     if (store.subscribers[json] === 1) {
       var action = Object.assign({ type: 'logux/subscribe' }, subscription)
-      store.subscriptions[json] = store.dispatch.sync(action).then(function () {
-        delete store.subscriptions[json]
-      })
+      store.subscriptions[json] = store.dispatch.sync(action)
     }
   })
 }
@@ -47,6 +45,7 @@ function remove (store, subscriptions) {
     if (store.subscribers[json] === 0) {
       var action = Object.assign({ type: 'logux/unsubscribe' }, subscription)
       store.log.add(action, { sync: true })
+      delete store.subscriptions[json]
     }
   })
 }

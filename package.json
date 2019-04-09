@@ -79,7 +79,10 @@
   },
   "size-limit": [
     {
-      "path": "index.js",
+      "path": [
+        "create-logux-creator.js",
+        "use-subscription.js"
+      ],
       "limit": "12 KB"
     }
   ],
