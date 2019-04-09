@@ -5,14 +5,15 @@
   "keywords": [
     "logux",
     "client",
-    "redux"
+    "redux",
+    "websocket"
   ],
   "scripts": {
-    "spellcheck": "yarn docs && yaspeller-ci *.md docs/*.html",
+    "spell": "yarn docs && yaspeller-ci *.md docs/*.html",
     "clean": "rimraf docs/ coverage/",
     "lint": "eslint *.js test/{**/,}*.js",
     "docs": "jsdoc -d docs/ *.js",
-    "test": "jest --coverage && yarn lint && size-limit && yarn spellcheck"
+    "test": "jest --coverage && yarn lint && size-limit && yarn spell"
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
@@ -90,7 +91,6 @@
     "dictionary": [
       "logux",
       "createStore",
-      "docdash",
       "JSDoc",
       "js",
       "JS",
