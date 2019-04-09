@@ -19,7 +19,7 @@
   "license": "MIT",
   "repository": "logux/redux",
   "peerDependencies": {
-    "react": "^16.3.0",
+    "react": "^16.0.0",
     "react-redux": "^6.0.0"
   },
   "dependencies": {
@@ -51,7 +51,7 @@
     "react-redux": "^6.0.1",
     "react-test-renderer": "^16.8.6",
     "rimraf": "^2.6.3",
-    "size-limit": "^1.0.0",
+    "size-limit": "^1.0.1",
     "yaspeller-ci": "^1.0.0"
   },
   "husky": {
