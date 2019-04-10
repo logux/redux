@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.2.1
+* Reduce size.
+
 ## 0.2
 * Rename project from `logux-redux` to `@logux/redux`.
 * Merge with `react-logux`.
