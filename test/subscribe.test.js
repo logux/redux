@@ -1,13 +1,18 @@
 var createReactClass = require('create-react-class')
+var createContext = require('react').createContext
 var Provider = require('react-redux').Provider
 var TestTime = require('@logux/core').TestTime
 var renderer = require('react-test-renderer')
-var React = require('react')
+var h = require('react').createElement
 
 var createLoguxCreator = require('../create-logux-creator')
 var subscribe = require('../subscribe')
 
-var h = React.createElement
+jest.mock('react', function () {
+  var React = require('react/cjs/react.development.js')
+  React.useEffect = React.useLayoutEffect
+  return React
+})
 
 function createComponent (content) {
   var createStore = createLoguxCreator({
@@ -209,7 +214,7 @@ it('supports multiple channels', function () {
 })
 
 it('supports different store sources', function () {
-  var MyContext = React.createContext()
+  var MyContext = createContext()
 
   var LoguxUserPhoto = subscribe(function (props) {
     return 'users/' + props.id
