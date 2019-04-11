@@ -44,6 +44,10 @@ function useSubscription (channels, opts) {
     return [subscription, JSON.stringify(subscription)]
   })
 
+  var id = subscriptions.map(function (i) {
+    return i[1]
+  }).sort().join(' ')
+
   useEffect(function () {
     var updated = false
     add(store, subscriptions).then(function () {
@@ -53,9 +57,7 @@ function useSubscription (channels, opts) {
       updated = true
       remove(store, subscriptions)
     }
-  }, subscriptions.map(function (i) {
-    return i[1]
-  }))
+  }, [id])
 
   return isSubscribing[0]
 }

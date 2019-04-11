@@ -255,3 +255,34 @@ it('reports about subscription end', function () {
     expect(component.toJSON().children[0].props.isSubscribing).toBeFalsy()
   })
 })
+
+it('works on channels size changes', function () {
+  jest.spyOn(console, 'error')
+  function UserList (props) {
+    useSubscription(props.ids.map(function (id) {
+      return 'users/' + id
+    }))
+    return h('div')
+  }
+  var UsersPage = createReactClass({
+    getInitialState: function () {
+      return {
+        ids: [1]
+      }
+    },
+    change: function (ids) {
+      this.setState({ ids: ids })
+    },
+    render: function () {
+      return h('div', { onClick: this.change },
+        h(UserList, { ids: this.state.ids })
+      )
+    }
+  })
+
+  var component = createComponent(h(UsersPage, { }))
+  renderer.act(function () {
+    component.toJSON().props.onClick([1, 2])
+  })
+  expect(console.error).not.toHaveBeenCalled()
+})
