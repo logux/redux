@@ -70,9 +70,8 @@ export const User = ({ id, name }) => {
   const isSubscribing = useSubscription([`user/${ id }`])
   if (isSubscribing) {
     return <Loader />
-  } else {
-    return <h1>{ name }</h1>
   }
+  return <h1>{ name }</h1>
 }
 ```
 
