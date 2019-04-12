@@ -7,9 +7,8 @@ function hackReducer (reducer) {
   return function (state, action) {
     if (action.type === 'logux/state') {
       return action.state
-    } else {
-      return reducer(state, action)
     }
+    return reducer(state, action)
   }
 }
 
@@ -213,11 +212,10 @@ function createLoguxCreator (config) {
             }
 
             return true
-          } else {
-            replayed = true
-            replaceState(history[meta.id], actions)
-            return false
           }
+          replayed = true
+          replaceState(history[meta.id], actions)
+          return false
         }).then(function () {
           if (!replayed) {
             if (historyCleaned) {
@@ -271,9 +269,8 @@ function createLoguxCreator (config) {
           if (wait[meta.id]) {
             delete wait[meta.id]
             return process(action, meta)
-          } else {
-            return false
           }
+          return false
         })
       }
 
@@ -290,10 +287,9 @@ function createLoguxCreator (config) {
             }
             delete history[action.id]
             return replay(action.id)
-          } else {
-            log.changeMeta(meta.id, { reasons: [] })
-            return warnBadUndo(action.id)
           }
+          log.changeMeta(meta.id, { reasons: [] })
+          return warnBadUndo(action.id)
         }).then(function () {
           if (processing[action.id]) {
             var error = new Error('Server asked to undo Logux action')
@@ -303,22 +299,23 @@ function createLoguxCreator (config) {
             log.removeReason('processing', { id: action.id })
           }
         })
-      } else if (isFirstOlder(prevMeta, meta)) {
+      }
+
+      if (isFirstOlder(prevMeta, meta)) {
         prevMeta = meta
         originDispatch(action)
         if (meta.added) saveHistory(meta)
         return Promise.resolve()
-      } else {
-        return replay(meta.id).then(function () {
-          if (meta.reasons.indexOf('replay') !== -1) {
-            log.changeMeta(meta.id, {
-              reasons: meta.reasons.filter(function (i) {
-                return i !== 'replay'
-              })
-            })
-          }
-        })
       }
+      return replay(meta.id).then(function () {
+        if (meta.reasons.indexOf('replay') !== -1) {
+          log.changeMeta(meta.id, {
+            reasons: meta.reasons.filter(function (i) {
+              return i !== 'replay'
+            })
+          })
+        }
+      })
     }
 
     var lastAdded = 0
