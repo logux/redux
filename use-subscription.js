@@ -27,7 +27,7 @@ function remove (store, subscriptions) {
     store.subscribers[json] -= 1
     if (store.subscribers[json] === 0) {
       var action = Object.assign({ type: 'logux/unsubscribe' }, subscription)
-      store.log.add(action, { sync: true })
+      store.dispatch.sync(action, { sync: true })
       delete store.subscriptions[json]
     }
   })
