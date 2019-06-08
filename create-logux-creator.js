@@ -13,12 +13,6 @@ function hackReducer (reducer) {
   }
 }
 
-function warnBadUndo (id) {
-  console.warn(
-    'Logux can not find "' + id + '" to undo it. Maybe action was cleaned.'
-  )
-}
-
 /**
  * Creates Logux client and connect it to Redux createStore function.
  *
@@ -161,7 +155,6 @@ function createLoguxCreator (config) {
       if (!meta.reasons) meta.reasons = []
 
       meta.sync = true
-      meta.reasons.push('processing')
 
       if (typeof meta.id === 'undefined') {
         meta.id = log.generateId()
@@ -282,25 +275,19 @@ function createLoguxCreator (config) {
         return log.byId(action.id).then(function (result) {
           if (result[0]) {
             if (reasons.length === 1 && reasons[0] === 'reasonsLoading') {
-              log.changeMeta(meta.id, {
-                reasons: result[1].reasons.filter(function (reason) {
-                  return reason !== 'processing'
-                })
-              })
+              log.changeMeta(meta.id, { reasons: result[1].reasons })
             }
             delete history[action.id]
             return replay(action.id)
           } else {
-            log.changeMeta(meta.id, { reasons: [] })
-            return warnBadUndo(action.id)
+            return log.changeMeta(meta.id, { reasons: [] })
           }
         }).then(function () {
           if (processing[action.id]) {
-            var error = new Error('Server asked to undo Logux action')
+            var error = new Error('Server undid Logux action')
             error.action = action
             processing[action.id][1](error)
             delete processing[action.id]
-            log.removeReason('processing', { id: action.id })
           }
         })
       } else if (isFirstOlder(prevMeta, meta)) {
@@ -330,7 +317,6 @@ function createLoguxCreator (config) {
         if (processing[action.id]) {
           processing[action.id][0]()
           delete processing[action.id]
-          log.removeReason('processing', { id: action.id })
         }
       }
 
