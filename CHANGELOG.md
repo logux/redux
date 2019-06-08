@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.2.4
+* Fix double subscription.
+
 ## 0.2.3
 * Fix React Redux warning.
 
