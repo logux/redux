@@ -625,3 +625,13 @@ it('emits change event', function () {
     ])
   })
 })
+
+it('warns about undoes cleaned action', function () {
+  var store = createStore(increment)
+
+  return store.dispatch.crossTab(
+    { type: 'logux/undo', id: '1 t 0' }
+  ).then(function () {
+    expect(store.log.actions()).toHaveLength(0)
+  })
+})
