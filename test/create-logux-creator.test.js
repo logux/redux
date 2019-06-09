@@ -34,6 +34,11 @@ function historyLine (state, action) {
   }
 }
 
+var originWarn = console.warn
+afterEach(function () {
+  console.warn = originWarn
+})
+
 it('throws error on missed config', function () {
   expect(function () {
     createLoguxCreator()
@@ -188,6 +193,19 @@ it('undoes actions', function () {
       { type: 'logux/undo', id: '2 ' + nodeId + ' 0' }, { reasons: ['test'] })
   }).then(function () {
     expect(store.getState().value).toEqual('0ac')
+  })
+})
+
+it('warns about undoes cleaned action', function () {
+  jest.spyOn(console, 'warn').mockImplementation(function () { })
+  var store = createStore(increment)
+
+  return store.dispatch.crossTab(
+    { type: 'logux/undo', id: '1 t 0' }, { reasons: [] }
+  ).then(function () {
+    expect(console.warn).toHaveBeenCalledWith(
+      'Logux can not find "1 t 0" to undo it. Maybe action was cleaned.'
+    )
   })
 })
 
@@ -440,10 +458,11 @@ it('dispatches sync actions', function () {
     var log = store.log.store.created
     expect(log[0][0]).toEqual({ type: 'INC' })
     expect(log[0][1].sync).toBeTruthy()
+    expect(log[0][1].reasons).toEqual(['test', 'processing'])
   })
 })
 
-it('has Promise for sync actions', function () {
+it('cleans sync action after processing', function () {
   jest.spyOn(console, 'warn').mockImplementation(function () { })
   var pair = new TestPair()
   var store = createStore(increment, { server: pair.left })
@@ -458,7 +477,7 @@ it('has Promise for sync actions', function () {
   store.dispatch.sync({ type: 'B' }, { id: '3 10:1:1 0' }).then(function () {
     resultB = 'processed'
   }).catch(function (e) {
-    expect(e.message).toContain('undid')
+    expect(e.message).toContain('undo')
     resultB = e.action.reason
   })
   return store.log.add(
@@ -466,14 +485,17 @@ it('has Promise for sync actions', function () {
   ).then(function () {
     expect(resultA).toBeUndefined()
     expect(resultB).toBeUndefined()
+    expect(store.log.actions()).toEqual([{ type: 'A' }, { type: 'B' }])
     return store.log.add({ type: 'logux/processed', id: '1 10:1:1 0' })
   }).then(function () {
     expect(resultA).toEqual('processed')
     expect(resultB).toBeUndefined()
+    expect(store.log.actions()).toEqual([{ type: 'B' }])
     store.log.add({ type: 'logux/undo', reason: 'error', id: '3 10:1:1 0' })
     return delay(1)
   }).then(function () {
     expect(resultB).toEqual('error')
+    expect(store.log.actions()).toEqual([])
     expect(console.warn).not.toHaveBeenCalled()
   })
 })
