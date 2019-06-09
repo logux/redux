@@ -13,12 +13,6 @@ function hackReducer (reducer) {
   }
 }
 
-function warnBadUndo (id) {
-  console.warn(
-    'Logux can not find "' + id + '" to undo it. Maybe action was cleaned.'
-  )
-}
-
 /**
  * Creates Logux client and connect it to Redux createStore function.
  *
@@ -291,8 +285,7 @@ function createLoguxCreator (config) {
             delete history[action.id]
             return replay(action.id)
           } else {
-            log.changeMeta(meta.id, { reasons: [] })
-            return warnBadUndo(action.id)
+            return log.changeMeta(meta.id, { reasons: [] })
           }
         }).then(function () {
           if (processing[action.id]) {

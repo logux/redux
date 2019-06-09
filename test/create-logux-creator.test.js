@@ -34,11 +34,6 @@ function historyLine (state, action) {
   }
 }
 
-var originWarn = console.warn
-afterEach(function () {
-  console.warn = originWarn
-})
-
 it('throws error on missed config', function () {
   expect(function () {
     createLoguxCreator()
@@ -193,19 +188,6 @@ it('undoes actions', function () {
       { type: 'logux/undo', id: '2 ' + nodeId + ' 0' }, { reasons: ['test'] })
   }).then(function () {
     expect(store.getState().value).toEqual('0ac')
-  })
-})
-
-it('warns about undoes cleaned action', function () {
-  jest.spyOn(console, 'warn').mockImplementation(function () { })
-  var store = createStore(increment)
-
-  return store.dispatch.crossTab(
-    { type: 'logux/undo', id: '1 t 0' }, { reasons: [] }
-  ).then(function () {
-    expect(console.warn).toHaveBeenCalledWith(
-      'Logux can not find "1 t 0" to undo it. Maybe action was cleaned.'
-    )
   })
 })
 
