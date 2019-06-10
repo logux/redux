@@ -155,7 +155,6 @@ function createLoguxCreator (config) {
       if (!meta.reasons) meta.reasons = []
 
       meta.sync = true
-      meta.reasons.push('processing')
 
       if (typeof meta.id === 'undefined') {
         meta.id = log.generateId()
@@ -278,7 +277,7 @@ function createLoguxCreator (config) {
             if (reasons.length === 1 && reasons[0] === 'reasonsLoading') {
               log.changeMeta(meta.id, {
                 reasons: result[1].reasons.filter(function (reason) {
-                  return reason !== 'processing'
+                  return reason !== 'syncing'
                 })
               })
             }
@@ -293,7 +292,6 @@ function createLoguxCreator (config) {
             error.action = action
             processing[action.id][1](error)
             delete processing[action.id]
-            log.removeReason('processing', { id: action.id })
           }
         })
       } else if (isFirstOlder(prevMeta, meta)) {
@@ -323,7 +321,6 @@ function createLoguxCreator (config) {
         if (processing[action.id]) {
           processing[action.id][0]()
           delete processing[action.id]
-          log.removeReason('processing', { id: action.id })
         }
       }
 

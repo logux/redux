@@ -440,7 +440,7 @@ it('dispatches sync actions', function () {
     var log = store.log.store.created
     expect(log[0][0]).toEqual({ type: 'INC' })
     expect(log[0][1].sync).toBeTruthy()
-    expect(log[0][1].reasons).toEqual(['test', 'processing'])
+    expect(log[0][1].reasons).toEqual(['test', 'syncing'])
   })
 })
 
