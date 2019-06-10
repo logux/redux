@@ -95,14 +95,10 @@ it('unsubscribes', function () {
       { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
       { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
     ])
-    component.toJSON().props.onClick([1, 2])
+    component.toJSON().props.onClick({ a: 1, c: 2 })
     return Promise.resolve()
   }).then(function () {
     expect(component.client.log.actions()).toEqual([
-      { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
-      { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] },
-      { type: 'logux/unsubscribe', channel: 'users/1', fields: ['photo'] },
-      { type: 'logux/unsubscribe', channel: 'users/2', fields: ['photo'] },
       { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
       { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
     ])
@@ -112,13 +108,7 @@ it('unsubscribes', function () {
     expect(component.client.log.actions()).toEqual([
       { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
       { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] },
-      { type: 'logux/unsubscribe', channel: 'users/1', fields: ['photo'] },
-      { type: 'logux/unsubscribe', channel: 'users/2', fields: ['photo'] },
-      { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
-      { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] },
-      { type: 'logux/unsubscribe', channel: 'users/1', fields: ['photo'] },
-      { type: 'logux/unsubscribe', channel: 'users/2', fields: ['photo'] },
-      { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
+      { type: 'logux/unsubscribe', channel: 'users/2', fields: ['photo'] }
     ])
   })
 })
