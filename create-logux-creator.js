@@ -197,6 +197,8 @@ function createLoguxCreator (config) {
             if (action.type === 'logux/undo') {
               ignore[action.id] = true
               return true
+            } else if (action.type.slice(0, 6) === 'logux/') {
+              return true
             }
 
             if (!ignore[meta.id]) actions.push([action, meta.id])
