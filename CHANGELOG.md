@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.2.7
+* Do not call reducers on `logux/subscribe` and `logux/unsubscribe`.
+
 ## 0.2.6
 * Fix history replays on `logux/processed`.
 
