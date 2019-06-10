@@ -247,10 +247,10 @@ function createLoguxCreator (config) {
     }
 
     log.on('preadd', function (action, meta) {
-      if (action.type === 'logux/undo' && meta.reasons.length === 0) {
+      if (action.type === 'logux/undo') {
         meta.reasons.push('reasonsLoading')
       }
-      if (!isFirstOlder(prevMeta, meta) && meta.reasons.length === 0) {
+      if (action.type !== 'logux/processed' && !isFirstOlder(prevMeta, meta)) {
         meta.reasons.push('replay')
       }
     })
@@ -271,16 +271,13 @@ function createLoguxCreator (config) {
       }
 
       if (action.type === 'logux/undo') {
-        var reasons = meta.reasons
         return log.byId(action.id).then(function (result) {
           if (result[0]) {
-            if (reasons.length === 1 && reasons[0] === 'reasonsLoading') {
-              log.changeMeta(meta.id, {
-                reasons: result[1].reasons.filter(function (reason) {
-                  return reason !== 'syncing'
-                })
+            log.changeMeta(meta.id, {
+              reasons: result[1].reasons.filter(function (reason) {
+                return reason !== 'syncing'
               })
-            }
+            })
             delete history[action.id]
             return replay(action.id)
           } else {
@@ -294,6 +291,8 @@ function createLoguxCreator (config) {
             delete processing[action.id]
           }
         })
+      } else if (action.type === 'logux/processed') {
+        return Promise.resolve()
       } else if (isFirstOlder(prevMeta, meta)) {
         prevMeta = meta
         originDispatch(action)

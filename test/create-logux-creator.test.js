@@ -236,6 +236,22 @@ it('ignores cleaned history from non-legacy actions', function () {
   })
 })
 
+it('does not replays actions on logux/processed', function () {
+  var reduced = []
+  var store = createStore(function (state, action) {
+    if (action.type.slice(0, 2) !== '@@') reduced.push(action.type)
+    return state
+  })
+  return store.log.add({ type: 'A' }, { reasons: ['t'] }).then(function () {
+    return store.log.add({ type: 'logux/processed' }, { time: 0 })
+  }).then(function () {
+    return Promise.resolve()
+  }).then(function () {
+    expect(reduced).toEqual(['A'])
+    expect(store.log.actions()).toEqual([{ type: 'A' }])
+  })
+})
+
 it('replays history for reason-less action', function () {
   var store = createStore(historyLine)
   return Promise.all([
@@ -391,24 +407,6 @@ it('copies reasons to undo action', function () {
   }).then(function (result) {
     expect(result[0].type).toEqual('logux/undo')
     expect(result[1].reasons).toEqual(['a', 'b'])
-  })
-})
-
-it('does not override undo action reasons', function () {
-  var store = createStore(increment)
-  var nodeId = store.client.nodeId
-  return store.dispatch.crossTab(
-    { type: 'INC' }, { reasons: ['a', 'b'] }
-  ).then(function () {
-    return store.dispatch.crossTab(
-      { type: 'logux/undo', id: '1 ' + nodeId + ' 0' },
-      { reasons: ['c'] }
-    )
-  }).then(function () {
-    return store.log.byId('2 ' + nodeId + ' 0')
-  }).then(function (result) {
-    expect(result[0].type).toEqual('logux/undo')
-    expect(result[1].reasons).toEqual(['c'])
   })
 })
 
