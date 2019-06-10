@@ -247,10 +247,11 @@ function createLoguxCreator (config) {
     }
 
     log.on('preadd', function (action, meta) {
-      if (action.type === 'logux/undo') {
+      var type = action.type
+      if (type === 'logux/undo') {
         meta.reasons.push('reasonsLoading')
       }
-      if (action.type !== 'logux/processed' && !isFirstOlder(prevMeta, meta)) {
+      if (type.slice(0, 6) !== 'logux/' && !isFirstOlder(prevMeta, meta)) {
         meta.reasons.push('replay')
       }
     })
