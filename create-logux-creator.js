@@ -291,7 +291,7 @@ function createLoguxCreator (config) {
             delete processing[action.id]
           }
         })
-      } else if (action.type === 'logux/processed') {
+      } else if (action.type.slice(0, 6) === 'logux/') {
         return Promise.resolve()
       } else if (isFirstOlder(prevMeta, meta)) {
         prevMeta = meta

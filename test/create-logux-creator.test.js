@@ -245,8 +245,6 @@ it('does not replays actions on logux/processed', function () {
   return store.log.add({ type: 'A' }, { reasons: ['t'] }).then(function () {
     return store.log.add({ type: 'logux/processed' }, { time: 0 })
   }).then(function () {
-    return Promise.resolve()
-  }).then(function () {
     expect(reduced).toEqual(['A'])
     expect(store.log.actions()).toEqual([{ type: 'A' }])
   })
@@ -631,5 +629,19 @@ it('warns about undoes cleaned action', function () {
     { type: 'logux/undo', id: '1 t 0' }
   ).then(function () {
     expect(store.log.actions()).toHaveLength(0)
+  })
+})
+
+it('does not call reducers on subscriptions', function () {
+  var reduced = []
+  var store = createStore(function (state, action) {
+    if (action.type.slice(0, 2) !== '@@') reduced.push(action.type)
+    return state
+  })
+  store.dispatch.sync({ type: 'logux/subscribe' })
+  store.dispatch.sync({ type: 'A' })
+  store.dispatch.sync({ type: 'logux/unsubscribe' })
+  return delay(1).then(function () {
+    expect(reduced).toEqual(['A'])
   })
 })
