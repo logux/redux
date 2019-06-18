@@ -460,13 +460,15 @@ it('cleans sync action after processing', function () {
   store.dispatch.sync({ type: 'A' }).then(function () {
     resultA = 'processed'
   }).catch(function (e) {
-    expect(e.message).toContain('undo')
+    expect(e.message).toContain('undid')
+    expect(e.message).toContain('because of error')
     resultA = e.action.reason
   })
   store.dispatch.sync({ type: 'B' }, { id: '3 10:1:1 0' }).then(function () {
     resultB = 'processed'
   }).catch(function (e) {
-    expect(e.message).toContain('undo')
+    expect(e.message).toContain('undid')
+    expect(e.message).toContain('because of error')
     resultB = e.action.reason
   })
   return store.log.add(
