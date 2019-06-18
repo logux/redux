@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.2.9
+* Improve error message on `logux/undo`.
+
 ## 0.2.8
 * Do not call reducers on `logux/*` actions during history replay.
 
