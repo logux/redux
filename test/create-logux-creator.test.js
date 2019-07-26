@@ -303,7 +303,7 @@ it('replays actions before staring since initial state', function () {
 it('replays actions on missed history', function () {
   var onMissedHistory = jest.fn()
   var store = createStore(historyLine, {
-    dispatchHistory: 2,
+    reasonlessHistory: 2,
     onMissedHistory: onMissedHistory,
     saveStateEvery: 2,
     checkEvery: 1
@@ -331,7 +331,7 @@ it('replays actions on missed history', function () {
 
 it('works without onMissedHistory', function () {
   var store = createStore(historyLine, {
-    dispatchHistory: 2,
+    reasonlessHistory: 2,
     saveStateEvery: 2,
     checkEvery: 1
   })
@@ -363,24 +363,36 @@ it('does not fall on missed onMissedHistory', function () {
   })
 })
 
-it('cleans action added by dispatch', function () {
-  var store = createStore(historyLine, {
-    dispatchHistory: 3
-  })
+it('cleans action added without reason', function () {
+  var store = createStore(historyLine, { reasonlessHistory: 3 })
+
+  store.dispatch.local({ type: 'ADD', value: 0 }, { reasons: ['test'] })
+  expect(store.log.entries()[0][1].reasons).toEqual(['test'])
 
   function add (index) {
     return function () {
-      store.dispatch({ type: 'ADD', value: index })
+      store.dispatch({ type: 'ADD', value: 4 * index - 3 })
+      store.dispatch.local({ type: 'ADD', value: 4 * index - 2 })
+      store.dispatch.crossTab({ type: 'ADD', value: 4 * index - 1 })
+      store.dispatch.sync({ type: 'ADD', value: 4 * index })
     }
   }
 
   var promise = Promise.resolve()
-  for (var i = 1; i <= 25; i++) {
+  for (var i = 1; i <= 6; i++) {
     promise = promise.then(add(i))
   }
 
   return promise.then(function () {
+    var entries = store.log.entries()
+    var last = entries[entries.length - 1]
+    expect(last[1].reasons).toEqual(['syncing', 'tab1'])
+    expect(last[1].autoreason).toBeTruthy()
+    store.dispatch({ type: 'ADD', value: 25 })
+    return store.log.removeReason('syncing')
+  }).then(function () {
     expect(store.log.actions()).toEqual([
+      { type: 'ADD', value: 0 },
       { type: 'ADD', value: 23 },
       { type: 'ADD', value: 24 },
       { type: 'ADD', value: 25 }
@@ -471,6 +483,7 @@ it('cleans sync action after processing', function () {
     expect(e.message).toContain('because of error')
     resultB = e.action.reason
   })
+  store.log.removeReason('tab1')
   return store.log.add(
     { type: 'logux/processed', id: '0 10:1:1 0' }
   ).then(function () {
@@ -492,7 +505,7 @@ it('cleans sync action after processing', function () {
 })
 
 it('applies old actions from store', function () {
-  var store1 = createStore(historyLine, { dispatchHistory: 2 })
+  var store1 = createStore(historyLine, { reasonlessHistory: 2 })
   var store2
   return Promise.all([
     store1.dispatch.crossTab(

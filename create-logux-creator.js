@@ -37,9 +37,9 @@ function hackReducer (reducer) {
  * @param {bool} [config.allowDangerousProtocol=false] Do not show warning
  *                                                     when using 'ws://'
  *                                                     in production.
- * @param {number} [config.dispatchHistory=1000] How many actions, added by
- *                                              {@link LoguxStore#dispatch}
- *                                              will be kept.
+ * @param {number} [config.reasonlessHistory=1000] How many actions without
+ *                                                 `meta.reasons` will be kept
+ *                                                 for time travel.
  * @param {number} [config.saveStateEvery=50] How often save state to history.
  * @param {checker} [config.onMissedHistory] Callback when there is no history
  *                                           to replay actions accurate.
@@ -51,8 +51,8 @@ function createLoguxCreator (config) {
 
   var checkEvery = config.checkEvery || 25
   delete config.checkEvery
-  var dispatchHistory = config.dispatchHistory || 1000
-  delete config.dispatchHistory
+  var reasonlessHistory = config.reasonlessHistory || 1000
+  delete config.reasonlessHistory
   var saveStateEvery = config.saveStateEvery || 50
   delete config.saveStateEvery
   var onMissedHistory = config.onMissedHistory
@@ -78,7 +78,7 @@ function createLoguxCreator (config) {
     store.client = client
     store.log = log
     var historyCleaned = false
-    var history = { }
+    var stateHistory = { }
 
     var processing = { }
 
@@ -86,7 +86,7 @@ function createLoguxCreator (config) {
     function saveHistory (meta) {
       actionCount += 1
       if (saveStateEvery === 1 || actionCount % saveStateEvery === 1) {
-        history[meta.id] = store.getState()
+        stateHistory[meta.id] = store.getState()
       }
     }
 
@@ -127,7 +127,8 @@ function createLoguxCreator (config) {
         id: log.generateId(),
         tab: store.client.id,
         reasons: ['tab' + store.client.id],
-        dispatch: true
+        dispatch: true,
+        autoreason: true
       }
       log.add(action, meta)
 
@@ -143,16 +144,19 @@ function createLoguxCreator (config) {
     store.dispatch.local = function local (action, meta) {
       if (!meta) meta = { }
       meta.tab = client.id
+      if (!meta.reasons) meta.autoreason = true
       return log.add(action, meta)
     }
 
     store.dispatch.crossTab = function crossTab (action, meta) {
+      if (!meta) meta = { }
+      if (!meta.reasons) meta.autoreason = true
       return log.add(action, meta)
     }
 
     store.dispatch.sync = function sync (action, meta) {
       if (!meta) meta = { }
-      if (!meta.reasons) meta.reasons = []
+      if (!meta.reasons) meta.autoreason = true
 
       meta.sync = true
 
@@ -171,9 +175,9 @@ function createLoguxCreator (config) {
       var newState = actions.reduceRight(function (prev, i) {
         var changed = reducer(prev, i[0])
         if (pushHistory && i === last) {
-          history[pushHistory] = changed
-        } else if (history[i[1]]) {
-          history[i[1]] = changed
+          stateHistory[pushHistory] = changed
+        } else if (stateHistory[i[1]]) {
+          stateHistory[i[1]] = changed
         }
         return changed
       }, state)
@@ -193,7 +197,7 @@ function createLoguxCreator (config) {
         log.each(function (action, meta) {
           if (meta.tab && meta.tab !== client.id) return true
 
-          if (collecting || !history[meta.id]) {
+          if (collecting || !stateHistory[meta.id]) {
             if (action.type === 'logux/undo') {
               ignore[action.id] = true
               return true
@@ -210,7 +214,7 @@ function createLoguxCreator (config) {
             return true
           } else {
             replayed = true
-            replaceState(history[meta.id], actions)
+            replaceState(stateHistory[meta.id], actions)
             return false
           }
         }).then(function () {
@@ -221,10 +225,10 @@ function createLoguxCreator (config) {
               }
               for (var i = actions.length - 1; i >= 0; i--) {
                 var id = actions[i][1]
-                if (history[id]) {
+                if (stateHistory[id]) {
                   replayed = true
                   replaceState(
-                    history[id],
+                    stateHistory[id],
                     actions.slice(0, i).concat([[newAction, actionId]]),
                     id
                   )
@@ -256,6 +260,12 @@ function createLoguxCreator (config) {
       if (type.slice(0, 6) !== 'logux/' && !isFirstOlder(prevMeta, meta)) {
         meta.reasons.push('replay')
       }
+      if (meta.autoreason) {
+        var reasons = meta.reasons.length
+        if (reasons === 0 || (reasons === 1 && meta.reasons[0] === 'syncing')) {
+          meta.reasons.push('tab' + store.client.id)
+        }
+      }
     })
 
     var wait = { }
@@ -281,7 +291,7 @@ function createLoguxCreator (config) {
                 return reason !== 'syncing'
               })
             })
-            delete history[action.id]
+            delete stateHistory[action.id]
             return replay(action.id)
           } else {
             return log.changeMeta(meta.id, { reasons: [] })
@@ -317,7 +327,7 @@ function createLoguxCreator (config) {
     }
 
     var lastAdded = 0
-    var dispatchCalls = 0
+    var addCalls = 0
     client.on('add', function (action, meta) {
       if (meta.added > lastAdded) lastAdded = meta.added
 
@@ -326,28 +336,27 @@ function createLoguxCreator (config) {
           processing[action.id][0]()
           delete processing[action.id]
         }
-      }
-
-      if (meta.dispatch) {
-        dispatchCalls += 1
-        if (dispatchCalls % checkEvery === 0 && lastAdded > dispatchHistory) {
+      } else if (meta.autoreason) {
+        addCalls += 1
+        if (addCalls % checkEvery === 0 && lastAdded > reasonlessHistory) {
           historyCleaned = true
           log.removeReason('tab' + store.client.id, {
-            maxAdded: lastAdded - dispatchHistory
+            maxAdded: lastAdded - reasonlessHistory
           })
         }
-        return
       }
 
-      var prevState = store.getState()
-      process(action, meta).then(function () {
-        emitter.emit('change', store.getState(), prevState, action, meta)
-      })
+      if (!meta.dispatch) {
+        var prevState = store.getState()
+        process(action, meta).then(function () {
+          emitter.emit('change', store.getState(), prevState, action, meta)
+        })
+      }
     })
 
     client.on('clean', function (action, meta) {
       delete wait[meta.id]
-      delete history[meta.id]
+      delete stateHistory[meta.id]
     })
 
     var previous = []
