@@ -89,6 +89,23 @@ it('subscribes', function () {
   })
 })
 
+it('subscribes by channel name', function () {
+  function Users () {
+    return null
+  }
+  var SubscribeUsers = subscribe(['users'])(Users)
+
+  var component = createComponent(h('div', { }, [
+    h(SubscribeUsers, { key: 1 }),
+    h(SubscribeUsers, { key: 2 })
+  ]))
+  return Promise.resolve().then(function () {
+    expect(component.client.log.actions()).toEqual([
+      { type: 'logux/subscribe', channel: 'users' }
+    ])
+  })
+})
+
 it('unsubscribes', function () {
   var UserList = createReactClass({
     getInitialState: function () {
