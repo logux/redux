@@ -1,16 +1,16 @@
-var createLoguxCreator = require('../create-logux-creator')
-var useSubscription = require('../use-subscription')
-var subscribe = require('../subscribe')
-var index = require('../')
+let createLoguxCreator = require('../create-logux-creator')
+let useSubscription = require('../use-subscription')
+let subscribe = require('../subscribe')
+let index = require('../')
 
-it('has createLoguxCreator function', function () {
+it('has createLoguxCreator function', () => {
   expect(index.createLoguxCreator).toBe(createLoguxCreator)
 })
 
-it('has useSubscription', function () {
+it('has useSubscription', () => {
   expect(index.useSubscription).toBe(useSubscription)
 })
 
-it('has subscribe', function () {
+it('has subscribe', () => {
   expect(index.subscribe).toBe(subscribe)
 })
