@@ -232,18 +232,20 @@ it('reports about subscription end', async () => {
   renderer.act(() => {
     component.toJSON().props.onClick(1)
   })
-  await delay(1)
   expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
   renderer.act(() => {
     component.toJSON().props.onClick(2)
   })
-  await delay(1)
   expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
-  log.add({ type: 'logux/processed', id: `1 ${ nodeId } 0` })
-  await delay(1)
+  await renderer.act(async () => {
+    log.add({ type: 'logux/processed', id: `1 ${ nodeId } 0` })
+    await delay(1)
+  })
   expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
-  log.add({ type: 'logux/processed', id: `3 ${ nodeId } 0` })
-  await delay(1)
+  await renderer.act(async () => {
+    log.add({ type: 'logux/processed', id: `3 ${ nodeId } 0` })
+    await delay(1)
+  })
   expect(component.toJSON().children[0].props.isSubscribing).toBeFalsy()
 })
 
