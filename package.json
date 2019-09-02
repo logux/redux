@@ -10,7 +10,7 @@
   ],
   "scripts": {
     "api": "documentation build *.js -f md -o api.md",
-    "spell": "yarn api && yaspeller-ci *.md",
+    "spell": "yarn api && yaspeller *.md",
     "clean": "rimraf api.md coverage/",
     "lint": "eslint *.js test/{**/,}*.js",
     "test": "jest --coverage && eslint . && size-limit && yarn spell"
@@ -53,6 +53,7 @@
     "react-redux": "^7.1.1",
     "react-test-renderer": "^16.9.0",
     "rimraf": "^3.0.0",
+    "yaspeller": "^6.0.0",
     "yaspeller-ci": "^1.0.1"
   },
   "husky": {
