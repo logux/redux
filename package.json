@@ -13,7 +13,7 @@
     "spell": "yarn api && yaspeller-ci *.md",
     "clean": "rimraf api.md coverage/",
     "lint": "eslint *.js test/{**/,}*.js",
-    "test": "jest --coverage && yarn lint && size-limit && yarn spell"
+    "test": "jest --coverage && eslint . && size-limit && yarn spell"
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
@@ -30,6 +30,7 @@
   },
   "devDependencies": {
     "@logux/eslint-config": "^31.0.0",
+    "@logux/sharec-config": "^0.4.3",
     "@size-limit/preset-small-lib": "^2.1.1",
     "clean-publish": "^1.1.2",
     "documentation": "^12.1.1",
@@ -37,7 +38,7 @@
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-es5": "^1.4.1",
     "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-jest": "22.16.0",
+    "eslint-plugin-jest": "^22.16.0",
     "eslint-plugin-node": "^9.2.0",
     "eslint-plugin-prefer-let": "^1.0.1",
     "eslint-plugin-promise": "^4.2.1",
@@ -113,5 +114,8 @@
       "Versioning",
       "ws"
     ]
+  },
+  "sharec": {
+    "version": "0.4.3"
   }
 }
