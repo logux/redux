@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.3
+* Keep 1000 latest actions with missed `reasons`.
+
 ## 0.2.9
 * Improve error message on `logux/undo`.
 
