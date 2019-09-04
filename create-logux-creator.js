@@ -45,6 +45,19 @@ function hackReducer (reducer) {
  *                                           to replay actions accurate.
  *
  * @return {storeCreator} Redux createStore compatible function.
+ *
+ * @example
+ * import { createLoguxCreator } from '@logux/redux/create-logux-store'
+ * const createStore = createLoguxCreator({
+ *   subprotocol: '1.0.0',
+ *   server: process.env.NODE_ENV === 'development'
+ *     ? 'ws://localhost:31337'
+ *     : 'wss://logux.example.com',
+ *   userId: false,  // TODO: We will fill it in next chapter
+ *   credentials: '' // TODO: We will fill it in next chapter
+ * })
+ * const store = createStore(reducer)
+ * store.client.start()
  */
 function createLoguxCreator (config) {
   if (!config) config = { }
