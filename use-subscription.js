@@ -33,6 +33,37 @@ function remove (store, subscriptions) {
   })
 }
 
+/**
+ * @typedef {object} Subscribe
+ * @property {string} channel
+ */
+
+/**
+ * @typedef {string|Subscribe} Channel
+ */
+
+/**
+ * Hook to subscribe for channel during component render and unsubscribe
+ * on component unmount.
+ *
+ * @param  {Channel[]} channels Channels to subscribe.
+ * @param  {object}  [opts={}] Options.
+ * @param  {Context} [opts.context] Context with the store.
+ * @return {boolean} `true` during data loading.
+ *
+ * @example
+ * const useSubscription = require('logux-redux/use-subscription')
+ * const useSelector = require('react-redux').useSelector
+ * const UserPage = ({ userId }) => {
+ *   const isSubscribing = useSubscription(`user/${ userId }`)
+ *   const user = useSelector(state => state.users.find(i => i.id === userId))
+ *   if (isSubscribing) {
+ *     return <Loader />
+ *   } else {
+ *     return <h1>{ user.name }</h1>
+ *   }
+ * }
+ */
 function useSubscription (channels, opts) {
   if (!opts) opts = { }
 
