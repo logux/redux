@@ -18,8 +18,8 @@ var useSubscription = require('./use-subscription')
  *
  * @example
  * import subscribe from '@logux/redux/subscribe'
- * @subscribe(({ id }) => `user/${ id }`)
  * class User extends React.Component { … }
+ * export default subscribe(({ id }) => `user/${ id }`)(User)
  *
  * @example
  * import subscribe from '@logux/redux/subscribe'
