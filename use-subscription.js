@@ -54,6 +54,7 @@ function remove (store, subscriptions) {
  * @example
  * import useSubscription from '@logux/redux/use-subscription'
  * import { useSelector } from 'react-redux'
+ *
  * const UserPage = ({ userId }) => {
  *   const isSubscribing = useSubscription(`user/${ userId }`)
  *   const user = useSelector(state => state.users.find(i => i.id === userId))

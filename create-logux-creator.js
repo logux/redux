@@ -48,6 +48,7 @@ function hackReducer (reducer) {
  *
  * @example
  * import { createLoguxCreator } from '@logux/redux/create-logux-store'
+ *
  * const createStore = createLoguxCreator({
  *   subprotocol: '1.0.0',
  *   server: process.env.NODE_ENV === 'development'
@@ -56,6 +57,7 @@ function hackReducer (reducer) {
  *   userId: false,  // TODO: We will fill it in next chapter
  *   credentials: '' // TODO: We will fill it in next chapter
  * })
+ *
  * const store = createStore(reducer)
  * store.client.start()
  */
