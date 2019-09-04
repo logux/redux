@@ -52,7 +52,7 @@ function remove (store, subscriptions) {
  * @return {boolean} `true` during data loading.
  *
  * @example
- * import useSubscription from 'logux-redux/use-subscription'
+ * import useSubscription from '@logux/redux/use-subscription'
  * import { useSelector } from 'react-redux'
  * const UserPage = ({ userId }) => {
  *   const isSubscribing = useSubscription(`user/${ userId }`)
