@@ -17,12 +17,12 @@ var useSubscription = require('./use-subscription')
  * @return {function} Class wrapper.
  *
  * @example
- * const subscribe = require('logux-redux/subscribe')
+ * import subscribe from 'logux-redux/subscribe'
  * @subscribe(({ id }) => `user/${ id }`)
  * class User extends React.Component { … }
  *
  * @example
- * const subscribe = require('logux-redux/subscribe')
+ * import subscribe from 'logux-redux/subscribe'
  * class User extends React.Component { … }
  * const SubscribeUser = subscribe(props => {
  *   return { channel: `user/${ props.id }`, fields: ['name'] }
