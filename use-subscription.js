@@ -56,7 +56,7 @@ function remove (store, subscriptions) {
  * import { useSelector } from 'react-redux'
  *
  * const UserPage = ({ userId }) => {
- *   const isSubscribing = useSubscription(`user/${ userId }`)
+ *   const isSubscribing = useSubscription([`user/${ userId }`])
  *   const user = useSelector(state => state.users.find(i => i.id === userId))
  *   if (isSubscribing) {
  *     return <Loader />
