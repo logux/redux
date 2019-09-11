@@ -33,7 +33,7 @@
     "@logux/sharec-config": "^0.4.4",
     "@size-limit/preset-small-lib": "^2.1.4",
     "clean-publish": "^1.1.2",
-    "documentation": "^12.1.1",
+    "documentation": "^12.1.2",
     "eslint": "^6.3.0",
     "eslint-config-standard": "^14.1.0",
     "eslint-plugin-es5": "^1.4.1",
