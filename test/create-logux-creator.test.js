@@ -55,7 +55,7 @@ it('sets tab ID', async () => {
   await new Promise(resolve => {
     store.log.on('add', (action, meta) => {
       expect(meta.tab).toEqual(store.client.id)
-      expect(meta.reasons).toEqual(['tab' + store.client.id])
+      expect(meta.reasons).toEqual([`timeTravelTab${ store.client.id }`])
       resolve()
     })
     store.dispatch({ type: 'INC' })
@@ -252,7 +252,9 @@ it('replays history for reason-less action', async () => {
     store.dispatch.crossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] }),
     store.dispatch.crossTab({ type: 'ADD', value: 'c' }, { reasons: ['test'] })
   ])
-  store.dispatch.crossTab({ type: 'ADD', value: '|' }, { id: '1 10:test1 1' })
+  store.dispatch.crossTab(
+    { type: 'ADD', value: '|' }, { id: '1 10:test1 1', noAutoReason: true }
+  )
   await delay(1)
   expect(store.getState().value).toEqual('0a|bc')
   expect(store.log.store.created).toHaveLength(3)
@@ -359,8 +361,7 @@ it('cleans action added without reason', async () => {
   await promise
   let entries = store.log.entries()
   let last = entries[entries.length - 1]
-  expect(last[1].reasons).toEqual(['syncing', 'tab1'])
-  expect(last[1].autoreason).toBeTruthy()
+  expect(last[1].reasons).toEqual(['syncing', 'timeTravel'])
   store.dispatch({ type: 'ADD', value: 25 })
   await store.log.removeReason('syncing')
   expect(store.log.actions()).toEqual([
@@ -449,7 +450,7 @@ it('cleans sync action after processing', async () => {
     resultB = e.action.reason
   })
 
-  store.log.removeReason('tab1')
+  store.log.removeReason('timeTravel')
   await store.log.add({ type: 'logux/processed', id: '0 10:1:1 0' })
   expect(resultA).toBeUndefined()
   expect(resultB).toBeUndefined()
@@ -595,4 +596,11 @@ it('warns about undoes cleaned action', async () => {
   let store = createStore(increment)
   await store.dispatch.crossTab({ type: 'logux/undo', id: '1 t 0' })
   expect(store.log.actions()).toHaveLength(0)
+})
+
+it('does not put reason on request', async () => {
+  let store = createStore(increment)
+  await store.dispatch.crossTab({ type: 'A' }, { noAutoReason: true })
+  await store.dispatch.crossTab({ type: 'B' })
+  expect(store.log.actions()).toEqual([{ type: 'B' }])
 })

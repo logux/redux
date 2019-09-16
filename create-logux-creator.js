@@ -141,9 +141,8 @@ function createLoguxCreator (config) {
       var meta = {
         id: log.generateId(),
         tab: store.client.id,
-        reasons: ['tab' + store.client.id],
-        dispatch: true,
-        autoreason: true
+        reasons: ['timeTravelTab' + store.client.id],
+        dispatch: true
       }
       log.add(action, meta)
 
@@ -159,19 +158,19 @@ function createLoguxCreator (config) {
     store.dispatch.local = function local (action, meta) {
       if (!meta) meta = { }
       meta.tab = client.id
-      if (!meta.reasons) meta.autoreason = true
+      if (meta.reasons) meta.noAutoReason = true
       return log.add(action, meta)
     }
 
     store.dispatch.crossTab = function crossTab (action, meta) {
       if (!meta) meta = { }
-      if (!meta.reasons) meta.autoreason = true
+      if (meta.reasons) meta.noAutoReason = true
       return log.add(action, meta)
     }
 
     store.dispatch.sync = function sync (action, meta) {
       if (!meta) meta = { }
-      if (!meta.reasons) meta.autoreason = true
+      if (meta.reasons) meta.noAutoReason = true
 
       meta.sync = true
 
@@ -269,17 +268,15 @@ function createLoguxCreator (config) {
 
     log.on('preadd', function (action, meta) {
       var type = action.type
+      var isLogux = type.slice(0, 6) === 'logux/'
       if (type === 'logux/undo') {
         meta.reasons.push('reasonsLoading')
       }
-      if (type.slice(0, 6) !== 'logux/' && !isFirstOlder(prevMeta, meta)) {
+      if (!isLogux && !isFirstOlder(prevMeta, meta)) {
         meta.reasons.push('replay')
       }
-      if (meta.autoreason) {
-        var reasons = meta.reasons.length
-        if (reasons === 0 || (reasons === 1 && meta.reasons[0] === 'syncing')) {
-          meta.reasons.push('tab' + store.client.id)
-        }
+      if (!isLogux && !meta.noAutoReason && !meta.dispatch) {
+        meta.reasons.push('timeTravel')
       }
     })
 
@@ -351,11 +348,14 @@ function createLoguxCreator (config) {
           processing[action.id][0]()
           delete processing[action.id]
         }
-      } else if (meta.autoreason) {
+      } else if (!meta.noAutoReason) {
         addCalls += 1
         if (addCalls % checkEvery === 0 && lastAdded > reasonlessHistory) {
           historyCleaned = true
-          log.removeReason('tab' + store.client.id, {
+          log.removeReason('timeTravel', {
+            maxAdded: lastAdded - reasonlessHistory
+          })
+          log.removeReason('timeTravelTab' + store.client.id, {
             maxAdded: lastAdded - reasonlessHistory
           })
         }
