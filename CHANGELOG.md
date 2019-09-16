@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.3.2
+* Fix the way to keep latest 1000 action without explicit `reasons`.
+
 ## 0.3.1
 * Fix JSDoc.
 
