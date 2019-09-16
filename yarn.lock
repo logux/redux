@@ -1101,17 +1101,17 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^13.0.0"
 
-"@logux/client@^0.4.0":
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/@logux/client/-/client-0.4.0.tgz#44c2c51229e9ee8762b669aefdef589e9dcab864"
-  integrity sha512-s2k8Aqg7TNDYvOYURosmAs5zqdiLILzNmeTMd4eZ1jAt09MiRWOeRdkSuaf4hDzWFb4tXGIzvltSWkaaFrb8fw==
+"@logux/client@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@logux/client/-/client-0.5.0.tgz#27705a517616bfd6f2315895683bd1b879498b70"
+  integrity sha512-L7pfqnHXzXBu8RQ5Z+NE7kwxNJ8qXPPOhgPPYizKOUYNog/HIF7mpn4cOkdVam+91vpM5G15/GT8BNVdg4cq6w==
   dependencies:
-    "@logux/core" "^0.3.2"
+    "@logux/core" "^0.3.3"
     browser-supports-log-styles "^1.1.7"
     nanoevents "^2.0.0"
-    nanoid "^2.1.0"
+    nanoid "^2.1.1"
 
-"@logux/core@^0.3.2", "@logux/core@^0.3.3":
+"@logux/core@^0.3.3":
   version "0.3.3"
   resolved "https://registry.yarnpkg.com/@logux/core/-/core-0.3.3.tgz#17746961c4735984ee4b0be8d2d0f64b88e5ac14"
   integrity sha512-AN105Xnp1R2Vkmix6IWJhTJzfJ/KxLjGLOeR3GTPh6GlF63nmFfo5ubqS6pr7RPwgnW7HjJw5I/xElSaUwj75Q==
@@ -6282,7 +6282,7 @@ nanoevents@^2.0.0:
   resolved "https://registry.yarnpkg.com/nanoevents/-/nanoevents-2.0.0.tgz#5a6051ebbcdfd67efe94cca0e4a03d616e1a4949"
   integrity sha512-6wRUNwBA07fyeun/xqG1UzmKd3ucgzcxTyaWcqjsNL0PaXy4YAezyHPnMdsPYEsOl/9wyQ85j39rPYF0FNDozQ==
 
-nanoid@^2.1.0, nanoid@^2.1.1:
+nanoid@^2.1.1:
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/nanoid/-/nanoid-2.1.1.tgz#524fd4acd45c126e0c87cd43ab5ee8346e695df9"
   integrity sha512-0YbJdaL4JFoejIOoawgLcYValFGJ2iyUuVDIWL3g8Es87SSOWFbWdRUMV3VMSiyPs3SQ3QxCIxFX00q5DLkMCw==
