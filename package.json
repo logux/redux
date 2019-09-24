@@ -30,8 +30,8 @@
   },
   "devDependencies": {
     "@logux/eslint-config": "^31.0.1",
-    "@logux/sharec-config": "^0.4.4",
-    "@size-limit/preset-small-lib": "^2.1.5",
+    "@logux/sharec-config": "^0.5.0",
+    "@size-limit/preset-small-lib": "^2.1.6",
     "clean-publish": "^1.1.2",
     "documentation": "^12.1.2",
     "eslint": "^6.4.0",
@@ -46,14 +46,14 @@
     "eslint-plugin-standard": "^4.0.1",
     "husky": "^3.0.5",
     "jest": "^24.9.0",
-    "lint-staged": "^9.2.5",
+    "lint-staged": "^9.3.0",
     "nanodelay": "^0.1.4",
     "react": "^16.9.0",
     "react-dom": "^16.9.0",
     "react-redux": "^7.1.1",
     "react-test-renderer": "^16.9.0",
     "rimraf": "^3.0.0",
-    "yaspeller": "^6.0.0"
+    "yaspeller": "^6.0.1"
   },
   "husky": {
     "hooks": {
