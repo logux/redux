@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.4.1
+* Set `noAutoReason` on explicit `meta.keepLast`.
+
 ## 0.4
 * Use Logux Client 0.5 with `store.client.tabId` instead of `store.client.id`.
 
