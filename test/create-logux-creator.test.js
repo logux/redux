@@ -603,4 +603,12 @@ it('does not put reason on request', async () => {
   await store.dispatch.crossTab({ type: 'A' }, { noAutoReason: true })
   await store.dispatch.crossTab({ type: 'B' })
   expect(store.log.actions()).toEqual([{ type: 'B' }])
+
+  await store.dispatch.crossTab({ type: 'a' }, { reasons: ['a'] })
+  await store.dispatch.crossTab({ type: 'b' }, { keepLast: 'b' })
+  expect(store.log.actions()).toEqual([
+    { type: 'B' }, { type: 'a' }, { type: 'b' }
+  ])
+  expect(store.log.entries()[1][1].noAutoReason).toBeTruthy()
+  expect(store.log.entries()[2][1].noAutoReason).toBeTruthy()
 })

@@ -158,19 +158,19 @@ function createLoguxCreator (config) {
     store.dispatch.local = function local (action, meta) {
       if (!meta) meta = { }
       meta.tab = client.id
-      if (meta.reasons) meta.noAutoReason = true
+      if (meta.reasons || meta.keepLast) meta.noAutoReason = true
       return log.add(action, meta)
     }
 
     store.dispatch.crossTab = function crossTab (action, meta) {
       if (!meta) meta = { }
-      if (meta.reasons) meta.noAutoReason = true
+      if (meta.reasons || meta.keepLast) meta.noAutoReason = true
       return log.add(action, meta)
     }
 
     store.dispatch.sync = function sync (action, meta) {
       if (!meta) meta = { }
-      if (meta.reasons) meta.noAutoReason = true
+      if (meta.reasons || meta.keepLast) meta.noAutoReason = true
 
       meta.sync = true
 
