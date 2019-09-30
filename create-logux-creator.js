@@ -140,8 +140,8 @@ function createLoguxCreator (config) {
     function dispatch (action) {
       var meta = {
         id: log.generateId(),
-        tab: store.client.id,
-        reasons: ['timeTravelTab' + store.client.id],
+        tab: store.client.tabId,
+        reasons: ['timeTravelTab' + store.client.tabId],
         dispatch: true
       }
       log.add(action, meta)
@@ -157,7 +157,7 @@ function createLoguxCreator (config) {
 
     store.dispatch.local = function local (action, meta) {
       if (!meta) meta = { }
-      meta.tab = client.id
+      meta.tab = client.tabId
       if (meta.reasons || meta.keepLast) meta.noAutoReason = true
       return log.add(action, meta)
     }
@@ -209,7 +209,7 @@ function createLoguxCreator (config) {
 
       replaying = new Promise(function (resolve) {
         log.each(function (action, meta) {
-          if (meta.tab && meta.tab !== client.id) return true
+          if (meta.tab && meta.tab !== client.tabId) return true
 
           if (collecting || !stateHistory[meta.id]) {
             if (action.type === 'logux/undo') {
@@ -355,7 +355,7 @@ function createLoguxCreator (config) {
           log.removeReason('timeTravel', {
             maxAdded: lastAdded - reasonlessHistory
           })
-          log.removeReason('timeTravelTab' + store.client.id, {
+          log.removeReason('timeTravelTab' + store.client.tabId, {
             maxAdded: lastAdded - reasonlessHistory
           })
         }

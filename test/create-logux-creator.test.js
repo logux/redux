@@ -54,8 +54,8 @@ it('sets tab ID', async () => {
   let store = createStore(increment)
   await new Promise(resolve => {
     store.log.on('add', (action, meta) => {
-      expect(meta.tab).toEqual(store.client.id)
-      expect(meta.reasons).toEqual([`timeTravelTab${ store.client.id }`])
+      expect(meta.tab).toEqual(store.client.tabId)
+      expect(meta.reasons).toEqual([`timeTravelTab${ store.client.tabId }`])
       resolve()
     })
     store.dispatch({ type: 'INC' })
@@ -404,7 +404,7 @@ it('dispatches local actions', async () => {
   let store = createStore(increment)
   await store.dispatch.local({ type: 'INC' }, { reasons: ['test'] })
   expect(store.log.store.created[0][0]).toEqual({ type: 'INC' })
-  expect(store.log.store.created[0][1].tab).toEqual(store.client.id)
+  expect(store.log.store.created[0][1].tab).toEqual(store.client.tabId)
   expect(store.log.store.created[0][1].reasons).toEqual(['test'])
 })
 
