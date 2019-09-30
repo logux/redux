@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.4.2
+* Fix `store.client.tabId` support.
+
 ## 0.4.1
 * Set `noAutoReason` on explicit `meta.keepLast`.
 
