@@ -33,6 +33,21 @@ function historyLine (state, action) {
   }
 }
 
+function subscribe (state, action, sync) {
+  switch (action.type) {
+    case 'SUBSCRIBE':
+      sync({ type: 'logux/subscribe' })
+      break
+    case 'UNSUBSCRIBE':
+      sync({ type: 'logux/unsubscribe' })
+      break
+    case 'SIDE_EFFECT':
+      sync({ type: 'A' })
+      break
+  }
+  return state
+}
+
 it('throws error on missed config', () => {
   expect(() => {
     createLoguxCreator()
@@ -612,3 +627,39 @@ it('does not put reason on request', async () => {
   expect(store.log.entries()[1][1].noAutoReason).toBeTruthy()
   expect(store.log.entries()[2][1].noAutoReason).toBeTruthy()
 })
+
+it('allows dispatching subscriptions from reducers', async () => {
+  let store = createStore(subscribe)
+  await store.dispatch({ type: 'SUBSCRIBE' })
+  expect(store.log.actions()).toEqual([
+    { type: 'SUBSCRIBE' },
+    { type: 'logux/subscribe' }
+  ])
+
+  await store.dispatch({ type: 'UNSUBSCRIBE' })
+  expect(store.log.actions()).toEqual([
+    { type: 'SUBSCRIBE' },
+    { type: 'logux/subscribe' },
+    { type: 'UNSUBSCRIBE' },
+    { type: 'logux/unsubscribe' }
+  ])
+})
+
+it(
+  'does not allow dispatching user defined actions from reducers',
+  async () => {
+    let errorMessage = ''
+    let store = createStore(subscribe)
+    try {
+      await store.dispatch({ type: 'SIDE_EFFECT' })
+    } catch (error) {
+      errorMessage = error.message
+    }
+    expect(store.log.actions()).toEqual([
+      { type: 'SIDE_EFFECT' }
+    ])
+    expect(errorMessage).toEqual('Unexpected dispatch in reducer: ' +
+        "In reducer you can dispatch only 'logux/subscribe'" +
+        " or 'logux/unsubscribe' actions")
+  }
+)

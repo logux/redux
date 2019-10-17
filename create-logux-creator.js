@@ -3,12 +3,12 @@ var isFirstOlder = require('@logux/core/is-first-older')
 var createStore = require('redux').createStore
 var NanoEvents = require('nanoevents')
 
-function hackReducer (reducer) {
+function hackReducer (reducer, passedSync) {
   return function (state, action) {
     if (action.type === 'logux/state') {
       return action.state
     } else {
-      return reducer(state, action)
+      return reducer(state, action, passedSync)
     }
   }
 }
@@ -86,7 +86,11 @@ function createLoguxCreator (config) {
    * @return {object} Redux store with Logux hacks.
    */
   return function createLoguxStore (reducer, preloadedState, enhancer) {
-    var store = createStore(hackReducer(reducer), preloadedState, enhancer)
+    var store = createStore(
+      hackReducer(reducer, syncInReducer),
+      preloadedState,
+      enhancer
+    )
 
     var emitter = new NanoEvents()
 
@@ -105,10 +109,38 @@ function createLoguxCreator (config) {
       }
     }
 
+    function sync (action, meta, restrictToSubscription) {
+      if (restrictToSubscription &&
+          ['logux/subscribe', 'logux/unsubscribe'].indexOf(action.type) === -1
+      ) {
+        throw new Error('Unexpected dispatch in reducer: ' +
+          "In reducer you can dispatch only 'logux/subscribe'" +
+          " or 'logux/unsubscribe' actions")
+      }
+
+      if (!meta) meta = { }
+      if (meta.reasons || meta.keepLast) meta.noAutoReason = true
+
+      meta.sync = true
+
+      if (typeof meta.id === 'undefined') {
+        meta.id = log.generateId()
+      }
+
+      return new Promise(function (resolve, reject) {
+        processing[meta.id] = [resolve, reject]
+        log.add(action, meta)
+      })
+    }
+
+    function syncInReducer (action, meta) {
+      return sync(action, meta, true)
+    }
+
     var originReplace = store.replaceReducer
     store.replaceReducer = function replaceReducer (newReducer) {
       reducer = newReducer
-      return originReplace(hackReducer(newReducer))
+      return originReplace(hackReducer(newReducer, syncInReducer))
     }
 
     /**
@@ -168,21 +200,7 @@ function createLoguxCreator (config) {
       return log.add(action, meta)
     }
 
-    store.dispatch.sync = function sync (action, meta) {
-      if (!meta) meta = { }
-      if (meta.reasons || meta.keepLast) meta.noAutoReason = true
-
-      meta.sync = true
-
-      if (typeof meta.id === 'undefined') {
-        meta.id = log.generateId()
-      }
-
-      return new Promise(function (resolve, reject) {
-        processing[meta.id] = [resolve, reject]
-        log.add(action, meta)
-      })
-    }
+    store.dispatch.sync = sync
 
     function replaceState (state, actions, pushHistory) {
       var last = actions[actions.length - 1]
