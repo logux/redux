@@ -64,7 +64,7 @@ ReactDOM.render(
 ```
 
 ```js
-import useSubscription from 'logux-redux/use-subscription'
+import useSubscription from '@logux/redux/use-subscription'
 
 export const User = ({ id, name }) => {
   const isSubscribing = useSubscription([`user/${ id }`])
