@@ -30,7 +30,7 @@ npm install @logux/redux
 See [documentation] for Logux API.
 
 ```js
-import createLoguxCreator from 'logux-redux/create-logux-creator'
+import createLoguxCreator from '@logux/redux/create-logux-creator'
 
 import log from '@logux/client/log'
 
