@@ -228,25 +228,25 @@ it('reports about subscription end', async () => {
   let nodeId = component.client.nodeId
   let log = component.client.log
   await delay(1)
-  expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
+  expect(component.toJSON().children[0].props.isSubscribing).toBe(true)
   renderer.act(() => {
     component.toJSON().props.onClick(1)
   })
-  expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
+  expect(component.toJSON().children[0].props.isSubscribing).toBe(true)
   renderer.act(() => {
     component.toJSON().props.onClick(2)
   })
-  expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
+  expect(component.toJSON().children[0].props.isSubscribing).toBe(true)
   await renderer.act(async () => {
     log.add({ type: 'logux/processed', id: `1 ${ nodeId } 0` })
     await delay(1)
   })
-  expect(component.toJSON().children[0].props.isSubscribing).toBeTruthy()
+  expect(component.toJSON().children[0].props.isSubscribing).toBe(true)
   await renderer.act(async () => {
     log.add({ type: 'logux/processed', id: `3 ${ nodeId } 0` })
     await delay(1)
   })
-  expect(component.toJSON().children[0].props.isSubscribing).toBeFalsy()
+  expect(component.toJSON().children[0].props.isSubscribing).toBe(false)
 })
 
 it('works on channels size changes', () => {

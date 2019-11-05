@@ -36,7 +36,7 @@ function historyLine (state, action) {
 it('throws error on missed config', () => {
   expect(() => {
     createLoguxCreator()
-  }).toThrowError('Missed server option in Logux client')
+  }).toThrow('Missed server option in Logux client')
 })
 
 it('creates Redux store', () => {
@@ -423,7 +423,7 @@ it('dispatches sync actions', async () => {
   await delay(1)
   let log = store.log.store.created
   expect(log[0][0]).toEqual({ type: 'INC' })
-  expect(log[0][1].sync).toBeTruthy()
+  expect(log[0][1].sync).toBe(true)
   expect(log[0][1].reasons).toEqual(['test', 'syncing'])
 })
 
@@ -609,6 +609,6 @@ it('does not put reason on request', async () => {
   expect(store.log.actions()).toEqual([
     { type: 'B' }, { type: 'a' }, { type: 'b' }
   ])
-  expect(store.log.entries()[1][1].noAutoReason).toBeTruthy()
-  expect(store.log.entries()[2][1].noAutoReason).toBeTruthy()
+  expect(store.log.entries()[1][1].noAutoReason).toBe(true)
+  expect(store.log.entries()[2][1].noAutoReason).toBe(true)
 })
