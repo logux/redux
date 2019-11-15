@@ -402,11 +402,11 @@ module.exports = createLoguxCreator
 
 /**
  * @callback storeCreator
- * @param {Function} reducer A function that returns the next state tree,
+ * @param {function} reducer A function that returns the next state tree,
  *                           given the current state tree and the action
  *                           to handle.
  * @param {any} [preloadedState] The initial state.
- * @param {Function} [enhancer] The store enhancer.
+ * @param {function} [enhancer] The store enhancer.
  * @return {LoguxStore} Redux store with Logux extensions.
  */
 
@@ -446,9 +446,9 @@ module.exports = createLoguxCreator
 /**
  * Adds a store change listener.
  *
- * @param {Function} listener A callback to be invoked on every new action.
+ * @param {function} listener A callback to be invoked on every new action.
  *
- * @returns {Function} A function to remove this change listener.
+ * @returns {function} A function to remove this change listener.
  *
  * @name subscribe
  * @function
@@ -481,9 +481,9 @@ module.exports = createLoguxCreator
 /**
  * Replaces the reducer currently used by the store to calculate the state.
  *
- * @param {Function} nextReducer The reducer for the store to use instead.
+ * @param {function} nextReducer The reducer for the store to use instead.
  *
- * @return {void}
+ * @return {undefined}
  *
  * @name replaceReducer
  * @function
