@@ -76,15 +76,6 @@ function createLoguxCreator (config) {
   var client = new CrossTabClient(config)
   var log = client.log
 
-  /**
-   * Creates Redux store and connect Logux Client to it.
-   *
-   * @param {function} reducer Redux reducer.
-   * @param {any} preloadedState Initial Redux state.
-   * @param {function} enhancer Redux middleware.
-   *
-   * @return {object} Redux store with Logux hacks.
-   */
   return function createLoguxStore (reducer, preloadedState, enhancer) {
     var store = createStore(hackReducer(reducer), preloadedState, enhancer)
 
@@ -406,7 +397,7 @@ module.exports = createLoguxCreator
  *                           given the current state tree and the action
  *                           to handle.
  * @param {any} [preloadedState] The initial state.
- * @param {function} [enhancer] The store enhancer.
+ * @param {function} [enhancer] Redux middleware.
  * @return {LoguxStore} Redux store with Logux extensions.
  */
 
