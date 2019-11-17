@@ -34,12 +34,12 @@ function remove (store, subscriptions) {
 }
 
 /**
- * @typedef {object} Subscribe
+ * @typedef {object} SubscribeAction
  * @property {string} channel
  */
 
 /**
- * @typedef {string|Subscribe} Channel
+ * @typedef {string|SubscribeAction} Channel
  */
 
 /**
