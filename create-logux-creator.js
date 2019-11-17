@@ -451,9 +451,9 @@ module.exports = createLoguxCreator
  * Use {@link dispatchLocal}, {@link dispatchCrossTab} or {@link dispatchSync}
  * instead.
  *
- * @param {Object} action A plain object representing “what changed”.
+ * @param {object} action A plain object representing “what changed”.
  *
- * @return {Object} For convenience, the same action object you dispatched.
+ * @return {object} For convenience, the same action object you dispatched.
  *
  * @property {dispatchLocal} local Add sync action to log and update
  *                                 store state. This action will be visible
