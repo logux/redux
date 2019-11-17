@@ -483,7 +483,7 @@ module.exports = createLoguxCreator
 /**
  * Interoperability point for observable/reactive libraries.
  *
- * @returns {observable} A minimal observable of state changes.
+ * @returns {Observable} A minimal observable of state changes.
  *
  * @name observable
  * @function
