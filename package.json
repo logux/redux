@@ -17,6 +17,7 @@
   },
   "author": "Andrey Sitnik <andrey@sitnik.ru>",
   "license": "MIT",
+  "homepage": "https://logux.io/",
   "repository": "logux/redux",
   "peerDependencies": {
     "react": ">=16.8.4",
@@ -116,7 +117,8 @@
       "ws",
       "useSubscription",
       "JSDoc",
-      "SubscribeAction"
+      "SubscribeAction",
+      "io"
     ]
   },
   "sharec": {
