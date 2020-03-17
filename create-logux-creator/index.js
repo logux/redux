@@ -1,7 +1,7 @@
 let { createNanoEvents } = require('nanoevents')
+let { CrossTabClient } = require('@logux/client/cross-tab-client')
+let { isFirstOlder } = require('@logux/core/is-first-older')
 let { createStore } = require('redux')
-let CrossTabClient = require('@logux/client/cross-tab-client')
-let isFirstOlder = require('@logux/core/is-first-older')
 
 function hackReducer (reducer) {
   return (state, action) => {
@@ -370,7 +370,7 @@ function createLoguxCreator (config = { }) {
   }
 }
 
-module.exports = createLoguxCreator
+module.exports = { createLoguxCreator }
 
 /**
  * @callback storeCreator

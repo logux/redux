@@ -1,5 +1,5 @@
-let { ReactReduxContext } = require('react-redux')
 let { useContext, useEffect, useState } = require('react')
+let { ReactReduxContext } = require('react-redux')
 
 function add (store, subscriptions) {
   if (!store.subscriptions) store.subscriptions = { }
@@ -88,4 +88,4 @@ function useSubscription (channels, opts = { }) {
   return isSubscribing
 }
 
-module.exports = useSubscription
+module.exports = { useSubscription }

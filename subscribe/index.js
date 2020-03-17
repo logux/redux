@@ -1,6 +1,6 @@
 let { createElement } = require('react')
 
-let useSubscription = require('./use-subscription')
+let { useSubscription } = require('../use-subscription')
 
 /**
  * Decorator to add subscribe action on component mount and unsubscribe
@@ -47,7 +47,7 @@ function subscribe (subscriber, opts = { }) {
   }
 }
 
-module.exports = subscribe
+module.exports = { subscribe }
 
 /**
  * @callback subscriber

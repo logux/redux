@@ -345,7 +345,7 @@ it('cleans action added without reason', async () => {
   expect(store.log.entries()[0][1].reasons).toEqual(['test'])
 
   function add (index) {
-    return function () {
+    return () => {
       store.dispatch({ type: 'ADD', value: 4 * index - 3 })
       store.dispatch.local({ type: 'ADD', value: 4 * index - 2 })
       store.dispatch.crossTab({ type: 'ADD', value: 4 * index - 1 })
@@ -359,11 +359,14 @@ it('cleans action added without reason', async () => {
   }
 
   await promise
+  await delay(1)
+
   let entries = store.log.entries()
   let last = entries[entries.length - 1]
   expect(last[1].reasons).toEqual(['syncing', 'timeTravel'])
   store.dispatch({ type: 'ADD', value: 25 })
   await store.log.removeReason('syncing')
+  await delay(1)
   expect(store.log.actions()).toEqual([
     { type: 'ADD', value: 0 },
     { type: 'ADD', value: 23 },
@@ -383,6 +386,7 @@ it('cleans last 1000 by default', async () => {
   }
 
   await promise
+  await delay(1)
   expect(store.log.actions()).toHaveLength(1000)
 })
 
