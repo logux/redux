@@ -81,7 +81,7 @@
   },
   "size-limit": [
     {
-      "path": "index.js",
+      "import": "{ createLoguxCreator, useSubscription }",
       "limit": "11 KB"
     }
   ],
