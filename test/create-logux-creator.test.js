@@ -2,7 +2,7 @@ let { TestPair, TestTime } = require('@logux/core')
 let { applyMiddleware } = require('redux')
 let { delay } = require('nanodelay')
 
-let createLoguxCreator = require('../create-logux-creator')
+let { createLoguxCreator } = require('..')
 
 function createStore (reducer, opts, enhancer) {
   if (!opts) opts = { }

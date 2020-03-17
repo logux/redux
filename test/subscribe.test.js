@@ -5,8 +5,7 @@ let { TestTime } = require('@logux/core')
 let { delay } = require('nanodelay')
 let renderer = require('react-test-renderer')
 
-let createLoguxCreator = require('../create-logux-creator')
-let subscribe = require('../subscribe')
+let { createLoguxCreator, subscribe } = require('..')
 
 jest.mock('react', () => {
   let React = require('react/cjs/react.development.js')
