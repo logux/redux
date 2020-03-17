@@ -28,8 +28,9 @@
     "@logux/client": "logux/client",
     "@logux/core": "logux/core",
     "@size-limit/dual-publish": "^4.4.0",
+    "@types/react": "^16.9.23",
     "dual-publish": "^0.5.2",
-    "nanoevents": "^5.0.1",
+    "nanoevents": "^5.1.0",
     "redux": "^4.0.5"
   },
   "devDependencies": {
