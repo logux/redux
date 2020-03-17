@@ -1,6 +1,6 @@
-var createElement = require('react').createElement
+let { createElement } = require('react')
 
-var useSubscription = require('./use-subscription')
+let useSubscription = require('./use-subscription')
 
 /**
  * Decorator to add subscribe action on component mount and unsubscribe
@@ -28,17 +28,17 @@ var useSubscription = require('./use-subscription')
  *   return { channel: `user/${ props.id }`, fields: ['name'] }
  * })(User)
  */
-function subscribe (subscriber, opts) {
-  var subscribingProp = 'isSubscribing'
-  if (opts && opts.subscribingProp) subscribingProp = opts.subscribingProp
+function subscribe (subscriber, opts = { }) {
+  let subscribingProp = 'isSubscribing'
+  if (opts.subscribingProp) subscribingProp = opts.subscribingProp
 
   return function (Wrapped) {
     function SubscribeComponent (ownProps) {
-      var channels = subscriber
+      let channels = subscriber
       if (typeof subscriber === 'function') channels = subscriber(ownProps)
       if (!Array.isArray(channels)) channels = [channels]
-      var isSubscribing = useSubscription(channels, opts)
-      var props = Object.assign({ }, ownProps)
+      let isSubscribing = useSubscription(channels, opts)
+      let props = { ...ownProps }
       props[subscribingProp] = isSubscribing
       return createElement(Wrapped, props)
     }

@@ -1,10 +1,10 @@
-var CrossTabClient = require('@logux/client/cross-tab-client')
-var isFirstOlder = require('@logux/core/is-first-older')
-var createStore = require('redux').createStore
-var NanoEvents = require('nanoevents')
+let { createNanoEvents } = require('nanoevents')
+let { createStore } = require('redux')
+let CrossTabClient = require('@logux/client/cross-tab-client')
+let isFirstOlder = require('@logux/core/is-first-older')
 
 function hackReducer (reducer) {
-  return function (state, action) {
+  return (state, action) => {
     if (action.type === 'logux/state') {
       return action.state
     } else {
@@ -61,34 +61,32 @@ function hackReducer (reducer) {
  * const store = createStore(reducer)
  * store.client.start()
  */
-function createLoguxCreator (config) {
-  if (!config) config = { }
-
-  var checkEvery = config.checkEvery || 25
+function createLoguxCreator (config = { }) {
+  let checkEvery = config.checkEvery || 25
   delete config.checkEvery
-  var reasonlessHistory = config.reasonlessHistory || 1000
+  let reasonlessHistory = config.reasonlessHistory || 1000
   delete config.reasonlessHistory
-  var saveStateEvery = config.saveStateEvery || 50
+  let saveStateEvery = config.saveStateEvery || 50
   delete config.saveStateEvery
-  var onMissedHistory = config.onMissedHistory
+  let onMissedHistory = config.onMissedHistory
   delete config.onMissedHistory
 
-  var client = new CrossTabClient(config)
-  var log = client.log
+  let client = new CrossTabClient(config)
+  let log = client.log
 
   return function createLoguxStore (reducer, preloadedState, enhancer) {
-    var store = createStore(hackReducer(reducer), preloadedState, enhancer)
+    let store = createStore(hackReducer(reducer), preloadedState, enhancer)
 
-    var emitter = new NanoEvents()
+    let emitter = createNanoEvents()
 
     store.client = client
     store.log = log
-    var historyCleaned = false
-    var stateHistory = { }
+    let historyCleaned = false
+    let stateHistory = { }
 
-    var processing = { }
+    let processing = { }
 
-    var actionCount = 0
+    let actionCount = 0
     function saveHistory (meta) {
       actionCount += 1
       if (saveStateEvery === 1 || actionCount % saveStateEvery === 1) {
@@ -96,8 +94,8 @@ function createLoguxCreator (config) {
       }
     }
 
-    var originReplace = store.replaceReducer
-    store.replaceReducer = function replaceReducer (newReducer) {
+    let originReplace = store.replaceReducer
+    store.replaceReducer = newReducer => {
       reducer = newReducer
       return originReplace(hackReducer(newReducer))
     }
@@ -121,15 +119,15 @@ function createLoguxCreator (config) {
      */
     store.on = emitter.on.bind(emitter)
 
-    var init
-    store.initialize = new Promise(function (resolve) {
+    let init
+    store.initialize = new Promise(resolve => {
       init = resolve
     })
 
-    var prevMeta
-    var originDispatch = store.dispatch
-    function dispatch (action) {
-      var meta = {
+    let prevMeta
+    let originDispatch = store.dispatch
+    store.dispatch = action => {
+      let meta = {
         id: log.generateId(),
         tab: store.client.tabId,
         reasons: ['timeTravelTab' + store.client.tabId],
@@ -138,29 +136,24 @@ function createLoguxCreator (config) {
       log.add(action, meta)
 
       prevMeta = meta
-      var prevState = store.getState()
+      let prevState = store.getState()
       originDispatch(action)
       emitter.emit('change', store.getState(), prevState, action, meta)
       saveHistory(meta)
     }
 
-    store.dispatch = dispatch
-
-    store.dispatch.local = function local (action, meta) {
-      if (!meta) meta = { }
+    store.dispatch.local = (action, meta = { }) => {
       meta.tab = client.tabId
       if (meta.reasons || meta.keepLast) meta.noAutoReason = true
       return log.add(action, meta)
     }
 
-    store.dispatch.crossTab = function crossTab (action, meta) {
-      if (!meta) meta = { }
+    store.dispatch.crossTab = (action, meta = { }) => {
       if (meta.reasons || meta.keepLast) meta.noAutoReason = true
       return log.add(action, meta)
     }
 
-    store.dispatch.sync = function sync (action, meta) {
-      if (!meta) meta = { }
+    store.dispatch.sync = (action, meta = { }) => {
       if (meta.reasons || meta.keepLast) meta.noAutoReason = true
 
       meta.sync = true
@@ -169,20 +162,20 @@ function createLoguxCreator (config) {
         meta.id = log.generateId()
       }
 
-      return new Promise(function (resolve, reject) {
+      return new Promise((resolve, reject) => {
         processing[meta.id] = [resolve, reject]
         log.add(action, meta)
       })
     }
 
     function replaceState (state, actions, pushHistory) {
-      var last = actions[actions.length - 1]
-      var newState = actions.reduceRight(function (prev, i) {
-        var changed = reducer(prev, i[0])
-        if (pushHistory && i === last) {
+      let last = actions[actions.length - 1][1]
+      let newState = actions.reduceRight((prev, [action, id]) => {
+        let changed = reducer(prev, action)
+        if (pushHistory && id === last) {
           stateHistory[pushHistory] = changed
-        } else if (stateHistory[i[1]]) {
-          stateHistory[i[1]] = changed
+        } else if (stateHistory[id]) {
+          stateHistory[id] = changed
         }
         return changed
       }, state)
@@ -190,23 +183,23 @@ function createLoguxCreator (config) {
       return newState
     }
 
-    var replaying
+    let replaying
     function replay (actionId) {
-      var ignore = { }
-      var actions = []
-      var replayed = false
-      var newAction
-      var collecting = true
+      let ignore = { }
+      let actions = []
+      let replayed = false
+      let newAction
+      let collecting = true
 
-      replaying = new Promise(function (resolve) {
-        log.each(function (action, meta) {
+      replaying = new Promise(resolve => {
+        log.each((action, meta) => {
           if (meta.tab && meta.tab !== client.tabId) return true
 
           if (collecting || !stateHistory[meta.id]) {
             if (action.type === 'logux/undo') {
               ignore[action.id] = true
               return true
-            } else if (action.type.slice(0, 6) === 'logux/') {
+            } else if (action.type.startsWith('logux/')) {
               return true
             }
 
@@ -222,14 +215,14 @@ function createLoguxCreator (config) {
             replaceState(stateHistory[meta.id], actions)
             return false
           }
-        }).then(function () {
+        }).then(() => {
           if (!replayed) {
             if (historyCleaned) {
               if (onMissedHistory) {
                 onMissedHistory(newAction)
               }
-              for (var i = actions.length - 1; i >= 0; i--) {
-                var id = actions[i][1]
+              for (let i = actions.length - 1; i >= 0; i--) {
+                let id = actions[i][1]
                 if (stateHistory[id]) {
                   replayed = true
                   replaceState(
@@ -257,9 +250,9 @@ function createLoguxCreator (config) {
       return replaying
     }
 
-    log.on('preadd', function (action, meta) {
-      var type = action.type
-      var isLogux = type.slice(0, 6) === 'logux/'
+    log.on('preadd', (action, meta) => {
+      let type = action.type
+      let isLogux = type.startsWith('logux/')
       if (type === 'logux/undo') {
         meta.reasons.push('reasonsLoading')
       }
@@ -271,67 +264,57 @@ function createLoguxCreator (config) {
       }
     })
 
-    var wait = { }
+    let wait = { }
 
-    function process (action, meta) {
+    async function process (action, meta) {
       if (replaying) {
         wait[meta.id] = true
-        return replaying.then(function () {
-          if (wait[meta.id]) {
-            delete wait[meta.id]
-            return process(action, meta)
-          } else {
-            return false
-          }
-        })
+        await replaying
+        if (wait[meta.id]) {
+          delete wait[meta.id]
+          await process(action, meta)
+        }
+        return
       }
 
       if (action.type === 'logux/undo') {
-        return log.byId(action.id).then(function (result) {
-          if (result[0]) {
+        let [undoAction, undoMeta] = await log.byId(action.id)
+        if (undoAction) {
+          log.changeMeta(meta.id, {
+            reasons: undoMeta.reasons.filter(i => i !== 'syncing')
+          })
+          delete stateHistory[action.id]
+          await replay(action.id)
+        } else {
+          await log.changeMeta(meta.id, { reasons: [] })
+        }
+        if (processing[action.id]) {
+          let error = new Error(
+            'Server undid Logux action because of ' + action.reason
+          )
+          error.action = action
+          processing[action.id][1](error)
+          delete processing[action.id]
+        }
+      } else if (!action.type.startsWith('logux/')) {
+        if (isFirstOlder(prevMeta, meta)) {
+          prevMeta = meta
+          originDispatch(action)
+          if (meta.added) saveHistory(meta)
+        } else {
+          await replay(meta.id)
+          if (meta.reasons.includes('replay')) {
             log.changeMeta(meta.id, {
-              reasons: result[1].reasons.filter(function (reason) {
-                return reason !== 'syncing'
-              })
-            })
-            delete stateHistory[action.id]
-            return replay(action.id)
-          } else {
-            return log.changeMeta(meta.id, { reasons: [] })
-          }
-        }).then(function () {
-          if (processing[action.id]) {
-            var error = new Error(
-              'Server undid Logux action because of ' + action.reason
-            )
-            error.action = action
-            processing[action.id][1](error)
-            delete processing[action.id]
-          }
-        })
-      } else if (action.type.slice(0, 6) === 'logux/') {
-        return Promise.resolve()
-      } else if (isFirstOlder(prevMeta, meta)) {
-        prevMeta = meta
-        originDispatch(action)
-        if (meta.added) saveHistory(meta)
-        return Promise.resolve()
-      } else {
-        return replay(meta.id).then(function () {
-          if (meta.reasons.indexOf('replay') !== -1) {
-            log.changeMeta(meta.id, {
-              reasons: meta.reasons.filter(function (i) {
-                return i !== 'replay'
-              })
+              reasons: meta.reasons.filter(i => i !== 'replay')
             })
           }
-        })
+        }
       }
     }
 
-    var lastAdded = 0
-    var addCalls = 0
-    client.on('add', function (action, meta) {
+    let lastAdded = 0
+    let addCalls = 0
+    client.on('add', (action, meta) => {
       if (meta.added > lastAdded) lastAdded = meta.added
 
       if (action.type === 'logux/processed') {
@@ -353,21 +336,21 @@ function createLoguxCreator (config) {
       }
 
       if (!meta.dispatch) {
-        var prevState = store.getState()
-        process(action, meta).then(function () {
+        let prevState = store.getState()
+        process(action, meta).then(() => {
           emitter.emit('change', store.getState(), prevState, action, meta)
         })
       }
     })
 
-    client.on('clean', function (action, meta) {
+    client.on('clean', (action, meta) => {
       delete wait[meta.id]
       delete stateHistory[meta.id]
     })
 
-    var previous = []
-    var ignores = { }
-    log.each(function (action, meta) {
+    let previous = []
+    let ignores = { }
+    log.each((action, meta) => {
       if (!meta.tab) {
         if (action.type === 'logux/undo') {
           ignores[action.id] = true
@@ -375,11 +358,9 @@ function createLoguxCreator (config) {
           previous.push([action, meta])
         }
       }
-    }).then(function () {
+    }).then(() => {
       if (previous.length > 0) {
-        Promise.all(previous.map(function (i) {
-          return process(i[0], i[1])
-        })).then(init)
+        Promise.all(previous.map(i => process(...i))).then(init)
       } else {
         init()
       }

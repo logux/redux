@@ -1,9 +1,9 @@
 let { Component, createContext } = require('react')
+let { createElement: h } = require('react')
 let { Provider } = require('react-redux')
 let { TestTime } = require('@logux/core')
+let { delay } = require('nanodelay')
 let renderer = require('react-test-renderer')
-let delay = require('nanodelay')
-let h = require('react').createElement
 
 let createLoguxCreator = require('../create-logux-creator')
 let useSubscription = require('../use-subscription')

@@ -1,19 +1,17 @@
-var ReactReduxContext = require('react-redux').ReactReduxContext
-var useContext = require('react').useContext
-var useEffect = require('react').useEffect
-var useState = require('react').useState
+let { ReactReduxContext } = require('react-redux')
+let { useContext, useEffect, useState } = require('react')
 
 function add (store, subscriptions) {
   if (!store.subscriptions) store.subscriptions = { }
   if (!store.subscribers) store.subscribers = { }
 
-  return Promise.all(subscriptions.map(function (i) {
-    var subscription = i[0]
-    var json = i[1]
+  return Promise.all(subscriptions.map(i => {
+    let subscription = i[0]
+    let json = i[1]
     if (!store.subscribers[json]) store.subscribers[json] = 0
     store.subscribers[json] += 1
     if (store.subscribers[json] === 1) {
-      var action = Object.assign({ type: 'logux/subscribe' }, subscription)
+      let action = { ...subscription, type: 'logux/subscribe' }
       store.subscriptions[json] = store.dispatch.sync(action)
     }
     return store.subscriptions[json]
@@ -21,12 +19,12 @@ function add (store, subscriptions) {
 }
 
 function remove (store, subscriptions) {
-  subscriptions.forEach(function (i) {
-    var subscription = i[0]
-    var json = i[1]
+  subscriptions.forEach(i => {
+    let subscription = i[0]
+    let json = i[1]
     store.subscribers[json] -= 1
     if (store.subscribers[json] === 0) {
-      var action = Object.assign({ type: 'logux/unsubscribe' }, subscription)
+      let action = { ...subscription, type: 'logux/unsubscribe' }
       store.log.add(action, { sync: true })
       delete store.subscriptions[json]
     }
@@ -65,33 +63,29 @@ function remove (store, subscriptions) {
  *   }
  * }
  */
-function useSubscription (channels, opts) {
-  if (!opts) opts = { }
+function useSubscription (channels, opts = { }) {
+  let [isSubscribing, changeSubscribing] = useState(true)
+  let { store } = useContext(opts.context || ReactReduxContext)
 
-  var isSubscribing = useState(true)
-  var store = useContext(opts.context || ReactReduxContext).store
-
-  var subscriptions = channels.map(function (i) {
-    var subscription = typeof i === 'string' ? { channel: i } : i
+  let subscriptions = channels.map(i => {
+    let subscription = typeof i === 'string' ? { channel: i } : i
     return [subscription, JSON.stringify(subscription)]
   })
 
-  var id = subscriptions.map(function (i) {
-    return i[1]
-  }).sort().join(' ')
+  let id = subscriptions.map(i => i[1]).sort().join(' ')
 
-  useEffect(function () {
-    var updated = false
-    add(store, subscriptions).then(function () {
-      if (!updated) isSubscribing[1](false)
+  useEffect(() => {
+    let updated = false
+    add(store, subscriptions).then(() => {
+      if (!updated) changeSubscribing(false)
     })
-    return function () {
+    return () => {
       updated = true
       remove(store, subscriptions)
     }
   }, [id])
 
-  return isSubscribing[0]
+  return isSubscribing
 }
 
 module.exports = useSubscription
