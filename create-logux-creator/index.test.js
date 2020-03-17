@@ -4,8 +4,7 @@ let { delay } = require('nanodelay')
 
 let { createLoguxCreator } = require('..')
 
-function createStore (reducer, opts, enhancer) {
-  if (!opts) opts = { }
+function createStore (reducer, opts = { }, enhancer) {
   if (!opts.server) opts.server = 'wss://localhost:1337'
   opts.subprotocol = '1.0.0'
   opts.userId = 10
