@@ -1,4 +1,4 @@
-import { Component, Context } from 'react'
+import { Component, Context as ReduxContext } from 'react'
 
 import { Channel } from '../use-subscription'
 
@@ -14,7 +14,7 @@ type SubscribeOptions = {
   /**
    * Context with the store.
    */
-  context?: Context<object>
+  context?: ReduxContext<object>
 
   /**
    * Change default `isSubscribing` property.
