@@ -2,7 +2,7 @@ import { Component, Context } from 'react'
 
 import { Channel } from '../use-subscription'
 
-interface subscriber<Props> {
+interface Subscriber<Props> {
   (props: Props): Channel[]
 }
 
@@ -47,6 +47,6 @@ type SubscribeOptions = {
  * @return Class wrapper.
  */
 export function subscribe<Props = object>(
-  subscriber: subscriber<Props>,
+  subscriber: Subscriber<Props>,
   opts?: SubscribeOptions
 ): Wrapper

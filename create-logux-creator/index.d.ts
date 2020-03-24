@@ -88,7 +88,7 @@ export interface LoguxDispatch<A extends Action = AnyAction> {
   log: Log<ClientMeta>
 }
 
-export interface stateListener<S, A> {
+export interface StateListener<S, A> {
   (state: S, prevState: S, action: A, meta: ClientMeta): void
 }
 
@@ -111,7 +111,7 @@ export interface LoguxStore<S = any, A extends Action = AnyAction> {
    * @param listener The listener function.
    * @returns Unbind listener from event.
    */
-  on (event: 'change', listener: stateListener<S, A>): Unsubscribe
+  on (event: 'change', listener: StateListener<S, A>): Unsubscribe
 }
 
 export type ExtendState<State, Extension> = [Extension] extends [never]
