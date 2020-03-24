@@ -1,10 +1,10 @@
-import { Context } from 'react'
+import { Context as ReduxContext } from 'react'
 
 type SubscribingOptions = {
   /**
    * Context with the store.
    */
-  context?: Context<object>
+  context?: ReduxContext<object>
 }
 
 export type Channel = string | {
