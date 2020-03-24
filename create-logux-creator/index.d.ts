@@ -10,7 +10,7 @@ import { ClientOptions, ClientMeta, CrossTabClient } from '@logux/client'
 import { Unsubscribe } from 'nanoevents'
 import { Log } from '@logux/core'
 
-export interface LoguxDispatch<A extends Action = AnyAction> {
+export interface LoguxDispatch<A extends Action> {
   <T extends A>(action: T, ...extraArgs: any[]): T
 
   /**
@@ -88,7 +88,7 @@ export interface LoguxDispatch<A extends Action = AnyAction> {
   log: Log<ClientMeta>
 }
 
-export interface StateListener<S, A> {
+export interface StateListener<S, A extends Action> {
   (state: S, prevState: S, action: A, meta: ClientMeta): void
 }
 
