@@ -28,19 +28,19 @@
   "dependencies": {
     "@logux/client": "logux/client",
     "@logux/core": "logux/core",
-    "@size-limit/dual-publish": "^4.4.0",
-    "@types/react": "^16.9.23",
-    "dual-publish": "^0.5.2",
-    "nanoevents": "^5.1.0",
+    "@size-limit/dual-publish": "^4.4.1",
+    "@types/react": "^16.9.25",
+    "dual-publish": "^0.8.5",
+    "nanoevents": "^5.1.5",
     "redux": "^4.0.5"
   },
   "devDependencies": {
     "@logux/eslint-config": "^36.1.1",
     "@logux/sharec-config": "^0.6.2",
-    "@size-limit/preset-small-lib": "^4.3.1",
+    "@size-limit/preset-small-lib": "^4.4.1",
     "check-dts": "^0.1.4",
     "eslint": "^6.8.0",
-    "eslint-config-standard": "^14.1.0",
+    "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.20.1",
     "eslint-plugin-jest": "^23.8.2",
     "eslint-plugin-node": "^11.0.0",
@@ -51,15 +51,15 @@
     "eslint-plugin-unicorn": "^17.2.0",
     "husky": "^4.2.3",
     "jest": "^25.1.0",
-    "lint-staged": "^10.0.8",
+    "lint-staged": "^10.0.9",
     "nanodelay": "^1.0.1",
-    "react": "^16.13.0",
-    "react-dom": "^16.13.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "react-redux": "^7.2.0",
-    "react-test-renderer": "^16.13.0",
+    "react-test-renderer": "^16.13.1",
     "rimraf": "^3.0.2",
-    "size-limit": "^4.3.1",
-    "yaspeller": "^6.0.3"
+    "size-limit": "^4.4.1",
+    "yaspeller": "^6.0.4"
   },
   "husky": {
     "hooks": {
