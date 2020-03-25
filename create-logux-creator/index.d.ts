@@ -4,7 +4,7 @@ import {
   Reducer,
   StoreEnhancer,
   PreloadedState,
-  Store
+  Store as ReduxStore
 } from 'redux'
 import { ClientOptions, ClientMeta, CrossTabClient } from '@logux/client'
 import { Unsubscribe } from 'nanoevents'
@@ -122,12 +122,12 @@ export interface LoguxStoreCreator {
   <S, A extends Action, Ext = {}, StateExt = {}>(
     reducer: Reducer<S, A>,
     enhancer?: StoreEnhancer<Ext, StateExt>
-  ): LoguxStore<S & StateExt, A> & Store<S & StateExt, A> & Ext
+  ): LoguxStore<S & StateExt, A> & ReduxStore<S & StateExt, A> & Ext
   <S, A extends Action, Ext, StateExt>(
     reducer: Reducer<S, A>,
     preloadedState?: PreloadedState<S>,
     enhancer?: StoreEnhancer<Ext>
-  ): LoguxStore<S & StateExt, A> & Store<S & StateExt, A> & Ext
+  ): LoguxStore<S & StateExt, A> & ReduxStore<S & StateExt, A> & Ext
 }
 
 type LoguxReduxConfig = ClientOptions & {
