@@ -28,16 +28,16 @@
   "dependencies": {
     "@logux/client": "logux/client",
     "@logux/core": "logux/core",
-    "@size-limit/dual-publish": "^4.4.1",
-    "@types/react": "^16.9.25",
-    "dual-publish": "^0.8.5",
+    "@size-limit/dual-publish": "^4.4.2",
+    "@types/react": "^16.9.26",
+    "dual-publish": "^0.8.6",
     "nanoevents": "^5.1.5",
     "redux": "^4.0.5"
   },
   "devDependencies": {
-    "@logux/eslint-config": "^36.1.1",
+    "@logux/eslint-config": "^36.1.2",
     "@logux/sharec-config": "^0.6.2",
-    "@size-limit/preset-small-lib": "^4.4.1",
+    "@size-limit/preset-small-lib": "^4.4.2",
     "check-dts": "^0.1.4",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.1",
@@ -48,9 +48,9 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-standard": "^4.0.1",
-    "eslint-plugin-unicorn": "^17.2.0",
+    "eslint-plugin-unicorn": "^18.0.0",
     "husky": "^4.2.3",
-    "jest": "^25.1.0",
+    "jest": "^25.2.3",
     "lint-staged": "^10.0.9",
     "nanodelay": "^1.0.1",
     "react": "^16.13.1",
@@ -58,7 +58,7 @@
     "react-redux": "^7.2.0",
     "react-test-renderer": "^16.13.1",
     "rimraf": "^3.0.2",
-    "size-limit": "^4.4.1",
+    "size-limit": "^4.4.2",
     "yaspeller": "^6.0.4"
   },
   "husky": {
