@@ -145,7 +145,7 @@ type LoguxReduxConfig = ClientOptions & {
   /**
    * Callback when there is no history to replay actions accurate.
    */
-  onMissedHistory?: (Action) => void
+  onMissedHistory?: (action: Action) => void
 }
 
 
