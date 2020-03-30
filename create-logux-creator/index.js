@@ -14,8 +14,8 @@ function hackReducer (reducer) {
 }
 
 function createLoguxCreator (config = { }) {
-  let checkEvery = config.checkEvery || 25
-  delete config.checkEvery
+  let cleanEvery = config.cleanEvery || 25
+  delete config.cleanEvery
   let reasonlessHistory = config.reasonlessHistory || 1000
   delete config.reasonlessHistory
   let saveStateEvery = config.saveStateEvery || 50
@@ -259,7 +259,7 @@ function createLoguxCreator (config = { }) {
         }
       } else if (!meta.noAutoReason) {
         addCalls += 1
-        if (addCalls % checkEvery === 0 && lastAdded > reasonlessHistory) {
+        if (addCalls % cleanEvery === 0 && lastAdded > reasonlessHistory) {
           historyCleaned = true
           log.removeReason('timeTravel', {
             maxAdded: lastAdded - reasonlessHistory

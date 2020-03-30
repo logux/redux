@@ -146,6 +146,12 @@ type LoguxReduxConfig = ClientOptions & {
    * Callback when there is no history to replay actions accurate.
    */
   onMissedHistory?: (action: Action) => void
+
+  /**
+   * How often we need to clean log from old actions. Default is every `25`
+   * actions.
+   */
+  cleanEvery?: number
 }
 
 

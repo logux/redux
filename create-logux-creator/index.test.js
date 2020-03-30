@@ -285,7 +285,7 @@ it('replays actions on missed history', async () => {
     reasonlessHistory: 2,
     onMissedHistory,
     saveStateEvery: 2,
-    checkEvery: 1
+    cleanEvery: 1
   })
   store.dispatch({ type: 'ADD', value: 'a' })
   store.dispatch({ type: 'ADD', value: 'b' })
@@ -311,7 +311,7 @@ it('works without onMissedHistory', async () => {
   let store = createStore(historyLine, {
     reasonlessHistory: 2,
     saveStateEvery: 2,
-    checkEvery: 1
+    cleanEvery: 1
   })
   store.dispatch({ type: 'ADD', value: 'a' })
   store.dispatch({ type: 'ADD', value: 'b' })
