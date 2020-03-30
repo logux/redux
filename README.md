@@ -30,9 +30,8 @@ npm install @logux/redux
 See [documentation] for Logux API.
 
 ```js
-import createLoguxCreator from '@logux/redux/create-logux-creator'
-
-import log from '@logux/client/log'
+import { createLoguxCreator } from '@logux/redux'
+import { log } from '@logux/client'
 
 let userId = document.querySelector('meta[name=user]').content
 let userToken = document.querySelector('meta[name=token]').content
@@ -64,7 +63,7 @@ ReactDOM.render(
 ```
 
 ```js
-import useSubscription from '@logux/redux/use-subscription'
+import { useSubscription } from '@logux/redux'
 
 export const User = ({ id, name }) => {
   const isSubscribing = useSubscription([`user/${ id }`])
