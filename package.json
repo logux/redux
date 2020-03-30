@@ -93,33 +93,12 @@
       " \\(by [^)]+\\)."
     ],
     "dictionary": [
-      "changeListener",
-      "createLoguxCreator",
-      "createLoguxStore",
-      "createStore",
-      "CrossTabClient",
-      "dispatchCrossTab",
-      "dispatchLocal",
-      "dispatchSync",
-      "getState",
-      "GraphQL",
-      "Logux",
-      "logux",
-      "LoguxStore",
-      "reconnection",
-      "reconnections",
-      "Redux",
-      "replaceReducer",
-      "SemVer",
-      "storeCreator",
-      "subprotocol",
-      "unsubscribe",
       "Versioning",
-      "ws",
-      "useSubscription",
+      "logux",
+      "Redux",
       "JSDoc",
-      "SubscribeAction",
-      "io"
+      "io",
+      "GraphQL"
     ]
   },
   "sharec": {
