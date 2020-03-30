@@ -1,6 +1,13 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.5
+* Rename `checkEvery` to `cleanEvery`.
+* Add ES modules support.
+* Add TypeScript definitions.
+* Move API docs from JSDoc to TypeDoc.
+* Mark package as side effect free.
+
 ## 0.4.2
 * Fix `store.client.tabId` support.
 
