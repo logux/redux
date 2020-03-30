@@ -26,8 +26,8 @@
     "react-redux": ">=6.0.0"
   },
   "dependencies": {
-    "@logux/client": "logux/client",
-    "@logux/core": "logux/core",
+    "@logux/client": "^0.7.0",
+    "@logux/core": "^0.4.0",
     "@size-limit/dual-publish": "^4.4.2",
     "@types/react": "^16.9.27",
     "dual-publish": "^0.8.6",
