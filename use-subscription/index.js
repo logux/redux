@@ -43,12 +43,12 @@ function useSubscription (channels, opts = { }) {
   let id = subscriptions.map(i => i[1]).sort().join(' ')
 
   useEffect(() => {
-    let updated = false
+    let ignoreResponce = false
     add(store, subscriptions).then(() => {
-      if (!updated) changeSubscribing(false)
+      if (!ignoreResponce) changeSubscribing(false)
     })
     return () => {
-      updated = true
+      ignoreResponce = true
       remove(store, subscriptions)
     }
   }, [id])
