@@ -53,7 +53,7 @@ export interface LoguxDispatch<A extends Action> {
    */
   crossTab <T extends A>(
     action: T, meta?: Partial<ClientMeta>
-  ):Promise<ClientMeta>
+  ): Promise<ClientMeta>
 
   /**
    * Add local action to log and update store state.
