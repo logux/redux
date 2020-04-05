@@ -76,16 +76,6 @@ export interface LoguxDispatch<A extends Action> {
   local <T extends A>(
     action: T, meta?: Partial<ClientMeta>
   ): Promise<ClientMeta>
-
-  /**
-   * Logux synchronization client.
-   */
-  client: CrossTabClient
-
-  /**
-   * The Logux log.
-   */
-  log: Log<ClientMeta>
 }
 
 export interface StateListener<S, A extends Action> {
@@ -112,6 +102,16 @@ export interface LoguxStore<S = any, A extends Action = AnyAction> {
    * @returns Unbind listener from event.
    */
   on (event: 'change', listener: StateListener<S, A>): Unsubscribe
+
+  /**
+   * Logux synchronization client.
+   */
+  client: CrossTabClient
+
+  /**
+   * The Logux log.
+   */
+  log: Log<ClientMeta>
 }
 
 export type ExtendState<State, Extension> = [Extension] extends [never]
