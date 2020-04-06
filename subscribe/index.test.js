@@ -17,7 +17,7 @@ function createComponent (content) {
   let createStore = createLoguxCreator({
     subprotocol: '0.0.0',
     server: 'wss://localhost:1337',
-    userId: false,
+    userId: '10',
     time: new TestTime()
   })
   let store = createStore(() => ({ }))
@@ -230,7 +230,7 @@ it('supports different store sources', async () => {
   let createStore = createLoguxCreator({
     subprotocol: '0.0.0',
     server: 'wss://localhost:1337',
-    userId: false,
+    userId: '10',
     time: new TestTime()
   })
   let store = createStore(() => ({ }))

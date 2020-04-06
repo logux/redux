@@ -3,7 +3,7 @@ import { createLoguxCreator } from '..'
 let createStore = createLoguxCreator({
   subprotocol: '1.0.0',
   server: 'ws://localhost',
-  userId: false
+  userId: '10'
 })
 
 type CounterState = number
