@@ -7,7 +7,7 @@ let { createLoguxCreator } = require('..')
 function createStore (reducer, opts = { }, enhancer) {
   if (!opts.server) opts.server = 'wss://localhost:1337'
   opts.subprotocol = '1.0.0'
-  opts.userId = 10
+  opts.userId = '10'
   opts.time = new TestTime()
 
   let creator = createLoguxCreator(opts)
