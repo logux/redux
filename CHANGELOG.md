@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.5.1
+* Remove development dependencies from `dependencies`.
+
 ## 0.5
 * Rename `checkEvery` to `cleanEvery`.
 * Add ES modules support.
