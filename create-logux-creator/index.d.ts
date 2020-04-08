@@ -163,7 +163,7 @@ type LoguxReduxConfig = ClientOptions & {
  *     ? 'ws://localhost:31337'
  *     : 'wss://logux.example.com',
  *   userId: userId.content
- *   credentials: token.content
+ *   token: token.content
  * })
  *
  * const store = createStore(reducer)

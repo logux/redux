@@ -34,13 +34,13 @@ import { createLoguxCreator } from '@logux/redux'
 import { log } from '@logux/client'
 
 let userId = document.querySelector('meta[name=user]').content
-let userToken = document.querySelector('meta[name=token]').content
+let token = document.querySelector('meta[name=token]').content
 
 const createStore = createLoguxCreator({
-  credentials: userToken,
   subprotocol: '1.0.0',
   server: 'wss://example.com:1337',
-  userId: userToken
+  userId,
+  token
 })
 
 const store = createStore(reducers, preloadedState)
