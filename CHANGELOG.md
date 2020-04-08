@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.5.2
+* Fix type compatibility issues with Redux <4.0.5.
+
 ## 0.5.1
 * Remove development dependencies from `dependencies`.
 
