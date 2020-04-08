@@ -114,16 +114,12 @@ export interface LoguxStore<S = any, A extends Action = AnyAction> {
   log: Log<ClientMeta>
 }
 
-export type ExtendState<State, Extension> = [Extension] extends [never]
-  ? State
-  : State & Extension
-
 export interface LoguxStoreCreator {
-  <S, A extends Action, Ext = {}, StateExt = {}>(
+  <S, A extends Action, Ext = { }, StateExt = { }>(
     reducer: Reducer<S, A>,
     enhancer?: StoreEnhancer<Ext, StateExt>
   ): LoguxStore<S & StateExt, A> & ReduxStore<S & StateExt, A> & Ext
-  <S, A extends Action, Ext = {}, StateExt = {}>(
+  <S, A extends Action, Ext = { }, StateExt = { }>(
     reducer: Reducer<S, A>,
     preloadedState?: PreloadedState<S>,
     enhancer?: StoreEnhancer<Ext>
