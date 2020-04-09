@@ -23,14 +23,14 @@
   },
   "peerDependencies": {
     "react": ">=16.8.4",
-    "react-redux": ">=6.0.0"
+    "react-redux": ">=6.0.0",
+    "redux": ">=4.0.0"
   },
   "dependencies": {
     "@logux/client": "^0.7.0",
     "@logux/core": "^0.4.2",
     "@types/react": "^16.9.32",
-    "nanoevents": "^5.1.5",
-    "redux": "^4.0.0"
+    "nanoevents": "^5.1.5"
   },
   "devDependencies": {
     "@logux/eslint-config": "^36.1.2",
@@ -57,6 +57,7 @@
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.0",
     "react-test-renderer": "^16.13.1",
+    "redux": "^4.0.5",
     "rimraf": "^3.0.2",
     "size-limit": "^4.4.5",
     "yaspeller": "^6.1.0"
