@@ -78,11 +78,11 @@ export interface LoguxDispatch<A extends Action> {
   ): Promise<ClientMeta>
 }
 
-export interface StateListener<S, A extends Action> {
+export interface ReduxStateListener<S, A extends Action> {
   (state: S, prevState: S, action: A, meta: ClientMeta): void
 }
 
-export interface LoguxStore<S = any, A extends Action = AnyAction> {
+export class LoguxReduxStore<S = any, A extends Action = AnyAction> {
   /**
    * Add action to log with Redux compatible API.
    */
@@ -101,7 +101,7 @@ export interface LoguxStore<S = any, A extends Action = AnyAction> {
    * @param listener The listener function.
    * @returns Unbind listener from event.
    */
-  on (event: 'change', listener: StateListener<S, A>): Unsubscribe
+  on (event: 'change', listener: ReduxStateListener<S, A>): Unsubscribe
 
   /**
    * Logux synchronization client.
@@ -118,12 +118,12 @@ export interface LoguxStoreCreator {
   <S, A extends Action, Ext = { }, StateExt = { }>(
     reducer: Reducer<S, A>,
     enhancer?: StoreEnhancer<Ext, StateExt>
-  ): LoguxStore<S & StateExt, A> & ReduxStore<S & StateExt, A> & Ext
+  ): LoguxReduxStore<S & StateExt, A> & ReduxStore<S & StateExt, A> & Ext
   <S, A extends Action, Ext = { }, StateExt = { }>(
     reducer: Reducer<S, A>,
     preloadedState?: PreloadedState<S>,
     enhancer?: StoreEnhancer<Ext>
-  ): LoguxStore<S & StateExt, A> & ReduxStore<S & StateExt, A> & Ext
+  ): LoguxReduxStore<S & StateExt, A> & ReduxStore<S & StateExt, A> & Ext
 }
 
 type LoguxReduxConfig = ClientOptions & {
