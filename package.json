@@ -27,8 +27,8 @@
     "redux": ">=4.0.0"
   },
   "dependencies": {
-    "@logux/client": "^0.8.0",
-    "@logux/core": "^0.5.1",
+    "@logux/client": "^0.8.2",
+    "@logux/core": "^0.5.2",
     "@types/react": "^16.9.34",
     "nanoevents": "^5.1.5"
   },
@@ -38,7 +38,7 @@
     "@size-limit/dual-publish": "^4.4.5",
     "@size-limit/preset-small-lib": "^4.4.5",
     "check-dts": "^0.3.0",
-    "dual-publish": "^0.8.7",
+    "dual-publish": "^0.10.0",
     "eslint": "^6.8.0",
     "eslint-config-standard": "^14.1.1",
     "eslint-plugin-import": "^2.20.2",
@@ -60,7 +60,7 @@
     "redux": "^4.0.5",
     "rimraf": "^3.0.2",
     "size-limit": "^4.4.5",
-    "yaspeller": "^6.1.0"
+    "yaspeller": "^7.0.0"
   },
   "husky": {
     "hooks": {
