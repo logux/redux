@@ -27,3 +27,5 @@ store.dispatch.crossTab({ type: 'INC' }, { reasons: ['reason'] })
 store.dispatch.sync({ type: 'INC' }).then(meta => {
   console.log(meta.id)
 })
+
+console.log(store.getState().toFixed())

@@ -2,6 +2,7 @@ import {
   AnyAction,
   Action,
   Reducer,
+  Observable,
   StoreEnhancer,
   PreloadedState,
   Store as ReduxStore
@@ -82,7 +83,9 @@ export interface ReduxStateListener<S, A extends Action> {
   (state: S, prevState: S, action: A, meta: ClientMeta): void
 }
 
-export class LoguxReduxStore<S = any, A extends Action = AnyAction> {
+export class LoguxReduxStore<
+  S = any, A extends Action = AnyAction
+> implements ReduxStore<S, A> {
   /**
    * Add action to log with Redux compatible API.
    */
@@ -112,18 +115,42 @@ export class LoguxReduxStore<S = any, A extends Action = AnyAction> {
    * The Logux log.
    */
   log: Log<ClientMeta>
+
+  /**
+   * Reads the state tree managed by the store.
+   *
+   * @returns The current state tree of your application.
+   */
+  getState (): S
+
+  /**
+   * Adds a change listener.
+   *
+   * @param listener A callback to be invoked on every dispatch.
+   * @returns A function to remove this change listener.
+   */
+  subscribe (listener: () => void): Unsubscribe
+
+  /**
+   * Replaces the reducer currently used by the store to calculate the state.
+   *
+   * @param nextReducer The reducer for the store to use instead.
+   */
+  replaceReducer (nextReducer: Reducer<S, A>): void
+
+  [Symbol.observable] (): Observable<S>
 }
 
 export interface LoguxStoreCreator {
   <S, A extends Action, Ext = { }, StateExt = { }>(
     reducer: Reducer<S, A>,
     enhancer?: StoreEnhancer<Ext, StateExt>
-  ): LoguxReduxStore<S & StateExt, A> & ReduxStore<S & StateExt, A> & Ext
+  ): LoguxReduxStore<S & StateExt, A> & Ext
   <S, A extends Action, Ext = { }, StateExt = { }>(
     reducer: Reducer<S, A>,
     preloadedState?: PreloadedState<S>,
     enhancer?: StoreEnhancer<Ext>
-  ): LoguxReduxStore<S & StateExt, A> & ReduxStore<S & StateExt, A> & Ext
+  ): LoguxReduxStore<S & StateExt, A> & Ext
 }
 
 type LoguxReduxConfig = ClientOptions & {
