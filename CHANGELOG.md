@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.6.1
+* Export `LoguxReduxStore` type.
+
 ## 0.6
 * Use Logux Core 0.5 and WebSocket Protocol 3.
 * Use Logux Client 0.8 with `store.client.changeUser`.
