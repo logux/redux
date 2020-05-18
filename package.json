@@ -29,17 +29,18 @@
   "dependencies": {
     "@logux/client": "logux/client#next",
     "@logux/core": "logux/core#next",
-    "@types/react": "^16.9.35",
     "nanoevents": "^5.1.7"
   },
   "devDependencies": {
-    "@logux/eslint-config": "^39.0.2",
-    "@logux/sharec-config": "^0.7.2",
+    "@logux/eslint-config": "^39.0.3",
+    "@logux/sharec-config": "^0.7.3",
     "@size-limit/dual-publish": "^4.5.0",
     "@size-limit/preset-small-lib": "^4.5.0",
-    "@types/jest": "^25.2.1",
-    "@typescript-eslint/eslint-plugin": "^2.32.0",
-    "@typescript-eslint/parser": "^2.32.0",
+    "@types/jest": "^25.2.2",
+    "@types/react": "^16.9.35",
+    "@types/ws": "^7.2.4",
+    "@typescript-eslint/eslint-plugin": "^2.34.0",
+    "@typescript-eslint/parser": "^2.34.0",
     "check-dts": "^0.3.0",
     "dual-publish": "^0.10.2",
     "eslint": "^7.0.0",
@@ -55,7 +56,7 @@
     "eslint-plugin-unicorn": "^20.0.0",
     "husky": "^4.2.5",
     "jest": "^26.0.1",
-    "lint-staged": "^10.2.2",
+    "lint-staged": "^10.2.4",
     "nanodelay": "^1.0.2",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
@@ -121,6 +122,6 @@
   },
   "sharec": {
     "config": "@logux/sharec-config",
-    "version": "0.7.2"
+    "version": "0.7.3"
   }
 }

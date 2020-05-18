@@ -1,3 +1,5 @@
+import { Action } from '@logux/core'
+
 import { createLoguxCreator } from '..'
 
 let createStore = createLoguxCreator({
@@ -27,6 +29,6 @@ function reducer (state: CounterState = 0, action: IncAction): CounterState {
 let store = createStore<CounterState, IncAction>(reducer)
 
 // THROWS Type '"RENAME"' is not assignable to type '"INC"'.
-store.dispatch({ type: 'RENAME' }, { reasons: ['reason'] })
+store.dispatch({ type: 'RENAME' })
 // THROWS Type 'number' is not assignable to type 'string[] | undefined'.
 store.dispatch.crossTab({ type: 'INC' }, { reasons: 1 })

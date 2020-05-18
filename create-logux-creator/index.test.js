@@ -65,7 +65,7 @@ it('has shortcut for add', async () => {
   let store = createStore(increment)
   await store.dispatch.crossTab({ type: 'INC' }, { reasons: ['test'] })
   expect(store.getState()).toEqual({ value: 1 })
-  expect(store.log.store.created[0][1].reasons).toEqual(['test'])
+  expect(store.log.store.entries[0][1].reasons).toEqual(['test'])
 })
 
 it('listen for action from other tabs', () => {
@@ -267,7 +267,7 @@ it('replays history for reason-less action', async () => {
   )
   await delay(1)
   expect(store.getState().value).toEqual('0a|bc')
-  expect(store.log.store.created).toHaveLength(3)
+  expect(store.log.store.entries).toHaveLength(3)
 })
 
 it('replays actions before staring since initial state', async () => {
@@ -418,9 +418,9 @@ it('copies reasons to undo action', async () => {
 it('dispatches local actions', async () => {
   let store = createStore(increment)
   await store.dispatch.local({ type: 'INC' }, { reasons: ['test'] })
-  expect(store.log.store.created[0][0]).toEqual({ type: 'INC' })
-  expect(store.log.store.created[0][1].tab).toEqual(store.client.tabId)
-  expect(store.log.store.created[0][1].reasons).toEqual(['test'])
+  expect(store.log.store.entries[0][0]).toEqual({ type: 'INC' })
+  expect(store.log.store.entries[0][1].tab).toEqual(store.client.tabId)
+  expect(store.log.store.entries[0][1].reasons).toEqual(['test'])
 })
 
 it('allows to miss meta for local actions', async () => {
@@ -429,14 +429,14 @@ it('allows to miss meta for local actions', async () => {
     meta.reasons.push('preadd')
   })
   await store.dispatch.local({ type: 'INC' })
-  expect(store.log.store.created[0][0]).toEqual({ type: 'INC' })
+  expect(store.log.store.entries[0][0]).toEqual({ type: 'INC' })
 })
 
 it('dispatches sync actions', async () => {
   let store = createStore(increment)
   store.dispatch.sync({ type: 'INC' }, { reasons: ['test'] })
   await delay(1)
-  let log = store.log.store.created
+  let log = store.log.store.entries
   expect(log[0][0]).toEqual({ type: 'INC' })
   expect(log[0][1].sync).toBe(true)
   expect(log[0][1].reasons).toEqual(['test', 'syncing'])
