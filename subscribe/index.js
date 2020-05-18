@@ -2,7 +2,7 @@ let { createElement } = require('react')
 
 let { useSubscription } = require('../use-subscription')
 
-function subscribe (subscriber, opts = { }) {
+function subscribe (subscriber, opts = {}) {
   let subscribingProp = 'isSubscribing'
   if (opts.subscribingProp) subscribingProp = opts.subscribingProp
 

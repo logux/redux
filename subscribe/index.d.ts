@@ -46,7 +46,7 @@ type SubscribeOptions = {
  *
  * @return Class wrapper.
  */
-export function subscribe<Props = object>(
+export function subscribe<Props = object> (
   subscriber: Subscriber<Props>,
   opts?: SubscribeOptions
 ): Wrapper

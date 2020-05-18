@@ -12,7 +12,7 @@ import { Unsubscribe } from 'nanoevents'
 import { Log } from '@logux/core'
 
 export interface LoguxDispatch<A extends Action> {
-  <T extends A>(action: T, ...extraArgs: any[]): T
+  <T extends A>(action: T): T
 
   /**
    * Add sync action to log and update store state.
@@ -31,9 +31,7 @@ export interface LoguxDispatch<A extends Action> {
    * @param meta Action’s metadata.
    * @returns Promise when action will be processed by the server.
    */
-  sync <T extends A>(
-    action: T, meta?: Partial<ClientMeta>
-  ): Promise<ClientMeta>
+  sync<T extends A>(action: T, meta?: Partial<ClientMeta>): Promise<ClientMeta>
 
   /**
    * Add cross-tab action to log and update store state.
@@ -43,17 +41,18 @@ export interface LoguxDispatch<A extends Action> {
    * store.dispatch.crossTab(
    *   { type: 'CHANGE_FAVICON', favicon },
    *   { reasons: ['lastFavicon'] }
-    * ).then(meta => {
-    *   store.log.removeReason('lastFavicon', { maxAdded: meta.added - 1 })
-    * })
-    * ```
+   * ).then(meta => {
+   *   store.log.removeReason('lastFavicon', { maxAdded: meta.added - 1 })
+   * })
+   * ```
    *
    * @param action The new action.
    * @param meta Action’s metadata.
    * @returns Promise when action will be saved to the log.
    */
-  crossTab <T extends A>(
-    action: T, meta?: Partial<ClientMeta>
+  crossTab<T extends A>(
+    action: T,
+    meta?: Partial<ClientMeta>
   ): Promise<ClientMeta>
 
   /**
@@ -74,18 +73,15 @@ export interface LoguxDispatch<A extends Action> {
    * @param meta Action’s metadata.
    * @returns Promise when action will be saved to the log.
    */
-  local <T extends A>(
-    action: T, meta?: Partial<ClientMeta>
-  ): Promise<ClientMeta>
+  local<T extends A>(action: T, meta?: Partial<ClientMeta>): Promise<ClientMeta>
 }
 
 export interface ReduxStateListener<S, A extends Action> {
   (state: S, prevState: S, action: A, meta: ClientMeta): void
 }
 
-export class LoguxReduxStore<
-  S = any, A extends Action = AnyAction
-> implements ReduxStore<S, A> {
+export class LoguxReduxStore<S = any, A extends Action = AnyAction>
+  implements ReduxStore<S, A> {
   /**
    * Add action to log with Redux compatible API.
    */
@@ -144,11 +140,11 @@ export class LoguxReduxStore<
 }
 
 export interface LoguxStoreCreator {
-  <S, A extends Action, Ext = { }, StateExt = { }>(
+  <S, A extends Action, Ext = {}, StateExt = {}>(
     reducer: Reducer<S, A>,
     enhancer?: StoreEnhancer<Ext, StateExt>
   ): LoguxReduxStore<S & StateExt, A> & Ext
-  <S, A extends Action, Ext = { }, StateExt = { }>(
+  <S, A extends Action, Ext = {}, StateExt = {}>(
     reducer: Reducer<S, A>,
     preloadedState?: PreloadedState<S>,
     enhancer?: StoreEnhancer<Ext>
@@ -179,7 +175,6 @@ type LoguxReduxConfig = ClientOptions & {
   cleanEvery?: number
 }
 
-
 /**
  * Creates Logux client and connect it to Redux createStore function.
  *
@@ -202,6 +197,4 @@ type LoguxReduxConfig = ClientOptions & {
  * @param config Logux Client config.
  * @returns Redux’s `createStore` compatible function.
  */
-export function createLoguxCreator(
-  config: LoguxReduxConfig
-): LoguxStoreCreator
+export function createLoguxCreator (config: LoguxReduxConfig): LoguxStoreCreator

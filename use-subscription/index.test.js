@@ -20,7 +20,7 @@ function createComponent (content) {
     userId: '10',
     time: new TestTime()
   })
-  let store = createStore(() => ({ }))
+  let store = createStore(() => ({}))
   let component = renderer.create(h(Provider, { store }, content))
   component.client = store.client
   return component
@@ -28,17 +28,19 @@ function createComponent (content) {
 
 function UserPhoto ({ id }) {
   let isSubscribing = useSubscription([
-    { channel: `users/${ id }`, fields: ['photo'] }
+    { channel: `users/${id}`, fields: ['photo'] }
   ])
-  return h('img', { isSubscribing, src: `${ id }.jpg` })
+  return h('img', { isSubscribing, src: `${id}.jpg` })
 }
 
 it('subscribes', async () => {
-  let component = createComponent(h('div', { }, [
-    h(UserPhoto, { id: '1', key: 1 }),
-    h(UserPhoto, { id: '1', key: 2 }),
-    h(UserPhoto, { id: '2', key: 3 })
-  ]))
+  let component = createComponent(
+    h('div', {}, [
+      h(UserPhoto, { id: '1', key: 1 }),
+      h(UserPhoto, { id: '1', key: 2 }),
+      h(UserPhoto, { id: '2', key: 3 })
+    ])
+  )
   await delay(1)
   expect(component.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
@@ -48,12 +50,10 @@ it('subscribes', async () => {
 
 it('accepts channel names', async () => {
   function User ({ id }) {
-    useSubscription([`users/${ id }`, `users/${ id }/comments`])
+    useSubscription([`users/${id}`, `users/${id}/comments`])
     return h('div')
   }
-  let component = createComponent(h('div', { }, [
-    h(User, { id: '1', key: 1 })
-  ]))
+  let component = createComponent(h('div', {}, [h(User, { id: '1', key: 1 })]))
   await delay(1)
   expect(component.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1' },
@@ -74,15 +74,19 @@ it('unsubscribes', async () => {
 
     render () {
       let users = this.state.users
-      return h('div', {
-        onClick: this.change.bind(this)
-      }, Object.keys(this.state.users).map(key => {
-        return h(UserPhoto, { id: users[key], key })
-      }))
+      return h(
+        'div',
+        {
+          onClick: this.change.bind(this)
+        },
+        Object.keys(this.state.users).map(key => {
+          return h(UserPhoto, { id: users[key], key })
+        })
+      )
     }
   }
 
-  let component = createComponent(h(UserList, { }))
+  let component = createComponent(h(UserList, {}))
   await delay(1)
   expect(component.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
@@ -115,13 +119,15 @@ it('changes subscription', async () => {
     }
 
     render () {
-      return h('div', { onClick: this.change.bind(this) },
+      return h(
+        'div',
+        { onClick: this.change.bind(this) },
         h(UserPhoto, { id: this.state.id })
       )
     }
   }
 
-  let component = createComponent(h(Profile, { }))
+  let component = createComponent(h(Profile, {}))
   await delay(1)
   expect(component.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
@@ -147,13 +153,15 @@ it('does not resubscribe on non-relevant props changes', () => {
     }
 
     render () {
-      return h('div', { onClick: this.change.bind(this) },
+      return h(
+        'div',
+        { onClick: this.change.bind(this) },
         h(UserPhoto, { id: 1, nonId: this.state.id })
       )
     }
   }
 
-  let component = createComponent(h(Profile, { }))
+  let component = createComponent(h(Profile, {}))
 
   let resubscriptions = 0
   component.client.log.on('add', () => {
@@ -178,7 +186,7 @@ it('supports different store sources', async () => {
     userId: '10',
     time: new TestTime()
   })
-  let store = createStore(() => ({ }))
+  let store = createStore(() => ({}))
 
   class Profile extends Component {
     getChildContext () {
@@ -186,19 +194,19 @@ it('supports different store sources', async () => {
     }
 
     render () {
-      return h(Provider, { context: MyContext, store },
-        h('div', null,
-          h(LoguxUserPhoto, { id: 1 })
-        )
+      return h(
+        Provider,
+        { context: MyContext, store },
+        h('div', null, h(LoguxUserPhoto, { id: 1 }))
       )
     }
   }
 
   Profile.childContextTypes = {
-    logux () { }
+    logux () {}
   }
 
-  createComponent(h(Profile, { }))
+  createComponent(h(Profile, {}))
   await delay(1)
   expect(store.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1' }
@@ -217,13 +225,15 @@ it('reports about subscription end', async () => {
     }
 
     render () {
-      return h('div', { onClick: this.change.bind(this) },
+      return h(
+        'div',
+        { onClick: this.change.bind(this) },
         h(UserPhoto, { id: this.state.id })
       )
     }
   }
 
-  let component = createComponent(h(Profile, { }))
+  let component = createComponent(h(Profile, {}))
   let nodeId = component.client.nodeId
   let log = component.client.log
   await delay(1)
@@ -237,12 +247,12 @@ it('reports about subscription end', async () => {
   })
   expect(component.toJSON().children[0].props.isSubscribing).toBe(true)
   await renderer.act(async () => {
-    log.add({ type: 'logux/processed', id: `1 ${ nodeId } 0` })
+    log.add({ type: 'logux/processed', id: `1 ${nodeId} 0` })
     await delay(1)
   })
   expect(component.toJSON().children[0].props.isSubscribing).toBe(true)
   await renderer.act(async () => {
-    log.add({ type: 'logux/processed', id: `3 ${ nodeId } 0` })
+    log.add({ type: 'logux/processed', id: `3 ${nodeId} 0` })
     await delay(1)
   })
   expect(component.toJSON().children[0].props.isSubscribing).toBe(false)
@@ -251,7 +261,7 @@ it('reports about subscription end', async () => {
 it('works on channels size changes', () => {
   jest.spyOn(console, 'error')
   function UserList ({ ids }) {
-    useSubscription(ids.map(id => `users/${ id }`))
+    useSubscription(ids.map(id => `users/${id}`))
     return h('div')
   }
   class UsersPage extends Component {
@@ -265,13 +275,15 @@ it('works on channels size changes', () => {
     }
 
     render () {
-      return h('div', { onClick: this.change.bind(this) },
+      return h(
+        'div',
+        { onClick: this.change.bind(this) },
         h(UserList, { ids: this.state.ids })
       )
     }
   }
 
-  let component = createComponent(h(UsersPage, { }))
+  let component = createComponent(h(UsersPage, {}))
   renderer.act(() => {
     component.toJSON().props.onClick([1, 2])
   })

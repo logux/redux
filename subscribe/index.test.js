@@ -20,7 +20,7 @@ function createComponent (content) {
     userId: '10',
     time: new TestTime()
   })
-  let store = createStore(() => ({ }))
+  let store = createStore(() => ({}))
   let component = renderer.create(h(Provider, { store }, content))
   component.client = store.client
   return component
@@ -33,26 +33,24 @@ function UserPhoto (props) {
   })
 }
 let SubscribeUserPhoto = subscribe(({ id }) => {
-  return { channel: `users/${ id }`, fields: ['photo'] }
+  return { channel: `users/${id}`, fields: ['photo'] }
 })(UserPhoto)
 
 it('passes properties', () => {
   function Post ({ title, children }) {
-    return h('article', { },
-      h('h1', { }, title),
-      children)
+    return h('article', {}, h('h1', {}, title), children)
   }
   let SubscribePost = subscribe(() => 'posts/10')(Post)
 
   let component = createComponent(
-    h(SubscribePost, { title: 'A' }, h('p', { }, 'Text'))
+    h(SubscribePost, { title: 'A' }, h('p', {}, 'Text'))
   )
   expect(component.toJSON()).toEqual({
     type: 'article',
-    props: { },
+    props: {},
     children: [
-      { type: 'h1', props: { }, children: ['A'] },
-      { type: 'p', props: { }, children: ['Text'] }
+      { type: 'h1', props: {}, children: ['A'] },
+      { type: 'p', props: {}, children: ['Text'] }
     ]
   })
 })
@@ -65,13 +63,15 @@ it('subscribes', async () => {
   function User () {
     return null
   }
-  let SubscribeUser = subscribe(({ id }) => `users/${ id }`)(User)
+  let SubscribeUser = subscribe(({ id }) => `users/${id}`)(User)
 
-  let component = createComponent(h('div', { }, [
-    h(SubscribeUser, { id: '1', key: 1 }),
-    h(SubscribeUser, { id: '1', key: 2 }),
-    h(SubscribeUser, { id: '2', key: 3 })
-  ]))
+  let component = createComponent(
+    h('div', {}, [
+      h(SubscribeUser, { id: '1', key: 1 }),
+      h(SubscribeUser, { id: '1', key: 2 }),
+      h(SubscribeUser, { id: '2', key: 3 })
+    ])
+  )
   await delay(1)
   expect(component.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1' },
@@ -85,10 +85,9 @@ it('subscribes by channel name', async () => {
   }
   let SubscribeUsers = subscribe(['users'])(Users)
 
-  let component = createComponent(h('div', { }, [
-    h(SubscribeUsers, { key: 1 }),
-    h(SubscribeUsers, { key: 2 })
-  ]))
+  let component = createComponent(
+    h('div', {}, [h(SubscribeUsers, { key: 1 }), h(SubscribeUsers, { key: 2 })])
+  )
   await delay(1)
   expect(component.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users' }
@@ -108,15 +107,19 @@ it('unsubscribes', async () => {
 
     render () {
       let users = this.state.users
-      return h('div', {
-        onClick: this.change.bind(this)
-      }, Object.keys(this.state.users).map(key => {
-        return h(SubscribeUserPhoto, { id: users[key], key })
-      }))
+      return h(
+        'div',
+        {
+          onClick: this.change.bind(this)
+        },
+        Object.keys(this.state.users).map(key => {
+          return h(SubscribeUserPhoto, { id: users[key], key })
+        })
+      )
     }
   }
 
-  let component = createComponent(h(UserList, { }))
+  let component = createComponent(h(UserList, {}))
   await delay(1)
   expect(component.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
@@ -149,13 +152,15 @@ it('changes subscription', async () => {
     }
 
     render () {
-      return h('div', { onClick: this.change.bind(this) },
+      return h(
+        'div',
+        { onClick: this.change.bind(this) },
         h(SubscribeUserPhoto, { id: this.state.id })
       )
     }
   }
 
-  let component = createComponent(h(Profile, { }))
+  let component = createComponent(h(Profile, {}))
   await delay(1)
   expect(component.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
@@ -181,13 +186,15 @@ it('does not resubscribe on non-relevant props changes', () => {
     }
 
     render () {
-      return h('div', { onClick: this.change.bind(this) },
+      return h(
+        'div',
+        { onClick: this.change.bind(this) },
         h(SubscribeUserPhoto, { id: 1, nonId: this.state.id })
       )
     }
   }
 
-  let component = createComponent(h(Profile, { }))
+  let component = createComponent(h(Profile, {}))
 
   let resubscriptions = 0
   component.client.log.on('add', () => {
@@ -203,14 +210,16 @@ it('supports multiple channels', async () => {
     return null
   }
   let SubscribeUser = subscribe(({ id }) => {
-    return [`users/${ id }`, `pictures/${ id }`]
+    return [`users/${id}`, `pictures/${id}`]
   })(User)
 
-  let component = createComponent(h('div', { }, [
-    h(SubscribeUser, { id: '1', key: 1 }),
-    h(SubscribeUser, { id: '1', key: 2 }),
-    h(SubscribeUser, { id: '2', key: 3 })
-  ]))
+  let component = createComponent(
+    h('div', {}, [
+      h(SubscribeUser, { id: '1', key: 1 }),
+      h(SubscribeUser, { id: '1', key: 2 }),
+      h(SubscribeUser, { id: '2', key: 3 })
+    ])
+  )
   await delay(1)
   expect(component.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1' },
@@ -223,7 +232,7 @@ it('supports multiple channels', async () => {
 it('supports different store sources', async () => {
   let MyContext = createContext()
 
-  let LoguxUserPhoto = subscribe(({ id }) => `users/${ id }`, {
+  let LoguxUserPhoto = subscribe(({ id }) => `users/${id}`, {
     context: MyContext
   })(UserPhoto)
 
@@ -233,7 +242,7 @@ it('supports different store sources', async () => {
     userId: '10',
     time: new TestTime()
   })
-  let store = createStore(() => ({ }))
+  let store = createStore(() => ({}))
 
   class Profile extends Component {
     getChildContext () {
@@ -241,19 +250,19 @@ it('supports different store sources', async () => {
     }
 
     render () {
-      return h(Provider, { context: MyContext, store },
-        h('div', { onClick: this.change },
-          h(LoguxUserPhoto, { id: 1 })
-        )
+      return h(
+        Provider,
+        { context: MyContext, store },
+        h('div', { onClick: this.change }, h(LoguxUserPhoto, { id: 1 }))
       )
     }
   }
 
   Profile.childContextTypes = {
-    logux () { }
+    logux () {}
   }
 
-  createComponent(h(Profile, { }))
+  createComponent(h(Profile, {}))
   await delay(1)
   expect(store.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1' }
@@ -272,13 +281,15 @@ it('reports about subscription end', async () => {
     }
 
     render () {
-      return h('div', { onClick: this.change.bind(this) },
+      return h(
+        'div',
+        { onClick: this.change.bind(this) },
         h(SubscribeUserPhoto, { id: this.state.id })
       )
     }
   }
 
-  let component = createComponent(h(Profile, { }))
+  let component = createComponent(h(Profile, {}))
   let nodeId = component.client.nodeId
   let log = component.client.log
   await delay(1)

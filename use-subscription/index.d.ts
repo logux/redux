@@ -7,10 +7,12 @@ type SubscribingOptions = {
   context?: ReduxContext<object>
 }
 
-export type Channel = string | {
-  channel: string
-  [extra: string]: any
-}
+export type Channel =
+  | string
+  | {
+      channel: string
+      [extra: string]: any
+    }
 
 /**
  * Hook to subscribe for channel during component render and unsubscribe
@@ -35,7 +37,7 @@ export type Channel = string | {
  * @param opts Options
  * @return `true` during data loading.
  */
-export function useSubscription(
+export function useSubscription (
   channels: Channel[],
   opts?: SubscribingOptions
 ): boolean

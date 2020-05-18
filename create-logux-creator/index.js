@@ -13,7 +13,7 @@ function hackReducer (reducer) {
   }
 }
 
-function createLoguxCreator (config = { }) {
+function createLoguxCreator (config = {}) {
   let cleanEvery = config.cleanEvery || 25
   delete config.cleanEvery
   let reasonlessHistory = config.reasonlessHistory || 1000
@@ -34,9 +34,9 @@ function createLoguxCreator (config = { }) {
     store.client = client
     store.log = log
     let historyCleaned = false
-    let stateHistory = { }
+    let stateHistory = {}
 
-    let processing = { }
+    let processing = {}
 
     let actionCount = 0
     function saveHistory (meta) {
@@ -77,18 +77,18 @@ function createLoguxCreator (config = { }) {
       saveHistory(meta)
     }
 
-    store.dispatch.local = (action, meta = { }) => {
+    store.dispatch.local = (action, meta = {}) => {
       meta.tab = client.tabId
       if (meta.reasons || meta.keepLast) meta.noAutoReason = true
       return log.add(action, meta)
     }
 
-    store.dispatch.crossTab = (action, meta = { }) => {
+    store.dispatch.crossTab = (action, meta = {}) => {
       if (meta.reasons || meta.keepLast) meta.noAutoReason = true
       return log.add(action, meta)
     }
 
-    store.dispatch.sync = (action, meta = { }) => {
+    store.dispatch.sync = (action, meta = {}) => {
       if (meta.reasons || meta.keepLast) meta.noAutoReason = true
 
       meta.sync = true
@@ -120,66 +120,69 @@ function createLoguxCreator (config = { }) {
 
     let replaying
     function replay (actionId) {
-      let ignore = { }
+      let ignore = {}
       let actions = []
       let replayed = false
       let newAction
       let collecting = true
 
       replaying = new Promise(resolve => {
-        log.each((action, meta) => {
-          if (meta.tab && meta.tab !== client.tabId) return true
+        log
+          .each((action, meta) => {
+            if (meta.tab && meta.tab !== client.tabId) return true
 
-          if (collecting || !stateHistory[meta.id]) {
-            if (action.type === 'logux/undo') {
-              ignore[action.id] = true
-              return true
-            } else if (action.type.startsWith('logux/')) {
-              return true
-            }
-
-            if (!ignore[meta.id]) actions.push([action, meta.id])
-            if (meta.id === actionId) {
-              newAction = action
-              collecting = false
-            }
-
-            return true
-          } else {
-            replayed = true
-            replaceState(stateHistory[meta.id], actions)
-            return false
-          }
-        }).then(() => {
-          if (!replayed) {
-            if (historyCleaned) {
-              if (onMissedHistory) {
-                onMissedHistory(newAction)
+            if (collecting || !stateHistory[meta.id]) {
+              if (action.type === 'logux/undo') {
+                ignore[action.id] = true
+                return true
+              } else if (action.type.startsWith('logux/')) {
+                return true
               }
-              for (let i = actions.length - 1; i >= 0; i--) {
-                let id = actions[i][1]
-                if (stateHistory[id]) {
-                  replayed = true
-                  replaceState(
-                    stateHistory[id],
-                    actions.slice(0, i).concat([[newAction, actionId]]),
-                    id
-                  )
-                  break
+
+              if (!ignore[meta.id]) actions.push([action, meta.id])
+              if (meta.id === actionId) {
+                newAction = action
+                collecting = false
+              }
+
+              return true
+            } else {
+              replayed = true
+              replaceState(stateHistory[meta.id], actions)
+              return false
+            }
+          })
+          .then(() => {
+            if (!replayed) {
+              if (historyCleaned) {
+                if (onMissedHistory) {
+                  onMissedHistory(newAction)
+                }
+                for (let i = actions.length - 1; i >= 0; i--) {
+                  let id = actions[i][1]
+                  if (stateHistory[id]) {
+                    replayed = true
+                    replaceState(
+                      stateHistory[id],
+                      actions.slice(0, i).concat([[newAction, actionId]]),
+                      id
+                    )
+                    break
+                  }
                 }
               }
+
+              if (!replayed) {
+                replaceState(
+                  preloadedState,
+                  actions.concat([[{ type: '@@redux/INIT' }]])
+                )
+              }
             }
 
-            if (!replayed) {
-              replaceState(preloadedState, actions.concat([
-                [{ type: '@@redux/INIT' }]
-              ]))
-            }
-          }
-
-          replaying = false
-          resolve()
-        })
+            replaying = false
+            resolve()
+          })
       })
 
       return replaying
@@ -199,7 +202,7 @@ function createLoguxCreator (config = { }) {
       }
     })
 
-    let wait = { }
+    let wait = {}
 
     async function process (action, meta) {
       if (replaying) {
@@ -284,22 +287,24 @@ function createLoguxCreator (config = { }) {
     })
 
     let previous = []
-    let ignores = { }
-    log.each((action, meta) => {
-      if (!meta.tab) {
-        if (action.type === 'logux/undo') {
-          ignores[action.id] = true
-        } else if (!ignores[meta.id]) {
-          previous.push([action, meta])
+    let ignores = {}
+    log
+      .each((action, meta) => {
+        if (!meta.tab) {
+          if (action.type === 'logux/undo') {
+            ignores[action.id] = true
+          } else if (!ignores[meta.id]) {
+            previous.push([action, meta])
+          }
         }
-      }
-    }).then(() => {
-      if (previous.length > 0) {
-        Promise.all(previous.map(i => process(...i))).then(init)
-      } else {
-        init()
-      }
-    })
+      })
+      .then(() => {
+        if (previous.length > 0) {
+          Promise.all(previous.map(i => process(...i))).then(init)
+        } else {
+          init()
+        }
+      })
 
     return store
   }
