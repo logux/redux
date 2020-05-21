@@ -1,10 +1,12 @@
 import { Context as ReduxContext } from 'react'
 
+import { LoguxReduxStore } from '../create-logux-creator'
+
 type SubscribingOptions = {
   /**
    * Context with the store.
    */
-  context?: ReduxContext<object>
+  context?: ReduxContext<{ store: LoguxReduxStore }>
 }
 
 export type Channel =

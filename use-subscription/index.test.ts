@@ -1,11 +1,16 @@
-let { Component, createContext } = require('react')
-let { createElement: h } = require('react')
-let { Provider } = require('react-redux')
-let { TestTime } = require('@logux/core')
-let { delay } = require('nanodelay')
-let renderer = require('react-test-renderer')
+import {
+  FunctionComponent,
+  Component,
+  createContext,
+  ReactNode,
+  createElement as h
+} from 'react'
+import { TestTime, TestLog } from '@logux/core'
+import { create, act } from 'react-test-renderer'
+import { Provider } from 'react-redux'
+import { delay } from 'nanodelay'
 
-let { createLoguxCreator, useSubscription } = require('..')
+import { createLoguxCreator, useSubscription, LoguxReduxStore } from '..'
 
 jest.mock('react', () => {
   let React = require('react/cjs/react.development.js')
@@ -13,32 +18,55 @@ jest.mock('react', () => {
   return React
 })
 
-function createComponent (content) {
-  let createStore = createLoguxCreator({
+function createComponent (content: ReactNode) {
+  let createStore = createLoguxCreator<{}, TestLog>({
     subprotocol: '0.0.0',
     server: 'wss://localhost:1337',
     userId: '10',
     time: new TestTime()
   })
   let store = createStore(() => ({}))
-  let component = renderer.create(h(Provider, { store }, content))
-  component.client = store.client
-  return component
+  let component = create(h(Provider, { store }, content))
+  return { ...component, client: store.client }
 }
 
-function UserPhoto ({ id }) {
+type Users = {
+  [key: string]: number
+}
+
+type UserPhotoProps = {
+  id: number
+  nonId?: number
+}
+
+let UserPhoto: FunctionComponent<UserPhotoProps> = ({ id }) => {
   let isSubscribing = useSubscription([
     { channel: `users/${id}`, fields: ['photo'] }
   ])
   return h('img', { isSubscribing, src: `${id}.jpg` })
 }
 
+function click (component: ReturnType<typeof createComponent>, event: any) {
+  let node = component.toJSON()
+  if (node === null) throw new Error('Component returned null')
+  node.props.onClick(event)
+}
+
+function childProps (component: ReturnType<typeof createComponent>, i: number) {
+  let node = component.toJSON()
+  if (node === null) throw new Error('Component returned null')
+  if (node.children === null) throw new Error('Component has no childern')
+  let child = node.children[i]
+  if (typeof child !== 'object') throw new Error('Child has no a object')
+  return child.props
+}
+
 it('subscribes', async () => {
   let component = createComponent(
     h('div', {}, [
-      h(UserPhoto, { id: '1', key: 1 }),
-      h(UserPhoto, { id: '1', key: 2 }),
-      h(UserPhoto, { id: '2', key: 3 })
+      h(UserPhoto, { id: 1, key: 1 }),
+      h(UserPhoto, { id: 1, key: 2 }),
+      h(UserPhoto, { id: 2, key: 3 })
     ])
   )
   await delay(1)
@@ -49,7 +77,7 @@ it('subscribes', async () => {
 })
 
 it('accepts channel names', async () => {
-  function User ({ id }) {
+  let User: FunctionComponent<{ id: string }> = ({ id }) => {
     useSubscription([`users/${id}`, `users/${id}/comments`])
     return h('div')
   }
@@ -62,13 +90,13 @@ it('accepts channel names', async () => {
 })
 
 it('unsubscribes', async () => {
-  class UserList extends Component {
-    constructor (props) {
+  class UserList extends Component<{}, { users: Users }> {
+    constructor (props: {}) {
       super(props)
       this.state = { users: { a: 1, b: 1, c: 2 } }
     }
 
-    change (users) {
+    change (users: Users) {
       this.setState({ users })
     }
 
@@ -79,8 +107,8 @@ it('unsubscribes', async () => {
         {
           onClick: this.change.bind(this)
         },
-        Object.keys(this.state.users).map(key => {
-          return h(UserPhoto, { id: users[key], key })
+        Object.entries(this.state.users).map(([key, id]) => {
+          return h(UserPhoto, { id, key })
         })
       )
     }
@@ -92,13 +120,13 @@ it('unsubscribes', async () => {
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
     { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
   ])
-  component.toJSON().props.onClick({ a: 1, c: 2 })
+  click(component, { a: 1, c: 2 })
   await delay(1)
   expect(component.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
     { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
   ])
-  component.toJSON().props.onClick({ a: 1 })
+  click(component, { a: 1 })
   await delay(1)
   expect(component.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
@@ -108,13 +136,13 @@ it('unsubscribes', async () => {
 })
 
 it('changes subscription', async () => {
-  class Profile extends Component {
-    constructor (props) {
+  class Profile extends Component<{}, { id: number }> {
+    constructor (props: {}) {
       super(props)
       this.state = { id: 1 }
     }
 
-    change (id) {
+    change (id: number) {
       this.setState({ id })
     }
 
@@ -132,7 +160,7 @@ it('changes subscription', async () => {
   expect(component.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
   ])
-  component.toJSON().props.onClick(2)
+  click(component, 2)
   await delay(1)
   expect(component.client.log.actions()).toEqual([
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
@@ -142,13 +170,13 @@ it('changes subscription', async () => {
 })
 
 it('does not resubscribe on non-relevant props changes', () => {
-  class Profile extends Component {
-    constructor (props) {
+  class Profile extends Component<{}, { id: number }> {
+    constructor (props: {}) {
       super(props)
       this.state = { id: 1 }
     }
 
-    change (id) {
+    change (id: number) {
       this.setState({ id })
     }
 
@@ -168,42 +196,31 @@ it('does not resubscribe on non-relevant props changes', () => {
     resubscriptions += 1
   })
 
-  component.toJSON().props.onClick(2)
+  click(component, 2)
   expect(resubscriptions).toEqual(0)
 })
 
 it('supports different store sources', async () => {
-  let MyContext = createContext()
-
-  function LoguxUserPhoto () {
-    useSubscription(['users/1'], { context: MyContext })
-    return h('div')
-  }
-
-  let createStore = createLoguxCreator({
+  let createStore = createLoguxCreator<{}, TestLog>({
     subprotocol: '0.0.0',
     server: 'wss://localhost:1337',
     userId: '10',
     time: new TestTime()
   })
   let store = createStore(() => ({}))
+  let MyContext = createContext<{ store: LoguxReduxStore }>({ store })
 
-  class Profile extends Component {
-    getChildContext () {
-      return { logux: store }
-    }
-
-    render () {
-      return h(
-        Provider,
-        { context: MyContext, store },
-        h('div', null, h(LoguxUserPhoto, { id: 1 }))
-      )
-    }
+  function LoguxUserPhoto () {
+    useSubscription(['users/1'], { context: MyContext })
+    return h('div')
   }
 
-  Profile.childContextTypes = {
-    logux () {}
+  let Profile: FunctionComponent = () => {
+    return h(
+      MyContext.Provider,
+      { value: { store } },
+      h('div', null, h(LoguxUserPhoto, { id: 1 }))
+    )
   }
 
   createComponent(h(Profile, {}))
@@ -214,13 +231,13 @@ it('supports different store sources', async () => {
 })
 
 it('reports about subscription end', async () => {
-  class Profile extends Component {
-    constructor (props) {
+  class Profile extends Component<{}, { id: number }> {
+    constructor (props: {}) {
       super(props)
       this.state = { id: 1 }
     }
 
-    change (id) {
+    change (id: number) {
       this.setState({ id })
     }
 
@@ -237,40 +254,41 @@ it('reports about subscription end', async () => {
   let nodeId = component.client.nodeId
   let log = component.client.log
   await delay(1)
-  expect(component.toJSON().children[0].props.isSubscribing).toBe(true)
-  renderer.act(() => {
-    component.toJSON().props.onClick(1)
+  expect(childProps(component, 0).isSubscribing).toBe(true)
+  act(() => {
+    click(component, 1)
   })
-  expect(component.toJSON().children[0].props.isSubscribing).toBe(true)
-  renderer.act(() => {
-    component.toJSON().props.onClick(2)
+  expect(childProps(component, 0).isSubscribing).toBe(true)
+  act(() => {
+    click(component, 2)
   })
-  expect(component.toJSON().children[0].props.isSubscribing).toBe(true)
-  await renderer.act(async () => {
+  expect(childProps(component, 0).isSubscribing).toBe(true)
+  await act(async () => {
     log.add({ type: 'logux/processed', id: `1 ${nodeId} 0` })
     await delay(1)
   })
-  expect(component.toJSON().children[0].props.isSubscribing).toBe(true)
-  await renderer.act(async () => {
+  expect(childProps(component, 0).isSubscribing).toBe(true)
+  await act(async () => {
     log.add({ type: 'logux/processed', id: `3 ${nodeId} 0` })
     await delay(1)
   })
-  expect(component.toJSON().children[0].props.isSubscribing).toBe(false)
+  expect(childProps(component, 0).isSubscribing).toBe(false)
 })
 
 it('works on channels size changes', () => {
   jest.spyOn(console, 'error')
-  function UserList ({ ids }) {
+  let UserList: FunctionComponent<{ ids: number[] }> = ({ ids }) => {
     useSubscription(ids.map(id => `users/${id}`))
     return h('div')
   }
-  class UsersPage extends Component {
-    constructor (props) {
+
+  class UsersPage extends Component<{}, { ids: number[] }> {
+    constructor (props: {}) {
       super(props)
       this.state = { ids: [1] }
     }
 
-    change (ids) {
+    change (ids: number[]) {
       this.setState({ ids })
     }
 
@@ -284,8 +302,8 @@ it('works on channels size changes', () => {
   }
 
   let component = createComponent(h(UsersPage, {}))
-  renderer.act(() => {
-    component.toJSON().props.onClick([1, 2])
+  act(() => {
+    click(component, [1, 2])
   })
   expect(console.error).not.toHaveBeenCalled()
 })

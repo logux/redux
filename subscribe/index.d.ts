@@ -1,20 +1,27 @@
-import { Component, Context as ReduxContext } from 'react'
+import { ComponentType, Context as ReduxContext } from 'react'
 
 import { Channel } from '../use-subscription'
+import { LoguxReduxStore } from '../create-logux-creator'
 
-interface Subscriber<Props> {
-  (props: Props): Channel[]
+interface Subscriber<P> {
+  (props: P): Channel[] | Channel
 }
 
-interface Wrapper {
-  (component: Component): Component
+type WrappedComponent<P> = ComponentType<P> & {
+  WrappedComponent: ComponentType
+}
+
+interface Wrapper<P> {
+  (component: ComponentType<{ isSubscribing: boolean } & P>): WrappedComponent<
+    P
+  >
 }
 
 type SubscribeOptions = {
   /**
    * Context with the store.
    */
-  context?: ReduxContext<object>
+  context?: ReduxContext<{ store: LoguxReduxStore }>
 
   /**
    * Change default `isSubscribing` property.
@@ -46,7 +53,7 @@ type SubscribeOptions = {
  *
  * @return Class wrapper.
  */
-export function subscribe<Props = object> (
-  subscriber: Subscriber<Props>,
+export function subscribe<P = object> (
+  subscriber: Subscriber<P> | Channel[] | Channel,
   opts?: SubscribeOptions
-): Wrapper
+): Wrapper<P>

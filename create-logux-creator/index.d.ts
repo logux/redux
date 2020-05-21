@@ -11,6 +11,16 @@ import { ClientOptions, ClientMeta, CrossTabClient } from '@logux/client'
 import { Unsubscribe } from 'nanoevents'
 import { Log } from '@logux/core'
 
+export type LoguxUndoAction = {
+  type: 'logux/undo'
+  id: string
+  reason?: string
+}
+
+export type LoguxUndoError = Error & {
+  action: LoguxUndoAction
+}
+
 export interface LoguxDispatch<A extends Action> {
   <T extends A>(action: T): T
 
@@ -80,8 +90,27 @@ export interface ReduxStateListener<S, A extends Action> {
   (state: S, prevState: S, action: A, meta: ClientMeta): void
 }
 
-export class LoguxReduxStore<S = any, A extends Action = AnyAction>
-  implements ReduxStore<S, A> {
+export class LoguxReduxStore<
+  S = any,
+  A extends Action = AnyAction,
+  H extends object = {},
+  L extends Log = Log<ClientMeta>
+> implements ReduxStore<S, A> {
+  /**
+   * Logux synchronization client.
+   */
+  client: CrossTabClient<H, L>
+
+  /**
+   * The Logux log.
+   */
+  log: L
+
+  /**
+   * Promise until loading the state from IndexedDB.
+   */
+  initialize: Promise<void>
+
   /**
    * Add action to log with Redux compatible API.
    */
@@ -103,16 +132,6 @@ export class LoguxReduxStore<S = any, A extends Action = AnyAction>
    * @returns Unbind listener from event.
    */
   on (event: 'change', listener: ReduxStateListener<S, A>): Unsubscribe
-
-  /**
-   * Logux synchronization client.
-   */
-  client: CrossTabClient
-
-  /**
-   * The Logux log.
-   */
-  log: Log<ClientMeta>
 
   /**
    * Reads the state tree managed by the store.
@@ -139,19 +158,22 @@ export class LoguxReduxStore<S = any, A extends Action = AnyAction>
   [Symbol.observable] (): Observable<S>
 }
 
-export interface LoguxStoreCreator {
-  <S, A extends Action, Ext = {}, StateExt = {}>(
+export interface LoguxStoreCreator<
+  H extends object = {},
+  L extends Log = Log<ClientMeta>
+> {
+  <S, A extends Action = Action, Ext = {}, StateExt = {}>(
     reducer: Reducer<S, A>,
     enhancer?: StoreEnhancer<Ext, StateExt>
-  ): LoguxReduxStore<S & StateExt, A> & Ext
-  <S, A extends Action, Ext = {}, StateExt = {}>(
+  ): LoguxReduxStore<S & StateExt, A, H, L> & Ext
+  <S, A extends Action = Action, Ext = {}, StateExt = {}>(
     reducer: Reducer<S, A>,
     preloadedState?: PreloadedState<S>,
     enhancer?: StoreEnhancer<Ext>
-  ): LoguxReduxStore<S & StateExt, A> & Ext
+  ): LoguxReduxStore<S & StateExt, A, H, L> & Ext
 }
 
-type LoguxReduxConfig = ClientOptions & {
+export type LoguxReduxOptions = ClientOptions & {
   /**
    * How many actions without `meta.reasons` will be kept for time travel.
    * Default is `1000`.
@@ -197,4 +219,7 @@ type LoguxReduxConfig = ClientOptions & {
  * @param config Logux Client config.
  * @returns Redux’s `createStore` compatible function.
  */
-export function createLoguxCreator (config: LoguxReduxConfig): LoguxStoreCreator
+export function createLoguxCreator<
+  H extends object = {},
+  L extends Log = Log<ClientMeta>
+> (config: LoguxReduxOptions): LoguxStoreCreator<H, L>
