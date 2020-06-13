@@ -1,6 +1,11 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.7
+* Use Logux Core 0.6 and WebSocket Protocol 4.
+* Use Logux Client 0.9.
+* Fix types.
+
 ## 0.6.2
 * Add Redux methods to `LoguxReduxStore` type.
 
