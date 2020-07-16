@@ -1,7 +1,7 @@
 import { ComponentType, Context as ReduxContext } from 'react'
 
-import { Channel } from '../use-subscription'
-import { LoguxReduxStore } from '../create-logux-creator'
+import { LoguxReduxStore } from '../create-logux-creator/index.js'
+import { Channel } from '../use-subscription/index.js'
 
 interface Subscriber<P> {
   (props: P): Channel[] | Channel

@@ -8,7 +8,7 @@ import {
   LoguxReduxOptions,
   LoguxUndoAction,
   LoguxUndoError
-} from '..'
+} from '../index.js'
 
 type State = {
   value: string

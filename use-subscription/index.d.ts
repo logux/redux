@@ -1,6 +1,6 @@
 import { Context as ReduxContext } from 'react'
 
-import { LoguxReduxStore } from '../create-logux-creator'
+import { LoguxReduxStore } from '../create-logux-creator/index.js'
 
 type SubscribingOptions = {
   /**

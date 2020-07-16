@@ -10,7 +10,11 @@ import { create, act } from 'react-test-renderer'
 import { Provider } from 'react-redux'
 import { delay } from 'nanodelay'
 
-import { createLoguxCreator, useSubscription, LoguxReduxStore } from '..'
+import {
+  createLoguxCreator,
+  useSubscription,
+  LoguxReduxStore
+} from '../index.js'
 
 jest.mock('react', () => {
   let React = require('react/cjs/react.development.js')

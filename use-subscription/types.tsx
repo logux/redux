@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { useSubscription } from '..'
+import { useSubscription } from '../index.js'
 
 export function UserList ({ id }: { id: number }) {
   let isLoading = useSubscription([

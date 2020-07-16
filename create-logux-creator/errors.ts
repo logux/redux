@@ -1,6 +1,6 @@
 import { Action } from '@logux/core'
 
-import { createLoguxCreator } from '..'
+import { createLoguxCreator } from '../index.js'
 
 let createStore = createLoguxCreator({
   subprotocol: '1.0.0',
