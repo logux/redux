@@ -1,12 +1,14 @@
 import { Action } from '@logux/core'
 
-import { createLoguxCreator } from '../index.js'
+import { CrossTabClient, createStoreCreator } from '../index.js'
 
-let createStore = createLoguxCreator({
+let client = new CrossTabClient({
   subprotocol: '1.0.0',
   server: 'ws://localhost',
   userId: '10'
 })
+
+let createStore = createStoreCreator(client)
 
 type CounterState = number
 

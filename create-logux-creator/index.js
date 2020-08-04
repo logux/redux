@@ -1,7 +1,7 @@
 let { createNanoEvents } = require('nanoevents')
 let { CrossTabClient } = require('@logux/client/cross-tab-client')
 let { isFirstOlder } = require('@logux/core/is-first-older')
-let { createStore } = require('redux')
+let { createStore: createReduxStore } = require('redux')
 
 function hackReducer (reducer) {
   return (state, action) => {
@@ -13,21 +13,16 @@ function hackReducer (reducer) {
   }
 }
 
-function createLoguxCreator (config = {}) {
-  let cleanEvery = config.cleanEvery || 25
-  delete config.cleanEvery
-  let reasonlessHistory = config.reasonlessHistory || 1000
-  delete config.reasonlessHistory
-  let saveStateEvery = config.saveStateEvery || 50
-  delete config.saveStateEvery
-  let onMissedHistory = config.onMissedHistory
-  delete config.onMissedHistory
+function createStoreCreator (client, options = {}) {
+  let cleanEvery = options.cleanEvery || 25
+  let saveStateEvery = options.saveStateEvery || 50
+  let onMissedHistory = options.onMissedHistory
+  let reasonlessHistory = options.reasonlessHistory || 1000
 
-  let client = new CrossTabClient(config)
   let log = client.log
 
-  return function createLoguxStore (reducer, preloadedState, enhancer) {
-    let store = createStore(hackReducer(reducer), preloadedState, enhancer)
+  return function createStore (reducer, preloadedState, enhancer) {
+    let store = createReduxStore(hackReducer(reducer), preloadedState, enhancer)
 
     let emitter = createNanoEvents()
 
@@ -310,4 +305,32 @@ function createLoguxCreator (config = {}) {
   }
 }
 
-module.exports = { createLoguxCreator }
+function createLoguxCreator (config = {}) {
+  console.warn(
+    'Logux Redux: the "createLoguxCreator" function will be deprecated from v0.9. ' +
+      'Use "createStoreCreator" instead.'
+  )
+
+  let cleanEvery = config.cleanEvery || 25
+  delete config.cleanEvery
+  let saveStateEvery = config.saveStateEvery || 50
+  delete config.saveStateEvery
+  let onMissedHistory = config.onMissedHistory
+  delete config.onMissedHistory
+  let reasonlessHistory = config.reasonlessHistory || 1000
+  delete config.reasonlessHistory
+
+  let client = new CrossTabClient(config)
+
+  return createStoreCreator(client, {
+    cleanEvery,
+    saveStateEvery,
+    onMissedHistory,
+    reasonlessHistory
+  })
+}
+
+module.exports = {
+  createLoguxCreator,
+  createStoreCreator
+}

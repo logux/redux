@@ -102,7 +102,7 @@
   ],
   "size-limit": [
     {
-      "import": "{ createLoguxCreator, useSubscription }",
+      "import": "{ CrossTabClient, createStoreCreator, useSubscription }",
       "limit": "11 KB"
     }
   ],

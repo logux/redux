@@ -7,7 +7,12 @@ import {
   PreloadedState,
   Store as ReduxStore
 } from 'redux'
-import { ClientOptions, ClientMeta, CrossTabClient } from '@logux/client'
+import {
+  Client,
+  ClientMeta,
+  ClientOptions,
+  CrossTabClient
+} from '@logux/client'
 import { Unsubscribe } from 'nanoevents'
 import { Log } from '@logux/core'
 
@@ -173,7 +178,7 @@ export interface LoguxStoreCreator<
   ): LoguxReduxStore<S & StateExt, A, H, L> & Ext
 }
 
-export type LoguxReduxOptions = ClientOptions & {
+export type LoguxReduxOptions = {
   /**
    * How many actions without `meta.reasons` will be kept for time travel.
    * Default is `1000`.
@@ -198,7 +203,41 @@ export type LoguxReduxOptions = ClientOptions & {
 }
 
 /**
+ * Connects Logux Client to Redux createStore function.
+ *
+ * ```js
+ * import { CrossTabClient, createStoreCreator } from '@logux/redux'
+ *
+ * const client = new CrossTabClient({
+ *   subprotocol: '1.0.0',
+ *   server: process.env.NODE_ENV === 'development'
+ *     ? 'ws://localhost:31337'
+ *     : 'wss://logux.example.com',
+ *   userId: userId.content
+ *   token: token.content
+ * })
+ *
+ * const createStore = createStoreCreator(client)
+ *
+ * const store = createStore(reducer)
+ * store.client.start()
+ * ```
+ *
+ * @param client Logux Client.
+ * @param options Logux Redux options.
+ * @returns Redux’s `createStore` compatible function.
+ */
+export function createStoreCreator<
+  H extends object = {},
+  L extends Log = Log<ClientMeta>
+> (
+  client: Client | CrossTabClient,
+  options?: LoguxReduxOptions
+): LoguxStoreCreator<H, L>
+
+/**
  * Creates Logux client and connect it to Redux createStore function.
+ * Will be deprecated from v0.9.
  *
  * ```js
  * import { createLoguxCreator } from '@logux/redux'
@@ -222,4 +261,4 @@ export type LoguxReduxOptions = ClientOptions & {
 export function createLoguxCreator<
   H extends object = {},
   L extends Log = Log<ClientMeta>
-> (config: LoguxReduxOptions): LoguxStoreCreator<H, L>
+> (config: ClientOptions & LoguxReduxOptions): LoguxStoreCreator<H, L>

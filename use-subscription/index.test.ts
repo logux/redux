@@ -11,9 +11,10 @@ import { Provider } from 'react-redux'
 import { delay } from 'nanodelay'
 
 import {
-  createLoguxCreator,
+  createStoreCreator,
   useSubscription,
-  LoguxReduxStore
+  LoguxReduxStore,
+  CrossTabClient
 } from '../index.js'
 
 jest.mock('react', () => {
@@ -23,12 +24,13 @@ jest.mock('react', () => {
 })
 
 function createComponent (content: ReactNode) {
-  let createStore = createLoguxCreator<{}, TestLog>({
+  let client = new CrossTabClient<{}, TestLog>({
     subprotocol: '0.0.0',
     server: 'wss://localhost:1337',
     userId: '10',
     time: new TestTime()
   })
+  let createStore = createStoreCreator<{}, TestLog>(client)
   let store = createStore(() => ({}))
   let component = create(h(Provider, { store }, content))
   return { ...component, client: store.client }
@@ -205,12 +207,13 @@ it('does not resubscribe on non-relevant props changes', () => {
 })
 
 it('supports different store sources', async () => {
-  let createStore = createLoguxCreator<{}, TestLog>({
+  let client = new CrossTabClient<{}, TestLog>({
     subprotocol: '0.0.0',
     server: 'wss://localhost:1337',
     userId: '10',
     time: new TestTime()
   })
+  let createStore = createStoreCreator<{}, TestLog>(client)
   let store = createStore(() => ({}))
   let MyContext = createContext<{ store: LoguxReduxStore }>({ store })
 
