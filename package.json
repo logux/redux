@@ -102,7 +102,7 @@
   ],
   "size-limit": [
     {
-      "import": "{ createLoguxCreator, useSubscription }",
+      "import": "{ createLoguxCreator, useSubscription, useDispatch }",
       "limit": "11 KB"
     }
   ],
