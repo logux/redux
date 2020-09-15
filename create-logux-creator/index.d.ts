@@ -98,13 +98,13 @@ export interface ReduxStateListener<S, A extends Action> {
 export class LoguxReduxStore<
   S = any,
   A extends Action = AnyAction,
-  H extends object = {},
+  C extends Client = Client<{}, Log<ClientMeta>>,
   L extends Log = Log<ClientMeta>
 > implements ReduxStore<S, A> {
   /**
    * Logux synchronization client.
    */
-  client: CrossTabClient<H, L>
+  client: C
 
   /**
    * The Logux log.
@@ -164,18 +164,18 @@ export class LoguxReduxStore<
 }
 
 export interface LoguxStoreCreator<
-  H extends object = {},
+  C extends Client = Client<{}, Log<ClientMeta>>,
   L extends Log = Log<ClientMeta>
 > {
   <S, A extends Action = Action, Ext = {}, StateExt = {}>(
     reducer: Reducer<S, A>,
     enhancer?: StoreEnhancer<Ext, StateExt>
-  ): LoguxReduxStore<S & StateExt, A, H, L> & Ext
+  ): LoguxReduxStore<S & StateExt, A, C, L> & Ext
   <S, A extends Action = Action, Ext = {}, StateExt = {}>(
     reducer: Reducer<S, A>,
     preloadedState?: PreloadedState<S>,
     enhancer?: StoreEnhancer<Ext>
-  ): LoguxReduxStore<S & StateExt, A, H, L> & Ext
+  ): LoguxReduxStore<S & StateExt, A, C, L> & Ext
 }
 
 export type LoguxReduxOptions = {
@@ -228,12 +228,12 @@ export type LoguxReduxOptions = {
  * @returns Redux’s `createStore` compatible function.
  */
 export function createStoreCreator<
-  H extends object = {},
+  C extends Client = Client<{}, Log<ClientMeta>>,
   L extends Log = Log<ClientMeta>
 > (
   client: Client | CrossTabClient,
   options?: LoguxReduxOptions
-): LoguxStoreCreator<H, L>
+): LoguxStoreCreator<C, L>
 
 /**
  * Creates Logux client and connect it to Redux createStore function.
@@ -261,4 +261,6 @@ export function createStoreCreator<
 export function createLoguxCreator<
   H extends object = {},
   L extends Log = Log<ClientMeta>
-> (config: ClientOptions & LoguxReduxOptions): LoguxStoreCreator<H, L>
+> (
+  config: ClientOptions & LoguxReduxOptions
+): LoguxStoreCreator<CrossTabClient<H, L>, L>
