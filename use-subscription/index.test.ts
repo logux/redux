@@ -7,6 +7,7 @@ import {
 } from 'react'
 import { TestTime, TestLog } from '@logux/core'
 import { create, act } from 'react-test-renderer'
+import { ClientMeta } from '@logux/client'
 import { Provider } from 'react-redux'
 import { delay } from 'nanodelay'
 
@@ -24,13 +25,16 @@ jest.mock('react', () => {
 })
 
 function createComponent (content: ReactNode) {
-  let client = new CrossTabClient<{}, TestLog>({
+  let client = new CrossTabClient({
     subprotocol: '0.0.0',
     server: 'wss://localhost:1337',
     userId: '10',
     time: new TestTime()
   })
-  let createStore = createStoreCreator<{}, TestLog>(client)
+  let createStore = createStoreCreator<
+    CrossTabClient<{}, TestLog<ClientMeta>>,
+    TestLog<ClientMeta>
+  >(client)
   let store = createStore(() => ({}))
   let component = create(h(Provider, { store }, content))
   return { ...component, client: store.client }
@@ -207,13 +211,16 @@ it('does not resubscribe on non-relevant props changes', () => {
 })
 
 it('supports different store sources', async () => {
-  let client = new CrossTabClient<{}, TestLog>({
+  let client = new CrossTabClient({
     subprotocol: '0.0.0',
     server: 'wss://localhost:1337',
     userId: '10',
     time: new TestTime()
   })
-  let createStore = createStoreCreator<{}, TestLog>(client)
+  let createStore = createStoreCreator<
+    CrossTabClient<{}, TestLog<ClientMeta>>,
+    TestLog<ClientMeta>
+  >(client)
   let store = createStore(() => ({}))
   let MyContext = createContext<{ store: LoguxReduxStore }>({ store })
 
