@@ -62,15 +62,20 @@ let SubscribeUserPhoto = subscribe<SubsribedUserPhotoProps>(({ id }) => {
   return { channel: `users/${id}`, fields: ['photo'] }
 })(UserPhoto)
 
+function getJSON (component: ReturnType<typeof createComponent>) {
+  let value = component.toJSON()
+  if (value === null || 'length' in value) {
+    throw new Error('Wrong JSON result')
+  }
+  return value
+}
+
 function click (component: ReturnType<typeof createComponent>, event: any) {
-  let node = component.toJSON()
-  if (node === null) throw new Error('Component returned null')
-  node.props.onClick(event)
+  getJSON(component).props.onClick(event)
 }
 
 function getProps (component: ReturnType<typeof createComponent>, i?: number) {
-  let node = component.toJSON()
-  if (node === null) throw new Error('Component returned null')
+  let node = getJSON(component)
   if (typeof i !== 'undefined') {
     if (node.children === null) throw new Error('Component has no childern')
     let child = node.children[i]
@@ -125,10 +130,10 @@ it('subscribes', async () => {
 })
 
 it('subscribes by channel name', async () => {
-  function Users () {
+  function UserList () {
     return null
   }
-  let SubscribeUsers = subscribe(['users'])(Users)
+  let SubscribeUsers = subscribe(['users'])(UserList)
 
   let component = createComponent(
     h('div', {}, [h(SubscribeUsers, { key: 1 }), h(SubscribeUsers, { key: 2 })])

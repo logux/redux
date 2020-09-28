@@ -56,15 +56,20 @@ let UserPhoto: FunctionComponent<UserPhotoProps> = ({ id }) => {
   return h('img', { isSubscribing, src: `${id}.jpg` })
 }
 
+function getJSON (component: ReturnType<typeof createComponent>) {
+  let value = component.toJSON()
+  if (value === null || 'length' in value) {
+    throw new Error('Wrong JSON result')
+  }
+  return value
+}
+
 function click (component: ReturnType<typeof createComponent>, event: any) {
-  let node = component.toJSON()
-  if (node === null) throw new Error('Component returned null')
-  node.props.onClick(event)
+  getJSON(component).props.onClick(event)
 }
 
 function childProps (component: ReturnType<typeof createComponent>, i: number) {
-  let node = component.toJSON()
-  if (node === null) throw new Error('Component returned null')
+  let node = getJSON(component)
   if (node.children === null) throw new Error('Component has no childern')
   let child = node.children[i]
   if (typeof child !== 'object') throw new Error('Child has no a object')
@@ -284,6 +289,15 @@ it('reports about subscription end', async () => {
   expect(childProps(component, 0).isSubscribing).toBe(true)
   await act(async () => {
     log.add({ type: 'logux/processed', id: `3 ${nodeId} 0` })
+    await delay(1)
+  })
+  expect(childProps(component, 0).isSubscribing).toBe(false)
+  act(() => {
+    click(component, 3)
+  })
+  expect(childProps(component, 0).isSubscribing).toBe(true)
+  await act(async () => {
+    log.add({ type: 'logux/processed', id: `7 ${nodeId} 0` })
     await delay(1)
   })
   expect(childProps(component, 0).isSubscribing).toBe(false)

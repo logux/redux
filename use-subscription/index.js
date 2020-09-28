@@ -49,6 +49,7 @@ function useSubscription (channels, opts = {}) {
 
   useEffect(() => {
     let ignoreResponce = false
+    changeSubscribing(true)
     add(store, subscriptions).then(() => {
       if (!ignoreResponce) changeSubscribing(false)
     })
