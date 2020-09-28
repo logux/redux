@@ -102,7 +102,7 @@
   ],
   "size-limit": [
     {
-      "import": "{ CrossTabClient, createStoreCreator, useSubscription }",
+      "import": "{ CrossTabClient, createStoreCreator, useSubscription, useDispatch }",
       "limit": "11 KB"
     }
   ],
