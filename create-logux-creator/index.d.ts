@@ -7,7 +7,12 @@ import {
   PreloadedState,
   Store as ReduxStore
 } from 'redux'
-import { ClientOptions, ClientMeta, CrossTabClient } from '@logux/client'
+import {
+  Client,
+  ClientMeta,
+  ClientOptions,
+  CrossTabClient
+} from '@logux/client'
 import { Unsubscribe } from 'nanoevents'
 import { Log } from '@logux/core'
 
@@ -93,13 +98,13 @@ export interface ReduxStateListener<S, A extends Action> {
 export class LoguxReduxStore<
   S = any,
   A extends Action = AnyAction,
-  H extends object = {},
-  L extends Log = Log<ClientMeta>
+  L extends Log = Log<ClientMeta>,
+  C extends Client = Client<{}, L>
 > implements ReduxStore<S, A> {
   /**
    * Logux synchronization client.
    */
-  client: CrossTabClient<H, L>
+  client: C
 
   /**
    * The Logux log.
@@ -159,21 +164,21 @@ export class LoguxReduxStore<
 }
 
 export interface LoguxStoreCreator<
-  H extends object = {},
-  L extends Log = Log<ClientMeta>
+  L extends Log = Log<ClientMeta>,
+  C extends Client = Client<{}, L>
 > {
   <S, A extends Action = Action, Ext = {}, StateExt = {}>(
     reducer: Reducer<S, A>,
     enhancer?: StoreEnhancer<Ext, StateExt>
-  ): LoguxReduxStore<S & StateExt, A, H, L> & Ext
+  ): LoguxReduxStore<S & StateExt, A, L, C> & Ext
   <S, A extends Action = Action, Ext = {}, StateExt = {}>(
     reducer: Reducer<S, A>,
     preloadedState?: PreloadedState<S>,
     enhancer?: StoreEnhancer<Ext>
-  ): LoguxReduxStore<S & StateExt, A, H, L> & Ext
+  ): LoguxReduxStore<S & StateExt, A, L, C> & Ext
 }
 
-export type LoguxReduxOptions = ClientOptions & {
+export type LoguxReduxOptions = {
   /**
    * How many actions without `meta.reasons` will be kept for time travel.
    * Default is `1000`.
@@ -198,12 +203,12 @@ export type LoguxReduxOptions = ClientOptions & {
 }
 
 /**
- * Creates Logux client and connect it to Redux createStore function.
+ * Connects Logux Client to Redux createStore function.
  *
  * ```js
- * import { createLoguxCreator } from '@logux/redux'
+ * import { CrossTabClient, createStoreCreator } from '@logux/redux'
  *
- * const createStore = createLoguxCreator({
+ * const client = new CrossTabClient({
  *   subprotocol: '1.0.0',
  *   server: process.env.NODE_ENV === 'development'
  *     ? 'ws://localhost:31337'
@@ -212,14 +217,24 @@ export type LoguxReduxOptions = ClientOptions & {
  *   token: token.content
  * })
  *
+ * const createStore = createStoreCreator(client)
+ *
  * const store = createStore(reducer)
  * store.client.start()
  * ```
  *
- * @param config Logux Client config.
+ * @param client Logux Client.
+ * @param options Logux Redux options.
  * @returns Redux’s `createStore` compatible function.
  */
+export function createStoreCreator<
+  L extends Log = Log<ClientMeta>,
+  C extends Client = Client<{}, L>
+> (client: C, options?: LoguxReduxOptions): LoguxStoreCreator<L, C>
+
 export function createLoguxCreator<
   H extends object = {},
   L extends Log = Log<ClientMeta>
-> (config: LoguxReduxOptions): LoguxStoreCreator<H, L>
+> (
+  config: ClientOptions & LoguxReduxOptions
+): LoguxStoreCreator<L, CrossTabClient<H, L>>

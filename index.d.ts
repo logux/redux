@@ -1,5 +1,7 @@
+export { Client, CrossTabClient } from '@logux/client'
 export {
   createLoguxCreator,
+  createStoreCreator,
   LoguxReduxStore,
   LoguxReduxOptions,
   LoguxUndoAction,
