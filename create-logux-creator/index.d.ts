@@ -231,7 +231,7 @@ export function createStoreCreator<
   C extends Client = Client<{}, Log<ClientMeta>>,
   L extends Log = Log<ClientMeta>
 > (
-  client: Client | CrossTabClient,
+  client: C,
   options?: LoguxReduxOptions
 ): LoguxStoreCreator<C, L>
 
