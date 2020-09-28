@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.7.1
+* Fix `isLoading` on channel changes (by Eduard Aksamitov).
+
 ## 0.7
 * Use Logux Core 0.6 and WebSocket Protocol 4.
 * Use Logux Client 0.9.
