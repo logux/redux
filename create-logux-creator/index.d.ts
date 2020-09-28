@@ -235,29 +235,6 @@ export function createStoreCreator<
   options?: LoguxReduxOptions
 ): LoguxStoreCreator<C, L>
 
-/**
- * Creates Logux client and connect it to Redux createStore function.
- * Will be deprecated from v0.9.
- *
- * ```js
- * import { createLoguxCreator } from '@logux/redux'
- *
- * const createStore = createLoguxCreator({
- *   subprotocol: '1.0.0',
- *   server: process.env.NODE_ENV === 'development'
- *     ? 'ws://localhost:31337'
- *     : 'wss://logux.example.com',
- *   userId: userId.content
- *   token: token.content
- * })
- *
- * const store = createStore(reducer)
- * store.client.start()
- * ```
- *
- * @param config Logux Client config.
- * @returns Redux’s `createStore` compatible function.
- */
 export function createLoguxCreator<
   H extends object = {},
   L extends Log = Log<ClientMeta>
