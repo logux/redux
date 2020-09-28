@@ -277,6 +277,15 @@ it('reports about subscription end', async () => {
     await delay(1)
   })
   expect(childProps(component, 0).isSubscribing).toBe(false)
+  act(() => {
+    click(component, 3)
+  })
+  expect(childProps(component, 0).isSubscribing).toBe(true)
+  await act(async () => {
+    log.add({ type: 'logux/processed', id: `7 ${nodeId} 0` })
+    await delay(1)
+  })
+  expect(childProps(component, 0).isSubscribing).toBe(false)
 })
 
 it('works on channels size changes', () => {
