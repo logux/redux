@@ -35,18 +35,20 @@ npm install @logux/redux redux
 See [documentation] for Logux API.
 
 ```js
-import { createLoguxCreator } from '@logux/redux'
+import { CrossTabClient, createStoreCreator } from '@logux/redux'
 import { log } from '@logux/client'
 
 let userId = document.querySelector('meta[name=user]').content
 let token = document.querySelector('meta[name=token]').content
 
-const createStore = createLoguxCreator({
+const client = new CrossTabClient({
   subprotocol: '1.0.0',
   server: 'wss://example.com:1337',
   userId,
   token
 })
+
+const createStore = createStoreCreator(client)
 
 const store = createStore(reducers, preloadedState)
 log(store.client)

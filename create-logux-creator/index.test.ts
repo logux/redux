@@ -1,12 +1,14 @@
 import { applyMiddleware, Reducer, StoreEnhancer } from 'redux'
 import { TestPair, TestTime, Action, TestLog } from '@logux/core'
-import { ClientMeta } from '@logux/client'
+import { ClientMeta, ClientOptions } from '@logux/client'
 import { delay } from 'nanodelay'
 
 import {
   createLoguxCreator,
+  createStoreCreator,
   LoguxReduxOptions,
   LoguxUndoAction,
+  CrossTabClient,
   LoguxUndoError
 } from '../index.js'
 
@@ -21,16 +23,29 @@ type AddAction = {
 
 function createStore (
   reducer: Reducer = history,
-  opts: Partial<LoguxReduxOptions> = {},
+  opts: Partial<LoguxReduxOptions & ClientOptions> = {},
   enhancer?: StoreEnhancer
 ) {
-  let creator = createLoguxCreator<{}, TestLog<ClientMeta>>({
+  let creatorOptions = {
+    cleanEvery: opts.cleanEvery,
+    saveStateEvery: opts.saveStateEvery,
+    onMissedHistory: opts.onMissedHistory,
+    reasonlessHistory: opts.reasonlessHistory
+  }
+
+  delete opts.cleanEvery
+  delete opts.onMissedHistory
+  delete opts.saveStateEvery
+  delete opts.reasonlessHistory
+
+  let client = new CrossTabClient<{}, TestLog<ClientMeta>>({
     server: 'wss://localhost:1337',
     subprotocol: '1.0.0',
     userId: '10',
     time: new TestTime(),
     ...opts
   })
+  let creator = createStoreCreator<TestLog<ClientMeta>>(client, creatorOptions)
   let store = creator<State, AddAction | LoguxUndoAction>(
     reducer,
     { value: '0' },
@@ -58,11 +73,31 @@ function emit (obj: any, event: string, ...args: any[]) {
 
 const ADD_A: AddAction = { type: 'ADD', value: 'a' }
 
-it('throws error on missed config', () => {
+it('old api: creates store', () => {
+  let spy = jest.spyOn(console, 'warn').mockImplementation()
+
+  let creator = createLoguxCreator<{}, TestLog<ClientMeta>>({
+    server: 'wss://localhost:1337',
+    subprotocol: '1.0.0',
+    userId: '10',
+    time: new TestTime()
+  })
+  let historyReducer: Reducer = history
+  let store = creator(historyReducer, { value: '0' })
+  store.dispatch(ADD_A)
+  expect(store.getState()).toEqual({ value: '0a' })
+  expect(console.warn).toHaveBeenCalledTimes(1)
+  spy.mockRestore()
+})
+
+it('old api: throws error on missed config', () => {
+  let spy = jest.spyOn(console, 'warn').mockImplementation()
   expect(() => {
     // @ts-expect-error
     createLoguxCreator()
   }).toThrow('Missed server option in Logux client')
+  expect(console.warn).toHaveBeenCalledTimes(1)
+  spy.mockRestore()
 })
 
 it('creates Redux store', () => {
