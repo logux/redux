@@ -30,6 +30,8 @@ function reducer (state: CounterState = 0, action: IncAction): CounterState {
 
 let store = createStore<CounterState, IncAction>(reducer)
 
+console.log(store.client.role)
+
 store.dispatch({ type: 'INC' })
 store.dispatch.crossTab({ type: 'INC' }, { reasons: ['reason'] })
 store.dispatch.sync({ type: 'INC' }).then(meta => {
