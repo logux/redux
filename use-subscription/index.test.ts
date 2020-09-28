@@ -25,16 +25,13 @@ jest.mock('react', () => {
 })
 
 function createComponent (content: ReactNode) {
-  let client = new CrossTabClient({
+  let client = new CrossTabClient<{}, TestLog<ClientMeta>>({
     subprotocol: '0.0.0',
     server: 'wss://localhost:1337',
     userId: '10',
     time: new TestTime()
   })
-  let createStore = createStoreCreator<
-    CrossTabClient<{}, TestLog<ClientMeta>>,
-    TestLog<ClientMeta>
-  >(client)
+  let createStore = createStoreCreator(client)
   let store = createStore(() => ({}))
   let component = create(h(Provider, { store }, content))
   return { ...component, client: store.client }
@@ -216,16 +213,13 @@ it('does not resubscribe on non-relevant props changes', () => {
 })
 
 it('supports different store sources', async () => {
-  let client = new CrossTabClient({
+  let client = new CrossTabClient<{}, TestLog<ClientMeta>>({
     subprotocol: '0.0.0',
     server: 'wss://localhost:1337',
     userId: '10',
     time: new TestTime()
   })
-  let createStore = createStoreCreator<
-    CrossTabClient<{}, TestLog<ClientMeta>>,
-    TestLog<ClientMeta>
-  >(client)
+  let createStore = createStoreCreator(client)
   let store = createStore(() => ({}))
   let MyContext = createContext<{ store: LoguxReduxStore }>({ store })
 

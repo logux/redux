@@ -38,17 +38,14 @@ function createStore (
   delete opts.saveStateEvery
   delete opts.reasonlessHistory
 
-  let client = new CrossTabClient({
+  let client = new CrossTabClient<{}, TestLog<ClientMeta>>({
     server: 'wss://localhost:1337',
     subprotocol: '1.0.0',
     userId: '10',
     time: new TestTime(),
     ...opts
   })
-  let creator = createStoreCreator<
-    CrossTabClient<{}, TestLog<ClientMeta>>,
-    TestLog<ClientMeta>
-  >(client, creatorOptions)
+  let creator = createStoreCreator<TestLog<ClientMeta>>(client, creatorOptions)
   let store = creator<State, AddAction | LoguxUndoAction>(
     reducer,
     { value: '0' },
