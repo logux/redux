@@ -67,7 +67,7 @@ function useSubscription (channels, opts = {}) {
     return () => {
       ignoreResponce = true
       remove(store, subscriptions)
-      timeout && clearTimeout(timeout)
+      if (timeout) clearTimeout(timeout)
     }
   }, [id])
 
