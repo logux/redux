@@ -61,7 +61,7 @@ function useSubscription (channels, opts = {}) {
     }
 
     add(store, subscriptions).then(() => {
-      timeout && clearTimeout(timeout)
+      if (timeout) clearTimeout(timeout)
       if (!ignoreResponce) changeSubscribing(false)
     })
     return () => {
