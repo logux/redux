@@ -52,6 +52,11 @@ function useSubscription (channels, opts = {}) {
     let timeout
     let ignoreResponce = false
 
+    function resetTimeout () {
+      clearTimeout(timeout)
+      timeout = null
+    }
+
     if (debounce > 0) {
       timeout = setTimeout(() => {
         changeSubscribing(true)
@@ -61,13 +66,13 @@ function useSubscription (channels, opts = {}) {
     }
 
     add(store, subscriptions).then(() => {
-      if (timeout) clearTimeout(timeout)
+      if (timeout) resetTimeout()
       if (!ignoreResponce) changeSubscribing(false)
     })
     return () => {
       ignoreResponce = true
       remove(store, subscriptions)
-      if (timeout) clearTimeout(timeout)
+      if (timeout) resetTimeout()
     }
   }, [id])
 
