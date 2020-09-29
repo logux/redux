@@ -44,12 +44,14 @@ type Users = {
 type UserPhotoProps = {
   id: number
   nonId?: number
+  debounce?: number
 }
 
-let UserPhoto: FunctionComponent<UserPhotoProps> = ({ id }) => {
-  let isSubscribing = useSubscription([
-    { channel: `users/${id}`, fields: ['photo'] }
-  ])
+let UserPhoto: FunctionComponent<UserPhotoProps> = ({ id, debounce = 0 }) => {
+  let isSubscribing = useSubscription(
+    [{ channel: `users/${id}`, fields: ['photo'] }],
+    { debounce }
+  )
   return h('img', { isSubscribing, src: `${id}.jpg` })
 }
 
@@ -258,7 +260,7 @@ it('reports about subscription end', async () => {
       return h(
         'div',
         { onClick: this.change.bind(this) },
-        h(UserPhoto, { id: this.state.id })
+        h(UserPhoto, { id: this.state.id, debounce: 250 })
       )
     }
   }
@@ -289,9 +291,31 @@ it('reports about subscription end', async () => {
   act(() => {
     click(component, 3)
   })
-  expect(childProps(component, 0).isSubscribing).toBe(true)
+  expect(childProps(component, 0).isSubscribing).toBe(false)
   await act(async () => {
     log.add({ type: 'logux/processed', id: `7 ${nodeId} 0` })
+    await delay(1)
+  })
+  expect(childProps(component, 0).isSubscribing).toBe(false)
+  act(() => {
+    click(component, 4)
+  })
+  expect(childProps(component, 0).isSubscribing).toBe(false)
+  act(() => {
+    click(component, 5)
+  })
+  expect(childProps(component, 0).isSubscribing).toBe(false)
+  await act(async () => {
+    await delay(250)
+  })
+  expect(childProps(component, 0).isSubscribing).toBe(true)
+  await act(async () => {
+    log.add({ type: 'logux/processed', id: `10 ${nodeId} 0` })
+    await delay(1)
+  })
+  expect(childProps(component, 0).isSubscribing).toBe(true)
+  await act(async () => {
+    log.add({ type: 'logux/processed', id: `12 ${nodeId} 0` })
     await delay(1)
   })
   expect(childProps(component, 0).isSubscribing).toBe(false)

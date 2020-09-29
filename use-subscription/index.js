@@ -34,6 +34,7 @@ function remove (store, subscriptions) {
 }
 
 function useSubscription (channels, opts = {}) {
+  let debounce = opts.debounce || 0
   let [isSubscribing, changeSubscribing] = useState(true)
   let { store } = useContext(opts.context || ReactReduxContext)
 
@@ -48,14 +49,30 @@ function useSubscription (channels, opts = {}) {
     .join(' ')
 
   useEffect(() => {
+    let timeout
     let ignoreResponce = false
-    changeSubscribing(true)
+
+    function resetTimeout () {
+      clearTimeout(timeout)
+      timeout = null
+    }
+
+    if (debounce > 0) {
+      timeout = setTimeout(() => {
+        changeSubscribing(true)
+      }, debounce)
+    } else {
+      changeSubscribing(true)
+    }
+
     add(store, subscriptions).then(() => {
+      if (timeout) resetTimeout()
       if (!ignoreResponce) changeSubscribing(false)
     })
     return () => {
       ignoreResponce = true
       remove(store, subscriptions)
+      if (timeout) resetTimeout()
     }
   }, [id])
 
