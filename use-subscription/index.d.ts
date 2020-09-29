@@ -7,6 +7,10 @@ type SubscribingOptions = {
    * Context with the store.
    */
   context?: ReduxContext<{ store: LoguxReduxStore }>
+  /**
+   * Delay in milliseconds to avoid returning `true` when switching between `channels`.
+   */
+  debounce?: number
 }
 
 export type Channel =
