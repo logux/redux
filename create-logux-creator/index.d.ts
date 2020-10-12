@@ -16,18 +16,6 @@ import {
 import { Unsubscribe } from 'nanoevents'
 import { Log } from '@logux/core'
 
-export type LoguxUndoAction = {
-  type: 'logux/undo'
-  id: string
-  action: Action
-  reason?: string
-  [key: string]: any
-}
-
-export type LoguxUndoError = Error & {
-  action: LoguxUndoAction
-}
-
 export interface LoguxDispatch<A extends Action> {
   <T extends A>(action: T): T
 

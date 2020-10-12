@@ -3,9 +3,7 @@ export {
   createLoguxCreator,
   createStoreCreator,
   LoguxReduxStore,
-  LoguxReduxOptions,
-  LoguxUndoAction,
-  LoguxUndoError
+  LoguxReduxOptions
 } from './create-logux-creator/index.js'
 export { useSubscription, Channel } from './use-subscription/index.js'
 export { useDispatch } from './use-dispatch/index.js'
