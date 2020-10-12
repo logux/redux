@@ -246,7 +246,11 @@ it('undoes actions', async () => {
   ])
   expect(store.getState().value).toEqual('0abc')
   store.dispatch.crossTab(
-    { type: 'logux/undo', id: `2 ${nodeId} 0` },
+    {
+      type: 'logux/undo',
+      id: `2 ${nodeId} 0`,
+      action: { type: 'ADD', value: 'b' }
+    },
     { reasons: ['test'] }
   )
   await delay(1)
@@ -471,7 +475,7 @@ it('copies reasons to undo action', async () => {
   let nodeId = store.client.nodeId
   await store.dispatch.crossTab(ADD_A, { reasons: ['a', 'b'] })
   await store.dispatch.crossTab(
-    { type: 'logux/undo', id: `1 ${nodeId} 0` },
+    { type: 'logux/undo', id: `1 ${nodeId} 0`, action: ADD_A },
     { reasons: [] }
   )
   let result = await store.log.byId(`2 ${nodeId} 0`)
@@ -578,7 +582,11 @@ it('applies old actions from store', async () => {
       { id: '0 10:x 5', reasons: ['test'], tab: 'test2' }
     ),
     store1.dispatch.crossTab(
-      { type: 'logux/undo', id: '0 10:x 2' },
+      {
+        type: 'logux/undo',
+        id: '0 10:x 2',
+        action: { type: 'ADD', value: '2' }
+      },
       { id: '0 10:x 6', reasons: ['test'] }
     )
   ])
@@ -677,7 +685,11 @@ it('emits change event', async () => {
 
 it('warns about undoes cleaned action', async () => {
   let store = createStore(history)
-  await store.dispatch.crossTab({ type: 'logux/undo', id: '1 t 0' })
+  await store.dispatch.crossTab({
+    type: 'logux/undo',
+    id: '1 t 0',
+    action: { type: 'ADD' }
+  })
   expect(store.log.actions()).toHaveLength(0)
 })
 
