@@ -537,16 +537,15 @@
     "@types/yargs" "^15.0.0"
     chalk "^4.0.0"
 
-"@logux/client@^0.9.2":
+"@logux/client@logux/client#next":
   version "0.9.2"
-  resolved "https://registry.yarnpkg.com/@logux/client/-/client-0.9.2.tgz#619266d242c8d18c6bbc004002f562f3282bf121"
-  integrity sha512-mDFF5T/Nob0b3SLhXIclFuo8n4+iZic2S34wsk3A2LHyoypOAHQ5HOjst2R18y+OlfXaVtGVtlT/Oey8pX6uQA==
+  resolved "https://codeload.github.com/logux/client/tar.gz/e157b1ca1ebf00616faf768f1890172229948b2b"
   dependencies:
-    "@logux/core" "^0.6.1"
+    "@logux/core" "^0.6.2"
     nanoevents "^5.1.8"
     nanoid "^3.1.12"
 
-"@logux/core@^0.6.1", "@logux/core@^0.6.2":
+"@logux/core@^0.6.2":
   version "0.6.2"
   resolved "https://registry.yarnpkg.com/@logux/core/-/core-0.6.2.tgz#5065b9179508d2b599d1b286c368063203a9df48"
   integrity sha512-yn8WSSVvb6Fn89Rnt7FCGR1VDfn37/V/zemYNwwX5QPjShVUVS8ueQU+s6WGfxuXuvOzPSZnMR7dY5Q9QmatmA==

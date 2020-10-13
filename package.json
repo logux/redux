@@ -27,7 +27,7 @@
     "redux": ">=4.0.0"
   },
   "dependencies": {
-    "@logux/client": "^0.9.2",
+    "@logux/client": "logux/client#next",
     "@logux/core": "^0.6.2",
     "nanoevents": "^5.1.8"
   },
