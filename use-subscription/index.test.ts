@@ -5,17 +5,16 @@ import {
   ReactNode,
   createElement as h
 } from 'react'
+import { ClientMeta, CrossTabClient } from '@logux/client'
 import { TestTime, TestLog } from '@logux/core'
 import { create, act } from 'react-test-renderer'
-import { ClientMeta } from '@logux/client'
 import { Provider } from 'react-redux'
 import { delay } from 'nanodelay'
 
 import {
   createStoreCreator,
   useSubscription,
-  LoguxReduxStore,
-  CrossTabClient
+  LoguxReduxStore
 } from '../index.js'
 
 jest.mock('react', () => {

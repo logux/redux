@@ -2,7 +2,8 @@ import {
   ClientMeta,
   ClientOptions,
   LoguxUndoAction,
-  LoguxUndoError
+  LoguxUndoError,
+  CrossTabClient
 } from '@logux/client'
 import { applyMiddleware, Reducer, StoreEnhancer } from 'redux'
 import { TestPair, TestTime, Action, TestLog } from '@logux/core'
@@ -11,8 +12,7 @@ import { delay } from 'nanodelay'
 import {
   createLoguxCreator,
   createStoreCreator,
-  LoguxReduxOptions,
-  CrossTabClient
+  LoguxReduxOptions
 } from '../index.js'
 
 type State = {

@@ -1,5 +1,3 @@
-let { Client, CrossTabClient } = require('@logux/client')
-
 let {
   createLoguxCreator,
   createStoreCreator
@@ -12,8 +10,6 @@ module.exports = {
   createLoguxCreator,
   createStoreCreator,
   useSubscription,
-  CrossTabClient,
   useDispatch,
-  subscribe,
-  Client
+  subscribe
 }

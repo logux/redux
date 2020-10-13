@@ -1,4 +1,3 @@
-export { Client, CrossTabClient } from '@logux/client'
 export {
   createLoguxCreator,
   createStoreCreator,
