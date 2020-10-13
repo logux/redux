@@ -1,6 +1,7 @@
+import { CrossTabClient } from '@logux/client'
 import { Action } from '@logux/core'
 
-import { CrossTabClient, createStoreCreator } from '../index.js'
+import { createStoreCreator } from '../index.js'
 
 let client = new CrossTabClient({
   subprotocol: '1.0.0',
