@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@logux/eslint-config": "^40.0.5",
-    "@logux/sharec-config": "^0.7.4",
+    "@logux/sharec-config": "^0.7.5",
     "@size-limit/dual-publish": "^4.6.0",
     "@size-limit/preset-small-lib": "^4.6.0",
     "@types/jest": "^26.0.14",
@@ -127,6 +127,6 @@
   },
   "sharec": {
     "config": "@logux/sharec-config",
-    "version": "0.7.4"
+    "version": "0.7.5"
   }
 }
