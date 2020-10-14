@@ -105,7 +105,7 @@
   "size-limit": [
     {
       "import": "{ createStoreCreator, useSubscription, useDispatch }",
-      "limit": "2 KB"
+      "limit": "10 KB"
     }
   ],
   "yaspeller": {

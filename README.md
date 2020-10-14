@@ -27,7 +27,7 @@ This repository contains Redux compatible API on top of [Logux Client].
 ## Install
 
 ```sh
-npm install @logux/redux redux
+npm install @logux/client @logux/redux redux
 ```
 
 ## Usage
@@ -35,8 +35,8 @@ npm install @logux/redux redux
 See [documentation] for Logux API.
 
 ```js
-import { CrossTabClient, createStoreCreator } from '@logux/redux'
-import { log } from '@logux/client'
+import { CrossTabClient, log } from '@logux/client'
+import { createStoreCreator } from '@logux/redux'
 
 let userId = document.querySelector('meta[name=user]').content
 let token = document.querySelector('meta[name=token]').content
