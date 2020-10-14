@@ -1,6 +1,6 @@
 import { Action, AnyAction } from 'redux'
 
-import { LoguxDispatch } from '../create-logux-creator/index.js'
+import { LoguxDispatch } from '../create-store-creator/index.js'
 
 /**
  * A hook to access the Logux Redux `dispatch` function.

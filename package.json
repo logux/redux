@@ -22,16 +22,18 @@
     "node": ">=10.0.0"
   },
   "peerDependencies": {
+    "@logux/client": "logux/client#next",
+    "@logux/core": "^0.6.2",
     "react": ">=16.8.4",
     "react-redux": ">=6.0.0",
     "redux": ">=4.0.0"
   },
   "dependencies": {
-    "@logux/client": "logux/client#next",
-    "@logux/core": "^0.6.2",
     "nanoevents": "^5.1.8"
   },
   "devDependencies": {
+    "@logux/client": "logux/client#next",
+    "@logux/core": "^0.6.2",
     "@logux/eslint-config": "^40.0.5",
     "@logux/sharec-config": "^0.7.5",
     "@size-limit/dual-publish": "^4.6.0",
@@ -102,8 +104,8 @@
   ],
   "size-limit": [
     {
-      "import": "{ CrossTabClient, createStoreCreator, useSubscription, useDispatch }",
-      "limit": "11 KB"
+      "import": "{ createStoreCreator, useSubscription, useDispatch }",
+      "limit": "2 KB"
     }
   ],
   "yaspeller": {
