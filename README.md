@@ -27,7 +27,7 @@ This repository contains Redux compatible API on top of [Logux Client].
 ## Install
 
 ```sh
-npm install @logux/client @logux/redux redux
+npm install @logux/core @logux/client @logux/redux redux
 ```
 
 ## Usage
