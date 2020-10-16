@@ -132,6 +132,7 @@ it('saves previous states', async () => {
     id: '57 10:test1 1',
     reasons: ['test']
   })
+  await delay(10)
   expect(calls).toEqual(10)
 })
 
@@ -158,6 +159,7 @@ it('changes history recording frequency', async () => {
     id: '3 10:test1 1',
     reasons: ['test']
   })
+  await delay(10)
   expect(calls).toEqual(2)
 })
 
@@ -188,6 +190,7 @@ it('cleans its history on removing action', async () => {
     id: `5 ${nodeId} 1`,
     reasons: ['test']
   })
+  await delay(10)
   expect(calls).toEqual(3)
 })
 
@@ -204,6 +207,7 @@ it('changes history', async () => {
     { type: 'ADD', value: '|' },
     { id: '2 10:test1 1', reasons: ['test'] }
   )
+  await delay(10)
   expect(store.getState().value).toEqual('0ab|cd')
 })
 
@@ -248,6 +252,7 @@ it('replaces reducer', async () => {
     { type: 'ADD', value: 'z' },
     { id: '1 10:test1 1', reasons: ['test'] }
   )
+  await delay(10)
   expect(store.getState().value).toEqual('0aZB')
 })
 
@@ -662,6 +667,7 @@ it('warns about undoes cleaned action', async () => {
     id: '1 t 0',
     action: { type: 'ADD' }
   })
+  await delay(10)
   expect(store.log.actions()).toHaveLength(0)
 })
 
