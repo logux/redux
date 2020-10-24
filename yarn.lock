@@ -535,7 +535,7 @@
 
 "@logux/client@logux/client#next":
   version "0.9.2"
-  resolved "https://codeload.github.com/logux/client/tar.gz/9bf78e96ce0df369af3abdbfabcd5708ca224693"
+  resolved "https://codeload.github.com/logux/client/tar.gz/12b3ca8f3d171f0044eae4b6d1f0612313419029"
   dependencies:
     nanoevents "^5.1.10"
     nanoid "^3.1.15"
