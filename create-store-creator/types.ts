@@ -21,11 +21,14 @@ function isInc (action: Action): action is IncAction {
   return action.type === 'INC'
 }
 
-function reducer (state: CounterState = 0, action: IncAction): CounterState {
+function reducer (
+  state: CounterState | undefined,
+  action: IncAction
+): CounterState {
   if (isInc(action)) {
-    return state + 1
+    return (state ?? 0) + 1
   } else {
-    return state
+    return state ?? 0
   }
 }
 

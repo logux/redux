@@ -23,7 +23,7 @@ type AddAction = {
 function createStore (
   reducer: Reducer = history,
   opts: Partial<LoguxReduxOptions & ClientOptions> = {},
-  enhancer?: StoreEnhancer
+  enhancer: StoreEnhancer | undefined = undefined
 ) {
   let creatorOptions = {
     cleanEvery: opts.cleanEvery,
