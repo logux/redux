@@ -1,10 +1,8 @@
 name: Deploy
-
 on:
   create:
     tags:
       - "*.*.*"
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
