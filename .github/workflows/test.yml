@@ -26,10 +26,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: Install dependencies from network
-        if: steps.cache-deps.outputs.cache-hit != 'true'
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install --frozen-lockfile
       - name: Install dependencies from cache
-        if: steps.cache-deps.outputs.cache-hit == 'true'
+        if: steps.yarn-cache.outputs.cache-hit == 'true'
         run: yarn install --frozen-lockfile --offline
       - name: Run tests
         run: yarn test
@@ -59,10 +59,10 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: Install dependencies from network
-        if: steps.cache-deps.outputs.cache-hit != 'true'
+        if: steps.yarn-cache.outputs.cache-hit != 'true'
         run: yarn install --frozen-lockfile
       - name: Install dependencies from cache
-        if: steps.cache-deps.outputs.cache-hit == 'true'
+        if: steps.yarn-cache.outputs.cache-hit == 'true'
         run: yarn install --frozen-lockfile --offline
       - name: Run unit tests
         run: npx jest
