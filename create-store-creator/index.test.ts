@@ -85,7 +85,7 @@ it('creates Logux client', () => {
 
 it('sets tab ID', async () => {
   let store = createStore()
-  await new Promise(resolve => {
+  await new Promise<void>(resolve => {
     store.log.on('add', (action, meta) => {
       expect(meta.tab).toEqual(store.client.tabId)
       expect(meta.reasons).toEqual([`timeTravelTab${store.client.tabId}`])
@@ -225,7 +225,8 @@ it('undoes actions', async () => {
     {
       type: 'logux/undo',
       id: `2 ${nodeId} 0`,
-      action: { type: 'ADD', value: 'b' }
+      action: { type: 'ADD', value: 'b' },
+      reason: 'error'
     },
     { reasons: ['test'] }
   )
@@ -452,7 +453,7 @@ it('copies reasons to undo action', async () => {
   let nodeId = store.client.nodeId
   await store.dispatch.crossTab(ADD_A, { reasons: ['a', 'b'] })
   await store.dispatch.crossTab(
-    { type: 'logux/undo', id: `1 ${nodeId} 0`, action: ADD_A },
+    { type: 'logux/undo', id: `1 ${nodeId} 0`, action: ADD_A, reason: 'error' },
     { reasons: [] }
   )
   let result = await store.log.byId(`2 ${nodeId} 0`)
@@ -562,7 +563,8 @@ it('applies old actions from store', async () => {
       {
         type: 'logux/undo',
         id: '0 10:x 2',
-        action: { type: 'ADD', value: '2' }
+        action: { type: 'ADD', value: '2' },
+        reason: 'error'
       },
       { id: '0 10:x 6', reasons: ['test'] }
     )
@@ -603,7 +605,7 @@ it('supports middlewares', () => {
 it('waits for replaying', async () => {
   let store = createStore(history)
   let run: undefined | (() => void)
-  let waiting = new Promise(resolve => {
+  let waiting = new Promise<void>(resolve => {
     run = resolve
   })
 
@@ -665,7 +667,8 @@ it('warns about undoes cleaned action', async () => {
   await store.dispatch.crossTab({
     type: 'logux/undo',
     id: '1 t 0',
-    action: { type: 'ADD' }
+    action: { type: 'ADD' },
+    reason: 'error'
   })
   await delay(10)
   expect(store.log.actions()).toHaveLength(0)
