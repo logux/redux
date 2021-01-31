@@ -1,13 +1,5 @@
-let { createStoreCreator } = require('./create-store-creator')
-let { createLoguxCreator } = require('./create-logux-creator')
-let { useSubscription } = require('./use-subscription')
-let { useDispatch } = require('./use-dispatch')
-let { subscribe } = require('./subscribe')
-
-module.exports = {
-  createLoguxCreator,
-  createStoreCreator,
-  useSubscription,
-  useDispatch,
-  subscribe
-}
+export { createStoreCreator } from './create-store-creator'
+export { createLoguxCreator } from './create-logux-creator'
+export { useSubscription } from './use-subscription'
+export { useDispatch } from './use-dispatch'
+export { subscribe } from './subscribe'

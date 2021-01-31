@@ -1,8 +1,8 @@
-let { createElement } = require('react')
+import { createElement } from 'react'
 
-let { useSubscription } = require('../use-subscription')
+import { useSubscription } from '../use-subscription/index.js'
 
-function subscribe (subscriber, opts = {}) {
+export function subscribe (subscriber, opts = {}) {
   let subscribingProp = 'isSubscribing'
   if (opts.subscribingProp) subscribingProp = opts.subscribingProp
 
@@ -20,17 +20,3 @@ function subscribe (subscriber, opts = {}) {
     return SubscribeComponent
   }
 }
-
-module.exports = { subscribe }
-
-/**
- * @callback subscriber
- * @param {object} props The component properties.
- * @return {string|Subscription} The subscription action properties.
- */
-
-/**
- * Details for subscription action.
- * @typedef {object} Subscription
- * @property {string} channel The channel name.
- */

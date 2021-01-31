@@ -1,6 +1,6 @@
-let { createNanoEvents } = require('nanoevents')
-let { isFirstOlder } = require('@logux/core/is-first-older')
-let { createStore: createReduxStore } = require('redux')
+import { createStore as createReduxStore } from 'redux'
+import { createNanoEvents } from 'nanoevents'
+import { isFirstOlder } from '@logux/core'
 
 function hackReducer (reducer) {
   return (state, action) => {
@@ -12,7 +12,7 @@ function hackReducer (reducer) {
   }
 }
 
-function createStoreCreator (client, options = {}) {
+export function createStoreCreator (client, options = {}) {
   let cleanEvery = options.cleanEvery || 25
   let saveStateEvery = options.saveStateEvery || 50
   let onMissedHistory = options.onMissedHistory
@@ -277,8 +277,4 @@ function createStoreCreator (client, options = {}) {
 
     return store
   }
-}
-
-module.exports = {
-  createStoreCreator
 }

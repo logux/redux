@@ -1,5 +1,5 @@
-let { useContext, useEffect, useState } = require('react')
-let { ReactReduxContext } = require('react-redux')
+import { useContext, useEffect, useState } from 'react'
+import { ReactReduxContext } from 'react-redux'
 
 function add (store, subscriptions) {
   if (!store.subscriptions) store.subscriptions = {}
@@ -33,7 +33,7 @@ function remove (store, subscriptions) {
   })
 }
 
-function useSubscription (channels, opts = {}) {
+export function useSubscription (channels, opts = {}) {
   let debounce = opts.debounce || 0
   let [isSubscribing, changeSubscribing] = useState(true)
   let { store } = useContext(opts.context || ReactReduxContext)
@@ -78,5 +78,3 @@ function useSubscription (channels, opts = {}) {
 
   return isSubscribing
 }
-
-module.exports = { useSubscription }

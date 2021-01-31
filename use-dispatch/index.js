@@ -1,3 +1,1 @@
-let { useDispatch } = require('react-redux')
-
-module.exports = { useDispatch }
+export { useDispatch } from 'react-redux'

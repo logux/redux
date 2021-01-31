@@ -1,9 +1,9 @@
 import {
+  createElement as h,
   FunctionComponent,
-  Component,
   createContext,
-  ReactNode,
-  createElement as h
+  Component,
+  ReactNode
 } from 'react'
 import { ClientMeta, CrossTabClient } from '@logux/client'
 import { TestTime, TestLog } from '@logux/core'
@@ -114,7 +114,6 @@ it('unsubscribes', async () => {
     }
 
     render () {
-      let users = this.state.users
       return h(
         'div',
         {
