@@ -2,7 +2,7 @@ import { CrossTabClient } from '@logux/client'
 
 import { createStoreCreator } from '../create-store-creator/index.js'
 
-export function createLoguxCreator (config = {}) {
+export function createLoguxCreator(config = {}) {
   console.warn(
     'createLoguxCreator() will be removed in v0.9. ' +
       'Use createStoreCreator(client, opts) instead.'

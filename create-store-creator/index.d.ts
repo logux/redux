@@ -121,14 +121,14 @@ export class LoguxReduxStore<
    * @param listener The listener function.
    * @returns Unbind listener from event.
    */
-  on (event: 'change', listener: ReduxStateListener<S, A>): Unsubscribe
+  on(event: 'change', listener: ReduxStateListener<S, A>): Unsubscribe
 
   /**
    * Reads the state tree managed by the store.
    *
    * @returns The current state tree of your application.
    */
-  getState (): S
+  getState(): S
 
   /**
    * Adds a change listener.
@@ -136,16 +136,16 @@ export class LoguxReduxStore<
    * @param listener A callback to be invoked on every dispatch.
    * @returns A function to remove this change listener.
    */
-  subscribe (listener: () => void): Unsubscribe
+  subscribe(listener: () => void): Unsubscribe
 
   /**
    * Replaces the reducer currently used by the store to calculate the state.
    *
    * @param nextReducer The reducer for the store to use instead.
    */
-  replaceReducer (nextReducer: Reducer<S, A>): void
+  replaceReducer(nextReducer: Reducer<S, A>): void
 
-  [Symbol.observable] (): Observable<S>
+  [Symbol.observable](): Observable<S>
 }
 
 export interface LoguxStoreCreator<
@@ -215,4 +215,4 @@ export type LoguxReduxOptions = {
 export function createStoreCreator<
   L extends Log = Log<ClientMeta>,
   C extends Client = Client<{}, L>
-> (client: C, options?: LoguxReduxOptions): LoguxStoreCreator<L, C>
+>(client: C, options?: LoguxReduxOptions): LoguxStoreCreator<L, C>

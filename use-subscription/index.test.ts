@@ -1,15 +1,21 @@
 import {
   createElement as h,
-  FunctionComponent,
   createContext,
   Component,
-  ReactNode
+  ReactNode,
+  FC
 } from 'react'
+import {
+  ReactTestRendererJSON,
+  ReactTestRenderer,
+  create,
+  act
+} from 'react-test-renderer'
 import { ClientMeta, CrossTabClient } from '@logux/client'
 import { TestTime, TestLog } from '@logux/core'
-import { create, act } from 'react-test-renderer'
 import { Provider } from 'react-redux'
 import { delay } from 'nanodelay'
+import { jest } from '@jest/globals'
 
 import {
   createStoreCreator,
@@ -17,13 +23,11 @@ import {
   LoguxReduxStore
 } from '../index.js'
 
-jest.mock('react', () => {
-  let React = require('react/cjs/react.development.js')
-  React.useEffect = React.useLayoutEffect
-  return React
-})
+interface TestComponent extends ReactTestRenderer {
+  client: CrossTabClient<{}, TestLog<ClientMeta>>
+}
 
-function createComponent (content: ReactNode) {
+function createComponent(content: ReactNode): TestComponent {
   let client = new CrossTabClient<{}, TestLog<ClientMeta>>({
     subprotocol: '0.0.0',
     server: 'wss://localhost:1337',
@@ -36,17 +40,17 @@ function createComponent (content: ReactNode) {
   return { ...component, client: store.client }
 }
 
-type Users = {
+interface Users {
   [key: string]: number
 }
 
-type UserPhotoProps = {
+interface UserPhotoProps {
   id: number
   nonId?: number
   debounce?: number
 }
 
-let UserPhoto: FunctionComponent<UserPhotoProps> = ({ id, debounce = 0 }) => {
+let UserPhoto: FC<UserPhotoProps> = ({ id, debounce = 0 }) => {
   let isSubscribing = useSubscription(
     [{ channel: `users/${id}`, fields: ['photo'] }],
     { debounce }
@@ -54,7 +58,7 @@ let UserPhoto: FunctionComponent<UserPhotoProps> = ({ id, debounce = 0 }) => {
   return h('img', { isSubscribing, src: `${id}.jpg` })
 }
 
-function getJSON (component: ReturnType<typeof createComponent>) {
+function getJSON(component: TestComponent): ReactTestRendererJSON {
   let value = component.toJSON()
   if (value === null || 'length' in value) {
     throw new Error('Wrong JSON result')
@@ -62,11 +66,14 @@ function getJSON (component: ReturnType<typeof createComponent>) {
   return value
 }
 
-function click (component: ReturnType<typeof createComponent>, event: any) {
+function click(component: TestComponent, event: any): void {
   getJSON(component).props.onClick(event)
 }
 
-function childProps (component: ReturnType<typeof createComponent>, i: number) {
+function childProps(
+  component: TestComponent,
+  i: number
+): ReactTestRendererJSON['props'] {
   let node = getJSON(component)
   if (node.children === null) throw new Error('Component has no childern')
   let child = node.children[i]
@@ -90,7 +97,7 @@ it('subscribes', async () => {
 })
 
 it('accepts channel names', async () => {
-  let User: FunctionComponent<{ id: string }> = ({ id }) => {
+  let User: FC<{ id: string }> = ({ id }) => {
     useSubscription([`users/${id}`, `users/${id}/comments`])
     return h('div')
   }
@@ -104,16 +111,16 @@ it('accepts channel names', async () => {
 
 it('unsubscribes', async () => {
   class UserList extends Component<{}, { users: Users }> {
-    constructor (props: {}) {
+    constructor(props: {}) {
       super(props)
       this.state = { users: { a: 1, b: 1, c: 2 } }
     }
 
-    change (users: Users) {
+    change(users: Users): void {
       this.setState({ users })
     }
 
-    render () {
+    render(): ReactNode {
       return h(
         'div',
         {
@@ -149,16 +156,16 @@ it('unsubscribes', async () => {
 
 it('changes subscription', async () => {
   class Profile extends Component<{}, { id: number }> {
-    constructor (props: {}) {
+    constructor(props: {}) {
       super(props)
       this.state = { id: 1 }
     }
 
-    change (id: number) {
+    change(id: number): void {
       this.setState({ id })
     }
 
-    render () {
+    render(): ReactNode {
       return h(
         'div',
         { onClick: this.change.bind(this) },
@@ -183,16 +190,16 @@ it('changes subscription', async () => {
 
 it('does not resubscribe on non-relevant props changes', () => {
   class Profile extends Component<{}, { id: number }> {
-    constructor (props: {}) {
+    constructor(props: {}) {
       super(props)
       this.state = { id: 1 }
     }
 
-    change (id: number) {
+    change(id: number): void {
       this.setState({ id })
     }
 
-    render () {
+    render(): ReactNode {
       return h(
         'div',
         { onClick: this.change.bind(this) },
@@ -223,16 +230,16 @@ it('supports different store sources', async () => {
   let store = createStore(() => ({}))
   let MyContext = createContext<{ store: LoguxReduxStore }>({ store })
 
-  function LoguxUserPhoto () {
+  let LoguxUserPhoto: FC = () => {
     useSubscription(['users/1'], { context: MyContext })
     return h('div')
   }
 
-  let Profile: FunctionComponent = () => {
+  let Profile: FC = () => {
     return h(
       MyContext.Provider,
       { value: { store } },
-      h('div', null, h(LoguxUserPhoto, { id: 1 }))
+      h('div', null, h(LoguxUserPhoto))
     )
   }
 
@@ -245,16 +252,16 @@ it('supports different store sources', async () => {
 
 it('reports about subscription end', async () => {
   class Profile extends Component<{}, { id: number }> {
-    constructor (props: {}) {
+    constructor(props: {}) {
       super(props)
       this.state = { id: 1 }
     }
 
-    change (id: number) {
+    change(id: number): void {
       this.setState({ id })
     }
 
-    render () {
+    render(): ReactNode {
       return h(
         'div',
         { onClick: this.change.bind(this) },
@@ -321,22 +328,22 @@ it('reports about subscription end', async () => {
 
 it('works on channels size changes', () => {
   jest.spyOn(console, 'error')
-  let UserList: FunctionComponent<{ ids: number[] }> = ({ ids }) => {
+  let UserList: FC<{ ids: number[] }> = ({ ids }) => {
     useSubscription(ids.map(id => `users/${id}`))
     return h('div')
   }
 
   class UsersPage extends Component<{}, { ids: number[] }> {
-    constructor (props: {}) {
+    constructor(props: {}) {
       super(props)
       this.state = { ids: [1] }
     }
 
-    change (ids: number[]) {
+    change(ids: number[]): void {
       this.setState({ ids })
     }
 
-    render () {
+    render(): ReactNode {
       return h(
         'div',
         { onClick: this.change.bind(this) },

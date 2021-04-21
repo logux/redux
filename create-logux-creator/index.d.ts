@@ -12,6 +12,6 @@ import {
 export function createLoguxCreator<
   H extends object = {},
   L extends Log = Log<ClientMeta>
-> (
+>(
   config: ClientOptions & LoguxReduxOptions
 ): LoguxStoreCreator<L, CrossTabClient<H, L>>

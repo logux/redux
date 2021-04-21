@@ -1,6 +1,7 @@
 import { Action, TestTime, TestLog } from '@logux/core'
 import { ClientMeta } from '@logux/client'
 import { Reducer } from 'redux'
+import { jest } from '@jest/globals'
 
 import { createLoguxCreator } from '../index.js'
 
@@ -9,7 +10,7 @@ type AddAction = {
   value: string
 }
 
-function isAdd (action: Action): action is AddAction {
+function isAdd(action: Action): action is AddAction {
   return action.type === 'ADD'
 }
 
@@ -19,7 +20,7 @@ type State = {
   value: string
 }
 
-function history (state: State, action: Action) {
+function history(state: State, action: Action): State {
   if (isAdd(action)) {
     return { value: `${state.value}${action.value}` }
   } else {
@@ -28,7 +29,7 @@ function history (state: State, action: Action) {
 }
 
 it('creates store', () => {
-  let spy = jest.spyOn(console, 'warn').mockImplementation()
+  let spy = jest.spyOn(console, 'warn').mockImplementation(() => {})
 
   let creator = createLoguxCreator<{}, TestLog<ClientMeta>>({
     server: 'wss://localhost:1337',

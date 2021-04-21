@@ -43,7 +43,7 @@ export type Channel =
  * @param opts Options
  * @return `true` during data loading.
  */
-export function useSubscription (
+export function useSubscription(
   channels: Channel[],
   opts?: SubscribingOptions
 ): boolean

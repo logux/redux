@@ -12,9 +12,9 @@ type WrappedComponent<P> = ComponentType<P> & {
 }
 
 interface Wrapper<P> {
-  (component: ComponentType<{ isSubscribing: boolean } & P>): WrappedComponent<
-    P
-  >
+  (
+    component: ComponentType<{ isSubscribing: boolean } & P>
+  ): WrappedComponent<P>
 }
 
 type SubscribeOptions = {
@@ -53,7 +53,7 @@ type SubscribeOptions = {
  *
  * @return Class wrapper.
  */
-export function subscribe<P = object> (
+export function subscribe<P = object>(
   subscriber: Subscriber<P> | Channel[] | Channel,
   opts?: SubscribeOptions
 ): Wrapper<P>

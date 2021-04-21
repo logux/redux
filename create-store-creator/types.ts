@@ -17,11 +17,11 @@ interface IncAction {
   type: 'INC'
 }
 
-function isInc (action: Action): action is IncAction {
+function isInc(action: Action): action is IncAction {
   return action.type === 'INC'
 }
 
-function reducer (
+function reducer(
   state: CounterState | undefined,
   action: IncAction
 ): CounterState {

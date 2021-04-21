@@ -1,15 +1,20 @@
 import {
-  ClientMeta,
-  ClientOptions,
-  LoguxUndoAction,
+  CrossTabClient,
   LoguxUndoError,
-  CrossTabClient
+  ClientOptions,
+  ClientMeta
 } from '@logux/client'
 import { applyMiddleware, Reducer, StoreEnhancer } from 'redux'
 import { TestPair, TestTime, Action, TestLog } from '@logux/core'
+import { LoguxUndoAction } from '@logux/actions'
 import { delay } from 'nanodelay'
+import { jest } from '@jest/globals'
 
-import { createStoreCreator, LoguxReduxOptions } from '../index.js'
+import {
+  createStoreCreator,
+  LoguxReduxOptions,
+  LoguxReduxStore
+} from '../index.js'
 
 type State = {
   value: string
@@ -20,11 +25,11 @@ type AddAction = {
   value: string
 }
 
-function createStore (
+function createStore(
   reducer: Reducer = history,
   opts: Partial<LoguxReduxOptions & ClientOptions> = {},
   enhancer: StoreEnhancer | undefined = undefined
-) {
+): LoguxReduxStore<State, AddAction | LoguxUndoAction, TestLog<ClientMeta>> {
   let creatorOptions = {
     cleanEvery: opts.cleanEvery,
     saveStateEvery: opts.saveStateEvery,
@@ -54,11 +59,11 @@ function createStore (
   return store
 }
 
-function isAdd (action: Action): action is AddAction {
+function isAdd(action: Action): action is AddAction {
   return action.type === 'ADD'
 }
 
-function history (state: State, action: Action) {
+function history(state: State, action: Action): State {
   if (isAdd(action)) {
     return { value: `${state.value}${action.value}` }
   } else {
@@ -66,7 +71,7 @@ function history (state: State, action: Action) {
   }
 }
 
-function emit (obj: any, event: string, ...args: any[]) {
+function emit(obj: any, event: string, ...args: any[]): void {
   obj.emitter.emit(event, ...args)
 }
 
@@ -402,7 +407,7 @@ it('cleans action added without reason', async () => {
   store.dispatch.local({ type: 'ADD', value: '0' }, { reasons: ['test'] })
   expect(store.log.entries()[0][1].reasons).toEqual(['test'])
 
-  function add (index: number) {
+  function add(index: number) {
     return () => {
       store.dispatch({ type: 'ADD', value: `${4 * index - 3}` })
       store.dispatch.local({ type: 'ADD', value: `${4 * index - 2}` })

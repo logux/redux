@@ -20,4 +20,4 @@ import { LoguxDispatch } from '../create-store-creator/index.js'
  *
  * @return Logux Redux store’s `dispatch` function.
  */
-export function useDispatch<A extends Action = AnyAction> (): LoguxDispatch<A>
+export function useDispatch<A extends Action = AnyAction>(): LoguxDispatch<A>

@@ -2,7 +2,7 @@ import { createStore as createReduxStore } from 'redux'
 import { createNanoEvents } from 'nanoevents'
 import { isFirstOlder } from '@logux/core'
 
-function hackReducer (reducer) {
+function hackReducer(reducer) {
   return (state, action) => {
     if (action.type === 'logux/state') {
       return action.state
@@ -12,7 +12,7 @@ function hackReducer (reducer) {
   }
 }
 
-export function createStoreCreator (client, options = {}) {
+export function createStoreCreator(client, options = {}) {
   let cleanEvery = options.cleanEvery || 25
   let saveStateEvery = options.saveStateEvery || 50
   let onMissedHistory = options.onMissedHistory
@@ -20,7 +20,7 @@ export function createStoreCreator (client, options = {}) {
 
   let log = client.log
 
-  return function createStore (reducer, preloadedState, enhancer) {
+  return function createStore(reducer, preloadedState, enhancer) {
     let store = createReduxStore(hackReducer(reducer), preloadedState, enhancer)
 
     let emitter = createNanoEvents()
@@ -31,7 +31,7 @@ export function createStoreCreator (client, options = {}) {
     let stateHistory = {}
 
     let actionCount = 0
-    function saveHistory (meta) {
+    function saveHistory(meta) {
       actionCount += 1
       if (saveStateEvery === 1 || actionCount % saveStateEvery === 1) {
         stateHistory[meta.id] = store.getState()
@@ -85,7 +85,7 @@ export function createStoreCreator (client, options = {}) {
       return client.sync(action, meta)
     }
 
-    function replaceState (state, actions, pushHistory) {
+    function replaceState(state, actions, pushHistory) {
       let last = actions[actions.length - 1][1]
       let newState = actions.reduceRight((prev, [action, id]) => {
         let changed = reducer(prev, action)
@@ -101,7 +101,7 @@ export function createStoreCreator (client, options = {}) {
     }
 
     let replaying
-    function replay (actionId) {
+    function replay(actionId) {
       let ignore = {}
       let actions = []
       let replayed = false
@@ -186,7 +186,7 @@ export function createStoreCreator (client, options = {}) {
 
     let wait = {}
 
-    async function process (action, meta) {
+    async function process(action, meta) {
       if (replaying) {
         wait[meta.id] = true
         await replaying

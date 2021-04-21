@@ -1,8 +1,8 @@
-import * as React from 'react'
+import { FC } from 'react'
 
 import { useSubscription } from '../index.js'
 
-export function UserList ({ id }: { id: number }) {
+export const UserList: FC<{ id: number }> = ({ id }) => {
   let isLoading = useSubscription([
     'users',
     { channel: `user/${id}`, fields: ['name'] }

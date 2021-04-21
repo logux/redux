@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react'
 import { ReactReduxContext } from 'react-redux'
 
-function add (store, subscriptions) {
+function add(store, subscriptions) {
   if (!store.subscriptions) store.subscriptions = {}
   if (!store.subscribers) store.subscribers = {}
 
@@ -20,7 +20,7 @@ function add (store, subscriptions) {
   )
 }
 
-function remove (store, subscriptions) {
+function remove(store, subscriptions) {
   subscriptions.forEach(i => {
     let subscription = i[0]
     let json = i[1]
@@ -33,7 +33,7 @@ function remove (store, subscriptions) {
   })
 }
 
-export function useSubscription (channels, opts = {}) {
+export function useSubscription(channels, opts = {}) {
   let debounce = opts.debounce || 0
   let [isSubscribing, changeSubscribing] = useState(true)
   let { store } = useContext(opts.context || ReactReduxContext)
@@ -52,7 +52,7 @@ export function useSubscription (channels, opts = {}) {
     let timeout
     let ignoreResponce = false
 
-    function resetTimeout () {
+    function resetTimeout() {
       clearTimeout(timeout)
       timeout = null
     }

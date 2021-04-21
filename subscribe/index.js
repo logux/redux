@@ -2,12 +2,12 @@ import { createElement } from 'react'
 
 import { useSubscription } from '../use-subscription/index.js'
 
-export function subscribe (subscriber, opts = {}) {
+export function subscribe(subscriber, opts = {}) {
   let subscribingProp = 'isSubscribing'
   if (opts.subscribingProp) subscribingProp = opts.subscribingProp
 
   return function (Wrapped) {
-    function SubscribeComponent (ownProps) {
+    function SubscribeComponent(ownProps) {
       let channels = subscriber
       if (typeof subscriber === 'function') channels = subscriber(ownProps)
       if (!Array.isArray(channels)) channels = [channels]
