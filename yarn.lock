@@ -577,11 +577,11 @@
 
 "@logux/actions@logux/actions":
   version "0.0.0"
-  resolved "https://codeload.github.com/logux/actions/tar.gz/3926be005f94d0a6c48684b710a0eb5e1aba5297"
+  resolved "https://codeload.github.com/logux/actions/tar.gz/2d23b1914a94c10d0ffbcca25dac5be0619cde8e"
 
 "@logux/client@logux/client#next":
   version "0.9.3"
-  resolved "https://codeload.github.com/logux/client/tar.gz/4cc9b74aec7829230c71c04e8d05044a47ce0640"
+  resolved "https://codeload.github.com/logux/client/tar.gz/77be31a3bafa76df45e7c81c1038aa8cf9fb6093"
   dependencies:
     "@logux/actions" logux/actions
     fast-json-stable-stringify "^2.1.0"
@@ -591,7 +591,7 @@
 
 "@logux/core@logux/core#next":
   version "0.6.2"
-  resolved "https://codeload.github.com/logux/core/tar.gz/b6a90d2ca53e1e6bd317f2aaf0748db70ffd8af0"
+  resolved "https://codeload.github.com/logux/core/tar.gz/6b4c2cfc6118283da59022351494557252d8fea6"
   dependencies:
     nanoevents "^6.0.0"
 
@@ -1646,13 +1646,13 @@ browserify-zlib@^0.2.0:
     pako "~1.0.5"
 
 browserslist@^4.0.0, browserslist@^4.14.5:
-  version "4.16.4"
-  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.16.4.tgz#7ebf913487f40caf4637b892b268069951c35d58"
-  integrity sha512-d7rCxYV8I9kj41RH8UKYnvDYCRENUlHRgyXy/Rhr/1BaeLGfiCptEdFE8MIrvGfWbBFNjVYx76SQWvNX1j+/cQ==
+  version "4.16.5"
+  resolved "https://registry.yarnpkg.com/browserslist/-/browserslist-4.16.5.tgz#952825440bca8913c62d0021334cbe928ef062ae"
+  integrity sha512-C2HAjrM1AI/djrpAUU/tr4pml1DqLIzJKSLDBXBrNErl9ZCCTXdhwxdJjYc16953+mBWf7Lw+uUJgpgb8cN71A==
   dependencies:
-    caniuse-lite "^1.0.30001208"
+    caniuse-lite "^1.0.30001214"
     colorette "^1.2.2"
-    electron-to-chromium "^1.3.712"
+    electron-to-chromium "^1.3.719"
     escalade "^3.1.1"
     node-releases "^1.1.71"
 
@@ -1795,7 +1795,7 @@ caniuse-api@^3.0.0:
     lodash.memoize "^4.1.2"
     lodash.uniq "^4.5.0"
 
-caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001208:
+caniuse-lite@^1.0.0, caniuse-lite@^1.0.30001214:
   version "1.0.30001214"
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30001214.tgz#70f153c78223515c6d37a9fde6cd69250da9d872"
   integrity sha512-O2/SCpuaU3eASWVaesQirZv1MSjUNOvmugaD8zNSJqw6Vv5SGwoOpA9LJs3pNPfM745nxqPvfZY3MQKY4AKHYg==
@@ -2683,7 +2683,7 @@ editorconfig@0.15.3, editorconfig@^0.15.3:
     semver "^5.6.0"
     sigmund "^1.0.1"
 
-electron-to-chromium@^1.3.712:
+electron-to-chromium@^1.3.719:
   version "1.3.719"
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.3.719.tgz#87166fee347a46a2557f19aadb40a1d68241e61c"
   integrity sha512-heM78GKSqrIzO9Oz0/y22nTBN7bqSP1Pla2SyU9DiSnQD+Ea9SyyN5RWWlgqsqeBLNDkSlE9J9EHFmdMPzxB/g==
