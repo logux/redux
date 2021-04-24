@@ -15,15 +15,8 @@ import { ClientMeta, CrossTabClient } from '@logux/client'
 import { TestTime, TestLog } from '@logux/core'
 import { Provider } from 'react-redux'
 import { delay } from 'nanodelay'
-import { jest } from '@jest/globals'
 
 import { createStoreCreator, LoguxReduxStore, subscribe } from '../index.js'
-
-jest.mock('react', () => {
-  let React = require('react/cjs/react.development.js')
-  React.useEffect = React.useLayoutEffect
-  return React
-})
 
 interface TestComponent extends ReactTestRenderer {
   client: CrossTabClient<{}, TestLog<ClientMeta>>
