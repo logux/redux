@@ -1,6 +1,6 @@
 {
   "name": "@logux/redux",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "Redux compatible API for Logux",
   "keywords": [
     "logux",
@@ -157,7 +157,9 @@
       "ES",
       "TypeDoc",
       "WebSocket",
-      "roadmap"
+      "roadmap",
+      "ESM",
+      "js"
     ]
   },
   "sharec": {

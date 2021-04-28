@@ -1,6 +1,11 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.8
+* Moved project to ESM-only type. Applications must use ESM too.
+* Dropped Node.js 10 support.
+* Fixed types performance by replacing `type` to `interface`.
+
 ## 0.7.1
 * Fix `isLoading` on channel changes (by Eduard Aksamitov).
 
