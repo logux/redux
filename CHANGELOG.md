@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.8.1
+* Fixed peer dependency to the latest Logux Client.
+
 ## 0.8
 * Moved project to ESM-only type. Applications must use ESM too.
 * Dropped Node.js 10 support.
