@@ -86,7 +86,7 @@ export function createStoreCreator(client, options = {}) {
     }
 
     function replaceState(state, actions, pushHistory) {
-      let last = actions[actions.length - 1][1]
+      let last = actions.length === 0 ? null : actions[actions.length - 1][1]
       let newState = actions.reduceRight((prev, [action, id]) => {
         let changed = reducer(prev, action)
         if (pushHistory && id === last) {

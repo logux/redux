@@ -113,6 +113,33 @@ it('listen for action from other tabs', () => {
   expect(store.getState()).toEqual({ value: '0a' })
 })
 
+it('undoes last when snapshot exists', async () => {
+  let store = createStore(undefined, { saveStateEvery: 1 })
+
+  await store.dispatch.crossTab(ADD_A, {
+    id: '57 106:test1 1',
+    reasons: ['test']
+  })
+  await store.dispatch.crossTab(ADD_A, {
+    id: '58 106:test1 1',
+    reasons: ['test']
+  })
+  await store.dispatch.crossTab(
+    {
+      type: 'logux/undo',
+      id: '58 106:test1 1',
+      reason: 'test undo',
+      action: { type: '???' }
+    },
+    {
+      id: '59 106:test1 1',
+      reasons: ['as requested']
+    }
+  )
+  await delay(10)
+  expect(store.getState()).toEqual({ value: '0a' })
+})
+
 it('saves previous states', async () => {
   let calls = 0
   let store = createStore((state: State, action: Action) => {
