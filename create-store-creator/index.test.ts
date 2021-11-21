@@ -6,9 +6,11 @@ import {
 } from '@logux/client'
 import { applyMiddleware, Reducer, StoreEnhancer } from 'redux'
 import { TestPair, TestTime, Action, TestLog } from '@logux/core'
+import { spyOn, restoreAll, spy } from 'nanospy'
+import { equal, is, ok, type } from 'uvu/assert'
 import { LoguxUndoAction } from '@logux/actions'
 import { delay } from 'nanodelay'
-import { jest } from '@jest/globals'
+import { test } from 'uvu'
 
 import {
   createStoreCreator,
@@ -77,43 +79,50 @@ function emit(obj: any, event: string, ...args: any[]): void {
 
 const ADD_A: AddAction = { type: 'ADD', value: 'a' }
 
-it('creates Redux store', () => {
+// @ts-ignore
+global.WebSocket = () => {}
+
+test.after.each(() => {
+  restoreAll()
+})
+
+test('creates Redux store', () => {
   let store = createStore()
   store.dispatch(ADD_A)
-  expect(store.getState()).toEqual({ value: '0a' })
+  equal(store.getState(), { value: '0a' })
 })
 
-it('creates Logux client', () => {
+test('creates Logux client', () => {
   let store = createStore()
-  expect(store.client.options.subprotocol).toEqual('1.0.0')
+  equal(store.client.options.subprotocol, '1.0.0')
 })
 
-it('sets tab ID', async () => {
+test('sets tab ID', async () => {
   let store = createStore()
   await new Promise<void>(resolve => {
     store.log.on('add', (action, meta) => {
-      expect(meta.tab).toEqual(store.client.tabId)
-      expect(meta.reasons).toEqual([`timeTravelTab${store.client.tabId}`])
+      equal(meta.tab, store.client.tabId)
+      equal(meta.reasons, [`timeTravelTab${store.client.tabId}`])
       resolve()
     })
     store.dispatch(ADD_A)
   })
 })
 
-it('has shortcut for add', async () => {
+test('has shortcut for add', async () => {
   let store = createStore()
   await store.dispatch.crossTab(ADD_A, { reasons: ['test'] })
-  expect(store.getState()).toEqual({ value: '0a' })
-  expect(store.log.entries()[0][1].reasons).toEqual(['test'])
+  equal(store.getState(), { value: '0a' })
+  equal(store.log.entries()[0][1].reasons, ['test'])
 })
 
-it('listen for action from other tabs', () => {
+test('listen for action from other tabs', () => {
   let store = createStore()
   emit(store.client, 'add', ADD_A, { id: '1 t 0' })
-  expect(store.getState()).toEqual({ value: '0a' })
+  equal(store.getState(), { value: '0a' })
 })
 
-it('undoes last when snapshot exists', async () => {
+test('undoes last when snapshot exists', async () => {
   let store = createStore(undefined, { saveStateEvery: 1 })
 
   await store.dispatch.crossTab(ADD_A, {
@@ -137,10 +146,10 @@ it('undoes last when snapshot exists', async () => {
     }
   )
   await delay(10)
-  expect(store.getState()).toEqual({ value: '0a' })
+  equal(store.getState(), { value: '0a' })
 })
 
-it('saves previous states', async () => {
+test('saves previous states', async () => {
   let calls = 0
   let store = createStore((state: State, action: Action) => {
     if (action.type === 'ADD') calls += 1
@@ -158,17 +167,17 @@ it('saves previous states', async () => {
     }
   }
   await promise
-  expect(calls).toEqual(60)
+  equal(calls, 60)
   calls = 0
   await store.dispatch.crossTab(ADD_A, {
     id: '57 10:test1 1',
     reasons: ['test']
   })
   await delay(10)
-  expect(calls).toEqual(10)
+  equal(calls, 10)
 })
 
-it('changes history recording frequency', async () => {
+test('changes history recording frequency', async () => {
   let calls = 0
   let store = createStore(
     (state: State, action: Action) => {
@@ -192,10 +201,10 @@ it('changes history recording frequency', async () => {
     reasons: ['test']
   })
   await delay(10)
-  expect(calls).toEqual(2)
+  equal(calls, 2)
 })
 
-it('cleans its history on removing action', async () => {
+test('cleans its history on removing action', async () => {
   let calls = 0
   let store = createStore(
     (state: State, action: Action) => {
@@ -223,10 +232,10 @@ it('cleans its history on removing action', async () => {
     reasons: ['test']
   })
   await delay(10)
-  expect(calls).toEqual(3)
+  equal(calls, 3)
 })
 
-it('changes history', async () => {
+test('changes history', async () => {
   let store = createStore()
 
   await Promise.all([
@@ -240,10 +249,10 @@ it('changes history', async () => {
     { id: '2 10:test1 1', reasons: ['test'] }
   )
   await delay(10)
-  expect(store.getState().value).toEqual('0ab|cd')
+  equal(store.getState().value, '0ab|cd')
 })
 
-it('undoes actions', async () => {
+test('undoes actions', async () => {
   let store = createStore()
   let nodeId = store.client.nodeId
 
@@ -252,7 +261,7 @@ it('undoes actions', async () => {
     store.dispatch.crossTab({ type: 'ADD', value: 'b' }, { reasons: ['test'] }),
     store.dispatch.crossTab({ type: 'ADD', value: 'c' }, { reasons: ['test'] })
   ])
-  expect(store.getState().value).toEqual('0abc')
+  equal(store.getState().value, '0abc')
   store.dispatch.crossTab(
     {
       type: 'logux/undo',
@@ -263,14 +272,14 @@ it('undoes actions', async () => {
     { reasons: ['test'] }
   )
   await delay(1)
-  expect(store.getState().value).toEqual('0ac')
+  equal(store.getState().value, '0ac')
 })
 
-it('replaces reducer', async () => {
+test('replaces reducer', async () => {
   let store = createStore()
   store.dispatch({ type: 'ADD', value: 'a' })
   store.dispatch({ type: 'ADD', value: 'b' })
-  expect(store.getState().value).toEqual('0ab')
+  equal(store.getState().value, '0ab')
 
   store.replaceReducer(
     (state: State | undefined, action: AddAction | LoguxUndoAction): State => {
@@ -286,11 +295,11 @@ it('replaces reducer', async () => {
     { id: '1 10:test1 1', reasons: ['test'] }
   )
   await delay(10)
-  expect(store.getState().value).toEqual('0aZB')
+  equal(store.getState().value, '0aZB')
 })
 
-it('ignores cleaned history from non-legacy actions', async () => {
-  let onMissedHistory = jest.fn()
+test('ignores cleaned history from non-legacy actions', async () => {
+  let onMissedHistory = spy()
   let store = createStore(history, {
     onMissedHistory,
     saveStateEvery: 2
@@ -307,11 +316,11 @@ it('ignores cleaned history from non-legacy actions', async () => {
     { id: '1 10:test1 0', reasons: ['test'] }
   )
   await delay(1)
-  expect(store.getState().value).toEqual('0|bcd')
-  expect(onMissedHistory).not.toHaveBeenCalledWith()
+  equal(store.getState().value, '0|bcd')
+  is(onMissedHistory.called, false)
 })
 
-it('does not replays actions on logux/ actions', async () => {
+test('does not replays actions on logux/ actions', async () => {
   let reduced: string[] = []
   let store = createStore((state, action) => {
     if (action.type.slice(0, 2) !== '@@') reduced.push(action.type)
@@ -323,8 +332,8 @@ it('does not replays actions on logux/ actions', async () => {
   store.log.add({ type: 'logux/unsubscribe' }, { sync: true, time: 0 })
   store.log.add({ type: 'B' }, { reasons: ['t'], time: 0 })
   await delay(1)
-  expect(reduced).toEqual(['A', 'B', 'A'])
-  expect(store.log.actions()).toEqual([
+  equal(reduced, ['A', 'B', 'A'])
+  equal(store.log.actions(), [
     { type: 'logux/subscribe' },
     { type: 'logux/unsubscribe' },
     { type: 'B' },
@@ -332,7 +341,7 @@ it('does not replays actions on logux/ actions', async () => {
   ])
 })
 
-it('replays history for reason-less action', async () => {
+test('replays history for reason-less action', async () => {
   let store = createStore()
   await Promise.all([
     store.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['test'] }),
@@ -344,12 +353,12 @@ it('replays history for reason-less action', async () => {
     { id: '1 10:test1 1', noAutoReason: true }
   )
   await delay(1)
-  expect(store.getState().value).toEqual('0a|bc')
-  expect(store.log.entries()).toHaveLength(3)
+  equal(store.getState().value, '0a|bc')
+  equal(store.log.entries().length, 3)
 })
 
-it('replays actions before staring since initial state', async () => {
-  let onMissedHistory = jest.fn()
+test('replays actions before staring since initial state', async () => {
+  let onMissedHistory = spy()
   let store = createStore(history, {
     onMissedHistory,
     saveStateEvery: 2
@@ -364,12 +373,12 @@ it('replays actions before staring since initial state', async () => {
     { id: '0 10:test1 0', reasons: ['test'] }
   )
   await delay(1)
-  expect(onMissedHistory).not.toHaveBeenCalled()
-  expect(store.getState().value).toEqual('0|bcd')
+  is(onMissedHistory.called, false)
+  equal(store.getState().value, '0|bcd')
 })
 
-it('replays actions on missed history', async () => {
-  let onMissedHistory = jest.fn()
+test('replays actions on missed history', async () => {
+  let onMissedHistory = spy()
   let store = createStore(history, {
     reasonlessHistory: 2,
     onMissedHistory,
@@ -386,17 +395,17 @@ it('replays actions on missed history', async () => {
     { id: '0 10:test1 0', reasons: ['test'] }
   )
   await delay(1)
-  expect(store.getState().value).toEqual('0abc[d')
-  expect(onMissedHistory).toHaveBeenCalledWith({ type: 'ADD', value: '[' })
+  equal(store.getState().value, '0abc[d')
+  equal(onMissedHistory.calls, [[{ type: 'ADD', value: '[' }]])
   store.dispatch.crossTab(
     { type: 'ADD', value: ']' },
     { id: '0 10:test1 1', reasons: ['test'] }
   )
   await delay(1)
-  expect(store.getState().value).toEqual('0abc[]d')
+  equal(store.getState().value, '0abc[]d')
 })
 
-it('works without onMissedHistory', async () => {
+test('works without onMissedHistory', async () => {
   let store = createStore(history, {
     reasonlessHistory: 2,
     saveStateEvery: 2,
@@ -413,7 +422,7 @@ it('works without onMissedHistory', async () => {
   )
 })
 
-it('does not fall on missed onMissedHistory', async () => {
+test('does not fall on missed onMissedHistory', async () => {
   let store = createStore(history)
   await store.dispatch.crossTab(
     { type: 'ADD', value: 'a' },
@@ -425,14 +434,14 @@ it('does not fall on missed onMissedHistory', async () => {
     { id: '0 10:test1 0', reasons: ['test'] }
   )
   await delay(1)
-  expect(store.getState().value).toEqual('0|')
+  equal(store.getState().value, '0|')
 })
 
-it('cleans action added without reason', async () => {
+test('cleans action added without reason', async () => {
   let store = createStore(history, { reasonlessHistory: 3 })
 
   store.dispatch.local({ type: 'ADD', value: '0' }, { reasons: ['test'] })
-  expect(store.log.entries()[0][1].reasons).toEqual(['test'])
+  equal(store.log.entries()[0][1].reasons, ['test'])
 
   function add(index: number) {
     return () => {
@@ -453,11 +462,11 @@ it('cleans action added without reason', async () => {
 
   let entries = store.log.entries()
   let last = entries[entries.length - 1]
-  expect(last[1].reasons).toEqual(['syncing', 'timeTravel'])
+  equal(last[1].reasons, ['syncing', 'timeTravel'])
   store.dispatch({ type: 'ADD', value: '25' })
   await store.log.removeReason('syncing')
   await delay(1)
-  expect(store.log.actions()).toEqual([
+  equal(store.log.actions(), [
     { type: 'ADD', value: '0' },
     { type: 'ADD', value: '23' },
     { type: 'ADD', value: '24' },
@@ -465,7 +474,7 @@ it('cleans action added without reason', async () => {
   ])
 })
 
-it('cleans last 1000 by default', async () => {
+test('cleans last 1000 by default', async () => {
   let store = createStore()
 
   let promise = Promise.resolve()
@@ -477,10 +486,10 @@ it('cleans last 1000 by default', async () => {
 
   await promise
   await delay(1)
-  expect(store.log.actions()).toHaveLength(1000)
+  equal(store.log.actions().length, 1000)
 })
 
-it('copies reasons to undo action', async () => {
+test('copies reasons to undo action', async () => {
   let store = createStore()
   let nodeId = store.client.nodeId
   await store.dispatch.crossTab(ADD_A, { reasons: ['a', 'b'] })
@@ -490,39 +499,39 @@ it('copies reasons to undo action', async () => {
   )
   let result = await store.log.byId(`2 ${nodeId} 0`)
   if (result[0] === null) throw new Error('Action was not found')
-  expect(result[0].type).toEqual('logux/undo')
-  expect(result[1].reasons).toEqual(['a', 'b'])
+  equal(result[0].type, 'logux/undo')
+  equal(result[1].reasons, ['a', 'b'])
 })
 
-it('dispatches local actions', async () => {
+test('dispatches local actions', async () => {
   let store = createStore()
   await store.dispatch.local(ADD_A, { reasons: ['test'] })
-  expect(store.log.entries()[0][0]).toEqual(ADD_A)
-  expect(store.log.entries()[0][1].tab).toEqual(store.client.tabId)
-  expect(store.log.entries()[0][1].reasons).toEqual(['test'])
+  equal(store.log.entries()[0][0], ADD_A)
+  equal(store.log.entries()[0][1].tab, store.client.tabId)
+  equal(store.log.entries()[0][1].reasons, ['test'])
 })
 
-it('allows to miss meta for local actions', async () => {
+test('allows to miss meta for local actions', async () => {
   let store = createStore()
   store.log.on('preadd', (action, meta) => {
     meta.reasons.push('preadd')
   })
   await store.dispatch.local(ADD_A)
-  expect(store.log.entries()[0][0]).toEqual(ADD_A)
+  equal(store.log.entries()[0][0], ADD_A)
 })
 
-it('dispatches sync actions', async () => {
+test('dispatches sync actions', async () => {
   let store = createStore()
   store.dispatch.sync(ADD_A, { reasons: ['test'] })
   await delay(1)
   let log = store.log.entries()
-  expect(log[0][0]).toEqual(ADD_A)
-  expect(log[0][1].sync).toBe(true)
-  expect(log[0][1].reasons).toEqual(['test', 'syncing'])
+  equal(log[0][0], ADD_A)
+  is(log[0][1].sync, true)
+  equal(log[0][1].reasons, ['test', 'syncing'])
 })
 
-it('cleans sync action after processing', async () => {
-  jest.spyOn(console, 'warn').mockImplementation(() => {})
+test('cleans sync action after processing', async () => {
+  let warn = spyOn(console, 'warn', () => {})
   let pair = new TestPair()
   let store = createStore(history, { server: pair.left })
   let resultA, resultB
@@ -533,8 +542,8 @@ it('cleans sync action after processing', async () => {
       resultA = 'processed'
     })
     .catch((e: LoguxUndoError) => {
-      expect(e.message).toContain('undid')
-      expect(e.message).toContain('because of error')
+      ok(e.message.includes('undid'))
+      ok(e.message.includes('because of error'))
       resultA = e.action.reason
     })
   store.dispatch
@@ -543,31 +552,31 @@ it('cleans sync action after processing', async () => {
       resultB = 'processed'
     })
     .catch(e => {
-      expect(e.message).toContain('undid')
-      expect(e.message).toContain('because of error')
+      ok(e.message.includes('undid'))
+      ok(e.message.includes('because of error'))
       resultB = e.action.reason
     })
 
   store.log.removeReason('timeTravel')
   await store.log.add({ type: 'logux/processed', id: '0 10:1:1 0' })
-  expect(resultA).toBeUndefined()
-  expect(resultB).toBeUndefined()
-  expect(store.log.actions()).toEqual([
+  is(resultA, undefined)
+  is(resultB, undefined)
+  equal(store.log.actions(), [
     { type: 'ADD', value: 'a' },
     { type: 'ADD', value: 'b' }
   ])
   await store.log.add({ type: 'logux/processed', id: '1 10:1:1 0' })
-  expect(resultA).toEqual('processed')
-  expect(resultB).toBeUndefined()
-  expect(store.log.actions()).toEqual([{ type: 'ADD', value: 'b' }])
+  equal(resultA, 'processed')
+  is(resultB, undefined)
+  equal(store.log.actions(), [{ type: 'ADD', value: 'b' }])
   store.log.add({ type: 'logux/undo', reason: 'error', id: '3 10:1:1 0' })
   await delay(1)
-  expect(resultB).toEqual('error')
-  expect(store.log.actions()).toEqual([])
-  expect(console.warn).not.toHaveBeenCalled()
+  equal(resultB, 'error')
+  equal(store.log.actions(), [])
+  is(warn.called, false)
 })
 
-it('applies old actions from store', async () => {
+test('applies old actions from store', async () => {
   let store1 = createStore(history, { reasonlessHistory: 2 })
   let store2
   await Promise.all([
@@ -608,13 +617,13 @@ it('applies old actions from store', async () => {
   store2.dispatch.crossTab({ type: 'ADD', value: 'c' }, { reasons: ['test'] })
   store2.dispatch({ type: 'ADD', value: 'd' })
   store2.dispatch({ type: 'ADD', value: 'e' })
-  expect(store2.getState().value).toEqual('0abde')
+  equal(store2.getState().value, '0abde')
 
   await store2.initialize
-  expect(store2.getState().value).toEqual('0134abcde')
+  equal(store2.getState().value, '0134abcde')
 })
 
-it('supports middlewares', () => {
+test('supports middlewares', () => {
   let store = createStore(
     history,
     {},
@@ -631,10 +640,10 @@ it('supports middlewares', () => {
 
   store.dispatch({ type: 'ADD', value: 'a' })
   store.dispatch({ type: 'ADD', value: 'b' })
-  expect(store.getState().value).toEqual('0b')
+  equal(store.getState().value, '0b')
 })
 
-it('waits for replaying', async () => {
+test('waits for replaying', async () => {
   let store = createStore(history)
   let run: undefined | (() => void)
   let waiting = new Promise<void>(resolve => {
@@ -662,15 +671,15 @@ it('waits for replaying', async () => {
     store.dispatch.crossTab({ type: 'ADD', value: 'd' }, { reasons: ['t'] })
   ])
   delay(1)
-  expect(store.getState().value).toEqual('0b')
+  equal(store.getState().value, '0b')
   store.log.removeReason('o')
   if (typeof run === 'undefined') throw new Error('run was not set')
   run()
   await delay(10)
-  expect(store.getState().value).toEqual('0abd')
+  equal(store.getState().value, '0abd')
 })
 
-it('emits change event', async () => {
+test('emits change event', async () => {
   let store = createStore(history)
 
   store.log.on('preadd', (action, meta) => {
@@ -679,7 +688,7 @@ it('emits change event', async () => {
 
   let calls: [State, State, Action][] = []
   store.on('change', (state, prevState, action, meta) => {
-    expect(typeof meta.id).toEqual('string')
+    type(meta.id, 'string')
     calls.push([state, prevState, action])
   })
 
@@ -687,14 +696,14 @@ it('emits change event', async () => {
   store.dispatch.local({ type: 'ADD', value: 'c' })
   store.dispatch.local({ type: 'ADD', value: 'b' }, { id: '1 10:test1 1' })
   await delay(10)
-  expect(calls).toEqual([
+  equal(calls, [
     [{ value: '0a' }, { value: '0' }, { type: 'ADD', value: 'a' }],
     [{ value: '0ac' }, { value: '0a' }, { type: 'ADD', value: 'c' }],
     [{ value: '0abc' }, { value: '0ac' }, { type: 'ADD', value: 'b' }]
   ])
 })
 
-it('warns about undoes cleaned action', async () => {
+test('warns about undoes cleaned action', async () => {
   let store = createStore(history)
   await store.dispatch.crossTab({
     type: 'logux/undo',
@@ -703,25 +712,27 @@ it('warns about undoes cleaned action', async () => {
     reason: 'error'
   })
   await delay(10)
-  expect(store.log.actions()).toHaveLength(0)
+  equal(store.log.actions().length, 0)
 })
 
-it('does not put reason on request', async () => {
+test('does not put reason on request', async () => {
   let store = createStore(history)
   await store.dispatch.crossTab(
     { type: 'ADD', value: 'A' },
     { noAutoReason: true }
   )
   await store.dispatch.crossTab({ type: 'ADD', value: 'B' })
-  expect(store.log.actions()).toEqual([{ type: 'ADD', value: 'B' }])
+  equal(store.log.actions(), [{ type: 'ADD', value: 'B' }])
 
   await store.dispatch.crossTab({ type: 'ADD', value: 'a' }, { reasons: ['a'] })
   await store.dispatch.crossTab({ type: 'ADD', value: 'b' }, { keepLast: 'b' })
-  expect(store.log.actions()).toEqual([
+  equal(store.log.actions(), [
     { type: 'ADD', value: 'B' },
     { type: 'ADD', value: 'a' },
     { type: 'ADD', value: 'b' }
   ])
-  expect(store.log.entries()[1][1].noAutoReason).toBe(true)
-  expect(store.log.entries()[2][1].noAutoReason).toBe(true)
+  is(store.log.entries()[1][1].noAutoReason, true)
+  is(store.log.entries()[2][1].noAutoReason, true)
 })
+
+test.run()

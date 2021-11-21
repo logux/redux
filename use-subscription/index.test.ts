@@ -13,9 +13,11 @@ import {
 } from 'react-test-renderer'
 import { ClientMeta, CrossTabClient } from '@logux/client'
 import { TestTime, TestLog } from '@logux/core'
+import { spyOn, restoreAll } from 'nanospy'
+import { equal, is } from 'uvu/assert'
 import { Provider } from 'react-redux'
 import { delay } from 'nanodelay'
-import { jest } from '@jest/globals'
+import { test } from 'uvu'
 
 import {
   createStoreCreator,
@@ -81,7 +83,14 @@ function childProps(
   return child.props
 }
 
-it('subscribes', async () => {
+// @ts-ignore
+global.WebSocket = () => {}
+
+test.after.each(() => {
+  restoreAll()
+})
+
+test('subscribes', async () => {
   let component = createComponent(
     h('div', {}, [
       h(UserPhoto, { id: 1, key: 1 }),
@@ -90,26 +99,26 @@ it('subscribes', async () => {
     ])
   )
   await delay(1)
-  expect(component.client.log.actions()).toEqual([
+  equal(component.client.log.actions(), [
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
     { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
   ])
 })
 
-it('accepts channel names', async () => {
+test('accepts channel names', async () => {
   let User: FC<{ id: string }> = ({ id }) => {
     useSubscription([`users/${id}`, `users/${id}/comments`])
     return h('div')
   }
   let component = createComponent(h('div', {}, [h(User, { id: '1', key: 1 })]))
   await delay(1)
-  expect(component.client.log.actions()).toEqual([
+  equal(component.client.log.actions(), [
     { type: 'logux/subscribe', channel: 'users/1' },
     { type: 'logux/subscribe', channel: 'users/1/comments' }
   ])
 })
 
-it('unsubscribes', async () => {
+test('unsubscribes', async () => {
   class UserList extends Component<{}, { users: Users }> {
     constructor(props: {}) {
       super(props)
@@ -135,26 +144,26 @@ it('unsubscribes', async () => {
 
   let component = createComponent(h(UserList, {}))
   await delay(1)
-  expect(component.client.log.actions()).toEqual([
+  equal(component.client.log.actions(), [
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
     { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
   ])
   click(component, { a: 1, c: 2 })
   await delay(1)
-  expect(component.client.log.actions()).toEqual([
+  equal(component.client.log.actions(), [
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
     { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
   ])
   click(component, { a: 1 })
   await delay(1)
-  expect(component.client.log.actions()).toEqual([
+  equal(component.client.log.actions(), [
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
     { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] },
     { type: 'logux/unsubscribe', channel: 'users/2', fields: ['photo'] }
   ])
 })
 
-it('changes subscription', async () => {
+test('changes subscription', async () => {
   class Profile extends Component<{}, { id: number }> {
     constructor(props: {}) {
       super(props)
@@ -176,19 +185,19 @@ it('changes subscription', async () => {
 
   let component = createComponent(h(Profile, {}))
   await delay(1)
-  expect(component.client.log.actions()).toEqual([
+  equal(component.client.log.actions(), [
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
   ])
   click(component, 2)
   await delay(1)
-  expect(component.client.log.actions()).toEqual([
+  equal(component.client.log.actions(), [
     { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
     { type: 'logux/unsubscribe', channel: 'users/1', fields: ['photo'] },
     { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
   ])
 })
 
-it('does not resubscribe on non-relevant props changes', () => {
+test('does not resubscribe on non-relevant props changes', () => {
   class Profile extends Component<{}, { id: number }> {
     constructor(props: {}) {
       super(props)
@@ -216,10 +225,10 @@ it('does not resubscribe on non-relevant props changes', () => {
   })
 
   click(component, 2)
-  expect(resubscriptions).toEqual(0)
+  equal(resubscriptions, 0)
 })
 
-it('supports different store sources', async () => {
+test('supports different store sources', async () => {
   let client = new CrossTabClient<{}, TestLog<ClientMeta>>({
     subprotocol: '0.0.0',
     server: 'wss://localhost:1337',
@@ -245,12 +254,12 @@ it('supports different store sources', async () => {
 
   createComponent(h(Profile, {}))
   await delay(1)
-  expect(store.client.log.actions()).toEqual([
+  equal(store.client.log.actions(), [
     { type: 'logux/subscribe', channel: 'users/1' }
   ])
 })
 
-it('reports about subscription end', async () => {
+test('reports about subscription end', async () => {
   class Profile extends Component<{}, { id: number }> {
     constructor(props: {}) {
       super(props)
@@ -274,60 +283,60 @@ it('reports about subscription end', async () => {
   let nodeId = component.client.nodeId
   let log = component.client.log
   await delay(1)
-  expect(childProps(component, 0).isSubscribing).toBe(true)
+  is(childProps(component, 0).isSubscribing, true)
   act(() => {
     click(component, 1)
   })
-  expect(childProps(component, 0).isSubscribing).toBe(true)
+  is(childProps(component, 0).isSubscribing, true)
   act(() => {
     click(component, 2)
   })
-  expect(childProps(component, 0).isSubscribing).toBe(true)
+  is(childProps(component, 0).isSubscribing, true)
   await act(async () => {
     log.add({ type: 'logux/processed', id: `1 ${nodeId} 0` })
     await delay(1)
   })
-  expect(childProps(component, 0).isSubscribing).toBe(true)
+  is(childProps(component, 0).isSubscribing, true)
   await act(async () => {
     log.add({ type: 'logux/processed', id: `3 ${nodeId} 0` })
     await delay(1)
   })
-  expect(childProps(component, 0).isSubscribing).toBe(false)
+  is(childProps(component, 0).isSubscribing, false)
   act(() => {
     click(component, 3)
   })
-  expect(childProps(component, 0).isSubscribing).toBe(false)
+  is(childProps(component, 0).isSubscribing, false)
   await act(async () => {
     log.add({ type: 'logux/processed', id: `7 ${nodeId} 0` })
     await delay(1)
   })
-  expect(childProps(component, 0).isSubscribing).toBe(false)
+  is(childProps(component, 0).isSubscribing, false)
   act(() => {
     click(component, 4)
   })
-  expect(childProps(component, 0).isSubscribing).toBe(false)
+  is(childProps(component, 0).isSubscribing, false)
   act(() => {
     click(component, 5)
   })
-  expect(childProps(component, 0).isSubscribing).toBe(false)
+  is(childProps(component, 0).isSubscribing, false)
   await act(async () => {
     await delay(250)
   })
-  expect(childProps(component, 0).isSubscribing).toBe(true)
+  is(childProps(component, 0).isSubscribing, true)
   await act(async () => {
     log.add({ type: 'logux/processed', id: `10 ${nodeId} 0` })
     await delay(1)
   })
-  expect(childProps(component, 0).isSubscribing).toBe(true)
+  is(childProps(component, 0).isSubscribing, true)
   await act(async () => {
     log.add({ type: 'logux/processed', id: `12 ${nodeId} 0` })
     await delay(1)
   })
-  expect(childProps(component, 0).isSubscribing).toBe(false)
+  is(childProps(component, 0).isSubscribing, false)
 })
 
-it('works on channels size changes', () => {
-  jest.spyOn(console, 'error')
+test('works on channels size changes', () => {
+  let error = spyOn(console, 'error')
   let UserList: FC<{ ids: number[] }> = ({ ids }) => {
     useSubscription(ids.map(id => `users/${id}`))
     return h('div')
@@ -356,5 +365,7 @@ it('works on channels size changes', () => {
   act(() => {
     click(component, [1, 2])
   })
-  expect(console.error).not.toHaveBeenCalled()
+  is(error.called, false)
 })
+
+test.run()

@@ -1,7 +1,9 @@
 import { Action, TestTime, TestLog } from '@logux/core'
+import { restoreAll, spyOn } from 'nanospy'
 import { ClientMeta } from '@logux/client'
 import { Reducer } from 'redux'
-import { jest } from '@jest/globals'
+import { equal } from 'uvu/assert'
+import { test } from 'uvu'
 
 import { createLoguxCreator } from '../index.js'
 
@@ -28,8 +30,15 @@ function history(state: State, action: Action): State {
   }
 }
 
-it('creates store', () => {
-  let spy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+// @ts-ignore
+global.WebSocket = () => {}
+
+test.after.each(() => {
+  restoreAll()
+})
+
+test('creates store', () => {
+  let spy = spyOn(console, 'warn', () => {})
 
   let creator = createLoguxCreator<{}, TestLog<ClientMeta>>({
     server: 'wss://localhost:1337',
@@ -40,7 +49,8 @@ it('creates store', () => {
   let historyReducer: Reducer = history
   let store = creator(historyReducer, { value: '0' })
   store.dispatch(ADD_A)
-  expect(store.getState()).toEqual({ value: '0a' })
-  expect(console.warn).toHaveBeenCalledTimes(1)
-  spy.mockRestore()
+  equal(store.getState(), { value: '0a' })
+  equal(spy.callCount, 1)
 })
+
+test.run()
