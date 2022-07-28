@@ -359,26 +359,29 @@ test('replays history for reason-less action', async () => {
 
 test('does not accidentally re-process actions that were part of the latest replay', async () => {
   let pair = new TestPair()
-  let store = createStore(history, { server: pair.left })
+  let store = createStore(
+    (state: State, action: Action): State => {
+      if (isAdd(action)) {
+        let end = Date.now() + 1
+        while (end > Date.now()) {
+          // do nothing
+        }
+
+        return { value: `${state.value}${action.value}` }
+      } else {
+        return state
+      }
+    },
+    { server: pair.left }
+  )
 
   store.dispatch({ type: 'ADD', value: 'a' })
-  store.dispatch({ type: 'ADD', value: 'b' })
-
-  let localDispatch = store.dispatch.sync(
-    { type: 'ADD', value: 'c' },
-    { reasons: ['test'] }
-  )
-  // pair.left.emitter.emit('message', [
-  //   'sync',
-  //   { type: 'ADD', value: '|' },
-  //   { reasons: ['test'] }
-  // ])
-  await localDispatch
-  is(1, 2)
-  // await delay(1)
-  equal(store.getState().value, '0ab')
-  // equal(store.getState().value, '0a|c')
-  // equal(store.log.entries().length, 3)
+  store.dispatch.sync({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
+  store.dispatch({ type: 'ADD', value: 'c' })
+  store.dispatch.sync({ type: 'ADD', value: 'd' }, { reasons: ['test'] })
+  await delay(1)
+  equal(store.getState().value, '0abcd')
+  equal(store.log.entries().length, 4)
 })
 
 test('replays actions before staring since initial state', async () => {
