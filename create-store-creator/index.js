@@ -101,6 +101,7 @@ export function createStoreCreator(client, options = {}) {
     }
 
     let replaying
+    let lastReplay = 0
     function replay(actionId) {
       let ignore = {}
       let actions = []
@@ -108,6 +109,7 @@ export function createStoreCreator(client, options = {}) {
       let newAction
       let collecting = true
 
+      lastReplay += 1
       replaying = new Promise(resolve => {
         log
           .each((action, meta) => {
@@ -121,7 +123,7 @@ export function createStoreCreator(client, options = {}) {
                 return true
               }
 
-              if (!ignore[meta.id]) actions.push([action, meta.id])
+              if (!ignore[meta.id]) actions.push([action, meta.id, meta])
               if (meta.id === actionId) {
                 newAction = action
                 collecting = false
@@ -131,6 +133,9 @@ export function createStoreCreator(client, options = {}) {
             } else {
               replayed = true
               replaceState(stateHistory[meta.id], actions)
+              actions.forEach(entry => {
+                entry[2].replay = lastReplay
+              })
               return false
             }
           })
@@ -242,6 +247,7 @@ export function createStoreCreator(client, options = {}) {
         }
       }
 
+      // if (!meta.dispatch && meta.replay !== lastReplay) {
       if (!meta.dispatch) {
         let prevState = store.getState()
         process(action, meta).then(() => {
