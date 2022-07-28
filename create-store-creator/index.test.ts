@@ -358,22 +358,7 @@ test('replays history for reason-less action', async () => {
 })
 
 test('does not re-process actions that occurred in replay', async () => {
-  let pair = new TestPair()
-  let store = createStore(
-    (state: State, action: Action): State => {
-      if (isAdd(action)) {
-        let end = Date.now() + 1
-        while (end > Date.now()) {
-          // do nothing
-        }
-
-        return { value: `${state.value}${action.value}` }
-      } else {
-        return state
-      }
-    },
-    { server: pair.left }
-  )
+  let store = createStore()
 
   store.dispatch({ type: 'ADD', value: 'a' })
   store.dispatch.sync({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
