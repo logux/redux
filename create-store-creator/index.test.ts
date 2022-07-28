@@ -357,7 +357,7 @@ test('replays history for reason-less action', async () => {
   equal(store.log.entries().length, 3)
 })
 
-test('does not accidentally re-process actions that were part of the latest replay', async () => {
+test('does not re-process actions that occurred in replay', async () => {
   let pair = new TestPair()
   let store = createStore(
     (state: State, action: Action): State => {
