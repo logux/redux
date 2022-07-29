@@ -33,7 +33,7 @@ function createComponent(content: ReactNode): TestComponent {
   })
   let createStore = createStoreCreator(client)
   let store = createStore(() => ({}))
-  let component = create(h(Provider, { store }, content))
+  let component = create(h(Provider, { store, children: content }))
   return { ...component, client: store.client }
 }
 
@@ -90,13 +90,18 @@ function getProps(
 global.WebSocket = () => {}
 
 test('passes properties', () => {
-  let Post: FC<{ title: string }> = ({ title, children }) => {
+  let Post: FC<{ title: string; children: ReactNode }> = ({
+    title,
+    children
+  }) => {
     return h('article', {}, h('h1', {}, title), children)
   }
-  let SubscribePost = subscribe<{ title: string }>(() => 'posts/10')(Post)
+  let SubscribePost = subscribe<{ title: string; children: ReactNode }>(
+    () => 'posts/10'
+  )(Post)
 
   let component = createComponent(
-    h(SubscribePost, { title: 'A' }, h('p', {}, 'Text'))
+    h(SubscribePost, { title: 'A', children: h('p', {}, 'Text') })
   )
   equal(component.toJSON(), {
     type: 'article',

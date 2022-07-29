@@ -38,7 +38,7 @@ function createComponent(content: ReactNode): TestComponent {
   })
   let createStore = createStoreCreator(client)
   let store = createStore(() => ({}))
-  let component = create(h(Provider, { store }, content))
+  let component = create(h(Provider, { store, children: content }))
   return { ...component, client: store.client }
 }
 
