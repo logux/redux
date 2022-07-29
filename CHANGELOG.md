@@ -1,6 +1,9 @@
 # Change Log
 This project adheres to [Semantic Versioning](http://semver.org/).
 
+## 0.8.3
+* Fixed double reduce in some replays (by Ben Teichman).
+
 ## 0.8.2
 * Fixed replay with existing snapshot (by @betalb).
 * Updated `@logux/client`.
