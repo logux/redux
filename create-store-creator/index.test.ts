@@ -357,6 +357,18 @@ test('replays history for reason-less action', async () => {
   equal(store.log.entries().length, 3)
 })
 
+test('does not re-process actions that occurred in replay', async () => {
+  let store = createStore()
+
+  store.dispatch({ type: 'ADD', value: 'a' })
+  store.dispatch.sync({ type: 'ADD', value: 'b' }, { reasons: ['test'] })
+  store.dispatch({ type: 'ADD', value: 'c' })
+  store.dispatch.sync({ type: 'ADD', value: 'd' }, { reasons: ['test'] })
+  await delay(1)
+  equal(store.getState().value, '0abcd')
+  equal(store.log.entries().length, 4)
+})
+
 test('replays actions before staring since initial state', async () => {
   let onMissedHistory = spy()
   let store = createStore(history, {

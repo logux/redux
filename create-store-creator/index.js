@@ -29,6 +29,7 @@ export function createStoreCreator(client, options = {}) {
     store.log = log
     let historyCleaned = false
     let stateHistory = {}
+    let wait = {}
 
     let actionCount = 0
     function saveHistory(meta) {
@@ -88,6 +89,8 @@ export function createStoreCreator(client, options = {}) {
     function replaceState(state, actions, pushHistory) {
       let last = actions.length === 0 ? null : actions[actions.length - 1][1]
       let newState = actions.reduceRight((prev, [action, id]) => {
+        delete wait[id]
+
         let changed = reducer(prev, action)
         if (pushHistory && id === last) {
           stateHistory[pushHistory] = changed
@@ -184,8 +187,6 @@ export function createStoreCreator(client, options = {}) {
       }
     })
 
-    let wait = {}
-
     async function process(action, meta) {
       if (replaying) {
         wait[meta.id] = true
@@ -193,8 +194,10 @@ export function createStoreCreator(client, options = {}) {
         if (wait[meta.id]) {
           delete wait[meta.id]
           await process(action, meta)
+          return true
         }
-        return
+
+        return false
       }
 
       if (action.type === 'logux/undo') {
@@ -222,6 +225,8 @@ export function createStoreCreator(client, options = {}) {
           }
         }
       }
+
+      return true
     }
 
     let lastAdded = 0
@@ -244,8 +249,10 @@ export function createStoreCreator(client, options = {}) {
 
       if (!meta.dispatch) {
         let prevState = store.getState()
-        process(action, meta).then(() => {
-          emitter.emit('change', store.getState(), prevState, action, meta)
+        process(action, meta).then(didChange => {
+          if (didChange) {
+            emitter.emit('change', store.getState(), prevState, action, meta)
+          }
         })
       }
     })
@@ -269,7 +276,7 @@ export function createStoreCreator(client, options = {}) {
       })
       .then(() => {
         if (previous.length > 0) {
-          Promise.all(previous.map(i => process(...i))).then(init)
+          Promise.all(previous.map(i => process(...i))).then(() => init())
         } else {
           init()
         }
