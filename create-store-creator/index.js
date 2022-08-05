@@ -194,10 +194,9 @@ export function createStoreCreator(client, options = {}) {
         if (wait[meta.id]) {
           delete wait[meta.id]
           await process(action, meta)
-          return true
         }
 
-        return false
+        return
       }
 
       if (action.type === 'logux/undo') {
@@ -225,8 +224,6 @@ export function createStoreCreator(client, options = {}) {
           }
         }
       }
-
-      return true
     }
 
     let lastAdded = 0
@@ -249,10 +246,8 @@ export function createStoreCreator(client, options = {}) {
 
       if (!meta.dispatch) {
         let prevState = store.getState()
-        process(action, meta).then(didChange => {
-          if (didChange) {
-            emitter.emit('change', store.getState(), prevState, action, meta)
-          }
+        process(action, meta).then(() => {
+          emitter.emit('change', store.getState(), prevState, action, meta)
         })
       }
     })
