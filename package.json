@@ -37,9 +37,9 @@
     "nanoevents": "^7.0.1"
   },
   "devDependencies": {
-    "@logux/actions": "^0.2.3",
-    "@logux/client": "^0.15.3",
-    "@logux/core": "^0.7.3",
+    "@logux/actions": "^0.3.0",
+    "@logux/client": "^0.18.0",
+    "@logux/core": "^0.8.0",
     "@logux/eslint-config": "^47.2.0",
     "@size-limit/preset-small-lib": "^8.0.1",
     "@types/node": "^18.7.14",

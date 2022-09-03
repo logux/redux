@@ -188,9 +188,7 @@ test('unsubscribes', async () => {
   click(component, { a: 1 })
   await delay(1)
   equal(component.client.log.actions(), [
-    { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
-    { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] },
-    { type: 'logux/unsubscribe', channel: 'users/2', fields: ['photo'] }
+    { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] }
   ])
 })
 
@@ -222,8 +220,6 @@ test('changes subscription', async () => {
   click(component, 2)
   await delay(1)
   equal(component.client.log.actions(), [
-    { type: 'logux/subscribe', channel: 'users/1', fields: ['photo'] },
-    { type: 'logux/unsubscribe', channel: 'users/1', fields: ['photo'] },
     { type: 'logux/subscribe', channel: 'users/2', fields: ['photo'] }
   ])
 })

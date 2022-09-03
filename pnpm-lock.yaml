@@ -1,9 +1,9 @@
 lockfileVersion: 5.4
 
 specifiers:
-  '@logux/actions': ^0.2.3
-  '@logux/client': ^0.15.3
-  '@logux/core': ^0.7.3
+  '@logux/actions': ^0.3.0
+  '@logux/client': ^0.18.0
+  '@logux/core': ^0.8.0
   '@logux/eslint-config': ^47.2.0
   '@size-limit/preset-small-lib': ^8.0.1
   '@types/node': ^18.7.14
@@ -41,9 +41,9 @@ dependencies:
   nanoevents: 7.0.1
 
 devDependencies:
-  '@logux/actions': 0.2.3_@logux+core@0.7.3
-  '@logux/client': 0.15.3_mrsyzbu64vyn3j5esxuifafvsm
-  '@logux/core': 0.7.3
+  '@logux/actions': 0.3.0_@logux+core@0.8.0
+  '@logux/client': 0.18.0_6rfx6k4fzyojwkxmhtpvfc4d3e
+  '@logux/core': 0.8.0
   '@logux/eslint-config': 47.2.0_c5zrp42zbc5s4i6yiprz55kwaq
   '@size-limit/preset-small-lib': 8.0.1_size-limit@8.0.1
   '@types/node': 18.7.14
@@ -169,24 +169,24 @@ packages:
       '@jridgewell/sourcemap-codec': 1.4.14
     dev: true
 
-  /@logux/actions/0.2.3_@logux+core@0.7.3:
-    resolution: {integrity: sha512-LITIzuRFYkss8dL+da8IkTrpPH/q/I9maT1Ip+sanMxIxNu3Ba7eYcxIin7lR/Fhsq1O8ngjzs/clsEgIaR/Og==}
-    engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
+  /@logux/actions/0.3.0_@logux+core@0.8.0:
+    resolution: {integrity: sha512-VKFwcw2wPwxN4QZPlOUyelEhE46tyOC/ekDb4Zgk9vboRZD3w/X7kodhoK7Ikm/YQiLlAreAOEwMf+jYmnMjMw==}
+    engines: {node: ^14.0.0 || ^16.0.0 || >=18.0.0}
     peerDependencies:
-      '@logux/core': ^0.7.0
+      '@logux/core': ^0.8.0
     dependencies:
-      '@logux/core': 0.7.3
+      '@logux/core': 0.8.0
     dev: true
 
-  /@logux/client/0.15.3_mrsyzbu64vyn3j5esxuifafvsm:
-    resolution: {integrity: sha512-bgTIGhZm8OhyPDhR8s+fUsN8tJHTGmKmAgzdSI+a6o981my8UDn5CnRU8fQyBaeMQS+NbLIaaze8+UR1fIdWxg==}
-    engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
+  /@logux/client/0.18.0_6rfx6k4fzyojwkxmhtpvfc4d3e:
+    resolution: {integrity: sha512-7aY/QNU7CjV7FQKKyyKWeHRK3Uw4wCYZGiIsXTXTDY38CCkttcnuGLYQLFuXgYVxDniu2KzGV3+q+s9jwu0d/g==}
+    engines: {node: ^14.0.0 || ^16.0.0 || >=18.0.0}
     peerDependencies:
-      '@logux/core': ^0.7.0
+      '@logux/core': ^0.8.0
       '@nanostores/preact': '>=0.0.0'
       '@nanostores/react': '>=0.0.0'
       '@nanostores/vue': '>=0.0.0'
-      nanostores: ^0.5.0
+      nanostores: ^0.6.0
       preact: '>=10.0.0'
       react: '>=18.0.0'
       react-dom: '>=16.8.0'
@@ -207,22 +207,22 @@ packages:
       vue:
         optional: true
     dependencies:
-      '@logux/actions': 0.2.3_@logux+core@0.7.3
-      '@logux/core': 0.7.3
+      '@logux/actions': 0.3.0_@logux+core@0.8.0
+      '@logux/core': 0.8.0
       fast-json-stable-stringify: 2.1.0
       nanodelay: 2.0.2
-      nanoevents: 6.0.2
-      nanoid: 3.3.4
+      nanoevents: 7.0.1
+      nanoid: 4.0.0
       nanostores: 0.6.0
       react: 18.2.0
       react-dom: 18.2.0_react@18.2.0
     dev: true
 
-  /@logux/core/0.7.3:
-    resolution: {integrity: sha512-IMqhl8hEK/Ej/URUcpeREW9hMuKdakVHPyy3k0GSwcC+PlYmtCRirp7+4b7v3EfDjB+evSw8CnQTiNwnfev0gQ==}
-    engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
+  /@logux/core/0.8.0:
+    resolution: {integrity: sha512-jhV0gqAl6Busqh6lZMSYcoFegrUr+rR8yCpFHUrdurtGxla75ryeZ0/8knmotLYuPhxprWuQ2s8mGZ9PxWmn4g==}
+    engines: {node: ^14.0.0 || ^16.0.0 || >=18.0.0}
     dependencies:
-      nanoevents: 6.0.2
+      nanoevents: 7.0.1
     dev: true
 
   /@logux/eslint-config/47.2.0_c5zrp42zbc5s4i6yiprz55kwaq:
@@ -2058,19 +2058,19 @@ packages:
     engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
     dev: true
 
-  /nanoevents/6.0.2:
-    resolution: {integrity: sha512-FRS2otuFcPPYDPYViNWQ42+1iZqbXydinkRHTHFxrF4a1CpBfmydR9zkI44WSXAXCyPrkcGtPk5CnpW6Y3lFKQ==}
-    engines: {node: ^12.0.0 || ^14.0.0 || >=16.0.0}
-    dev: true
-
   /nanoevents/7.0.1:
     resolution: {integrity: sha512-o6lpKiCxLeijK4hgsqfR6CNToPyRU3keKyyI6uwuHRvpRTbZ0wXw51WRgyldVugZqoJfkGFrjrIenYH3bfEO3Q==}
     engines: {node: ^14.0.0 || ^16.0.0 || >=18.0.0}
-    dev: false
 
   /nanoid/3.3.4:
     resolution: {integrity: sha512-MqBkQh/OHTS2egovRtLk45wEyNXwF+cokD+1YPf9u5VfJiRdAiRwB2froX5Co9Rh20xs4siNPm8naNotSD6RBw==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+    dev: true
+
+  /nanoid/4.0.0:
+    resolution: {integrity: sha512-IgBP8piMxe/gf73RTQx7hmnhwz0aaEXYakvqZyE302IXW3HyVNhdNGC+O2MwMAVhLEnvXlvKtGbtJf6wvHihCg==}
+    engines: {node: ^14 || ^16 || >=18}
     hasBin: true
     dev: true
 

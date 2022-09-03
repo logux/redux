@@ -335,7 +335,6 @@ test('does not replays actions on logux/ actions', async () => {
   equal(reduced, ['A', 'B', 'A'])
   equal(store.log.actions(), [
     { type: 'logux/subscribe' },
-    { type: 'logux/unsubscribe' },
     { type: 'B' },
     { type: 'A' }
   ])
