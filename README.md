@@ -1,7 +1,7 @@
 # Logux Redux
 
 <img align="right" width="95" height="148" title="Logux logotype"
-     src="https://logux.io/branding/logotype.svg">
+     src="https://logux.org/branding/logotype.svg">
 
 Logux is a new way to connect client and server. Instead of sending
 HTTP requests (e.g., AJAX and GraphQL) it synchronizes log of operations
