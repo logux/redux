@@ -56,7 +56,7 @@
     "c8": "^7.14.0",
     "check-dts": "^0.7.2",
     "clean-publish": "^4.2.0",
-    "eslint": "^8.46.0",
+    "eslint": "^9.26.0",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.28.0",
     "eslint-plugin-n": "^15.7.0",
